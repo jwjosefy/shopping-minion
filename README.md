@@ -68,6 +68,13 @@ uv run pytest                        # add `-m live` for tests that hit real sit
 
 Set `BROWSER_CDP_URL` to use a remote browser instead of the local one.
 
+Start the web app (needs `ANTHROPIC_API_KEY` in the encrypted `.env`, see [ADR-0001](docs/adr/0001-secrets-with-dotenvx.md)):
+
+```bash
+dotenvx run -- uv run shopping-minion serve        # http://127.0.0.1:8000
+dotenvx run -- uv run shopping-minion serve --lan  # reachable from a phone on the same network
+```
+
 ## Repository layout
 
 ```
