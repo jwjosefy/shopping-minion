@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/minion-dark.svg">
+    <img src="docs/assets/minion.svg" alt="Minion" width="120">
+  </picture>
+</p>
+
 # Shopping Minion
 
 An agent that turns a handwritten grocery list into a ready-to-review online shopping cart.
