@@ -19,7 +19,7 @@ Non-negotiables:
 
 ## Documentation conventions
 - **ADR** (`docs/adr/NNNN-kebab-title.md`) for any decision that is costly to reverse or that a reviewer would ask "why?" about. Format: Status, Date, Context, Options considered, Decision, Consequences. Never rewrite an accepted ADR's decision; supersede it with a new one.
-- **Journal** (`docs/journal/YYYY-MM-DD-kebab-title.md`) for what was tried, what was rejected, and changes of mind. Entries are append-only history: don't edit old entries to match new decisions; write a new entry.
+- **Journal** (`docs/journal/YYYY-MM-DD-NNNN-kebab-title.md`, where `NNNN` is a global sequence from 0001, in order of creation, so a plain file listing reads chronologically) for what was tried, what was rejected, and changes of mind. Entries are append-only history: don't edit old entries to match new decisions; write a new entry.
 - When a change contradicts an ADR, stop and propose a new ADR first.
 
 ## Code conventions

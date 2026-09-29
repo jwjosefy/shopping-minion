@@ -32,5 +32,5 @@ The UI is deliberately minimal: photo on one side, an editable list of items (na
 
 - Downstream components receive clean, human-confirmed input, so resolution quality can be evaluated independently from OCR quality.
 - Every correction is a labeled example: the diff between the model's transcription and the confirmed list becomes evaluation data for the intake step at no extra cost.
-- v0 needs a small web UI, which the original scope excluded (see the [journal](../journal/2026-09-29-ocr-needs-a-human.md)).
+- v0 needs a small web UI, which the original scope excluded (see the [journal](../journal/2026-09-29-0002-ocr-needs-a-human.md)).
 - Option 2 becomes possible once enough corrections have been collected to measure where transcription actually fails.
