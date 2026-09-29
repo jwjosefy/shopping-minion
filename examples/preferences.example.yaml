@@ -1,0 +1,32 @@
+# Example preferences file (ADR-0003).
+# Copy to data/preferences.yaml (git-ignored) and edit with your real preferences.
+# Keys are canonical item names; aliases are how the item shows up on handwritten lists.
+
+coffee_filter:
+  aliases: [filtro, filtro melita, filtro de café]
+  brand: Melitta
+  size: "103"
+  default_quantity: 1
+
+margarine:
+  aliases: [margarina]
+  brand: Vigor
+  variant: mix
+  default_quantity: 1
+
+beans:
+  aliases: [feijão, feijão normal]
+  variant: carioca
+  exclude: [preto]
+  default_quantity: { value: 1, unit: kg }
+
+ham:
+  aliases: [presunto]
+  sliced: true
+  default_quantity: { value: 300, unit: g }
+
+toilet_paper:
+  aliases: [papel higiênico]
+  pack_size: 12
+  ply: double
+  default_quantity: 1

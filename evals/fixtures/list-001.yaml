@@ -1,0 +1,80 @@
+# Ground truth for the first real list (photo kept locally, not committed).
+# `raw` is the line as written; `items` is what a careful human reads it as.
+# Hard cases are tagged so we can report accuracy per difficulty.
+
+id: list-001
+date: 2026-09-29
+lines:
+  - raw: "Arroz"
+    items: [{ name: arroz }]
+  - raw: "Macarrão parafuso"
+    items: [{ name: macarrão parafuso }]
+  - raw: "Espaguete"
+    tags: [misspelled]          # written "espaguet"
+    items: [{ name: espaguete }]
+  - raw: "Farofa / sal"
+    tags: [multi_item]
+    items: [{ name: farofa }, { name: sal }]
+  - raw: "Creme de leite"
+    items: [{ name: creme de leite }]
+  - raw: "Atum"
+    items: [{ name: atum }]
+  - raw: "Molho de tomate"
+    items: [{ name: molho de tomate }]
+  - raw: "Azeitona"
+    items: [{ name: azeitona }]
+  - raw: "Leite / Farinha de trigo"
+    tags: [multi_item]
+    items: [{ name: leite }, { name: farinha de trigo }]
+  - raw: "Açúcar / refri / água gás"
+    tags: [multi_item, abbreviation]
+    items: [{ name: açúcar }, { name: refrigerante }, { name: água com gás }]
+  - raw: "Óleo normal"
+    tags: [qualifier]
+    items: [{ name: óleo, constraints: [normal] }]
+  - raw: "Lanches das crianças"
+    tags: [category_not_product]
+    items: [{ name: lanches das crianças, needs_clarification: true }]
+  - raw: "Pipocas"
+    items: [{ name: pipoca }]
+  - raw: "Feijão normal / preto não"
+    tags: [slash_is_not_separator, negation]
+    items: [{ name: feijão, constraints: [normal, "not preto"] }]
+  - raw: "Queijo ralado"
+    items: [{ name: queijo ralado }]
+  - raw: "Filtro Melita"
+    tags: [brand, misspelled]
+    items: [{ name: filtro de café, brand: Melitta }]
+  - raw: "Rosquinha coco"
+    items: [{ name: rosquinha de coco }]
+  - raw: "Fubá flocão"
+    items: [{ name: flocão de milho }]
+  - raw: "Requeijão"
+    tags: [duplicate]           # appears again below
+    items: [{ name: requeijão }]
+  - raw: "Margarina Vigor mix"
+    tags: [brand]
+    items: [{ name: margarina, brand: Vigor, variant: mix }]
+  - raw: "Granola"
+    items: [{ name: granola }]
+  - raw: "Papel higiênico"
+    items: [{ name: papel higiênico }]
+  - raw: "Papel toalha"
+    items: [{ name: papel toalha }]
+  - raw: "Papel alumínio"
+    items: [{ name: papel alumínio }]
+  - raw: "Massa lasanha direto no forno"
+    tags: [qualifier]
+    items: [{ name: massa de lasanha, constraints: [direto no forno] }]
+  - raw: "Presunto 600 g"
+    tags: [inline_quantity, weight]
+    items: [{ name: presunto, quantity: { value: 600, unit: g } }]
+  - raw: "Queijo mussarela 700 g"
+    tags: [inline_quantity, weight]
+    items: [{ name: queijo mussarela, quantity: { value: 700, unit: g } }]
+  - raw: "Requeijão"
+    tags: [duplicate]
+    items: [{ name: requeijão }]
+  - raw: "Saco lixo pia e banheiro"
+    tags: [crossed_out, multi_item]
+    items: [{ name: saco de lixo, variant: pia }, { name: saco de lixo, variant: banheiro }]
