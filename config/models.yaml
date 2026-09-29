@@ -2,8 +2,10 @@
 # in .env. Providers use LangChain's init_chat_model names.
 
 intake:
-  provider: anthropic
-  model: claude-sonnet-5-5 # alternative: claude-haiku-4-5
+  provider: google_genai # free-tier key for small tests (GOOGLE_API_KEY in .env)
+  model: gemini-3.5-flash # 3.8-flash returned 503 "high demand" on 2026-09-29
+  # provider: anthropic
+  # model: claude-sonnet-5-5 # alternative: claude-haiku-4-5
   # TODO(glm): add GLM 5.3 as an intake candidate (provider integration + GLM_API_KEY in .env)
 
 resolver:
