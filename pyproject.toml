@@ -9,7 +9,14 @@ authors = [
     { name = "Johann Josefy", email = "jwjosefy@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "playwright>=1.63.0",
+    "pydantic>=2.13.5",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+shopping-minion = "shopping_minion.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
@@ -23,4 +30,11 @@ target-version = "py312"
 dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.9",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not live'"
+markers = [
+    "live: hits real external sites; run explicitly with `uv run pytest -m live`",
 ]
