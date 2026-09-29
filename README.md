@@ -18,22 +18,28 @@ You take a photo of the list stuck to the fridge. Shopping Minion reads it, figu
 
 ## How it works
 
+```mermaid
+flowchart TD
+    photo[/"List photo"/] --> intake["Intake<br/>(OCR + parsing)"]
+    intake --> review1(["Human review<br/>(web UI)"])
+    review1 -- items --> catalog
+    history[/"Purchase history"/] --> prefs["Preferences"]
+    prefs --> catalog["Catalog<br/>(search + normalize, deterministic)"]
+    catalog -- structured candidates --> resolver["Resolver<br/>(LLM, structured output)"]
+    resolver -- "decision: product + quantity + rationale" --> executor["Executor<br/>(deterministic, validates, then acts)"]
+    executor --> cart["Cart"]
+    cart --> review2(["Human review"])
+    review2 --> checkout(["Checkout<br/>(manual)"])
+
+    classDef human fill:#fde68a,stroke:#b45309,color:#1f2937
+    classDef llm fill:#c7d2fe,stroke:#4338ca,color:#1f2937
+    classDef det fill:#d1fae5,stroke:#047857,color:#1f2937
+    class review1,review2,checkout human
+    class intake,resolver llm
+    class catalog,executor,cart det
 ```
-photo ──► Intake (OCR + parsing) ──► human review (web UI) ──► [items] ──┐
-                               │
-purchase history ──► Preferences ─┤
-                               ▼
-               Catalog (search + normalize, deterministic)
-                               │  structured candidates
-                               ▼
-                 Resolver (LLM, structured output)
-                               │  decision: product + quantity + rationale
-                               ▼
-               Executor (deterministic, validates, then acts)
-                               │
-                               ▼
-                      Cart ──► human review ──► checkout (manual)
-```
+
+<sub>🟨 human step · 🟦 LLM · 🟩 deterministic code</sub>
 
 **Design principles**
 
