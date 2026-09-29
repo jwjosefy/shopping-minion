@@ -1,0 +1,17 @@
+# One model per role (ADR-0009). Swapping a model or provider is a change here plus an API key
+# in .env. Providers use LangChain's init_chat_model names.
+
+intake:
+  provider: anthropic
+  model: claude-sonnet-5-5 # alternative: claude-haiku-4-5
+  # TODO(glm): add GLM 5.3 as an intake candidate (provider integration + GLM_API_KEY in .env)
+
+resolver:
+  backend: haiku # haiku | julia1 | jev (ADR-0010; default chosen by evals)
+  model: claude-haiku-4-5 # only used by LLM backends
+
+discovery:
+  provider: anthropic
+  model: claude-opus-5-5
+
+# fallback: reserved, not configured in v0 (ADR-0009)
