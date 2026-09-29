@@ -1,0 +1,37 @@
+# --- Secrets (dotenvx: .env is committed ENCRYPTED; keys never are) ---
+.env.keys
+.env.*.keys
+*.pem
+
+# --- Personal data: never leaves this machine ---
+data/
+*.sqlite
+*.db
+
+# --- Browser automation state (session cookies = credentials) ---
+.auth/
+storage_state*.json
+playwright/.cache/
+screenshots/
+traces/
+
+# --- Raw list photos ---
+inbox/
+*.heic
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
