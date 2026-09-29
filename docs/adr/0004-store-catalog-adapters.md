@@ -1,6 +1,6 @@
 # ADR-0004: Store access goes through a catalog adapter
 
-- **Status:** Accepted
+- **Status:** Accepted. Extended by [ADR-0006](0006-discovery-agent-writes-site-profile.md) (adapters are generic and execute a site profile).
 - **Date:** 2026-09-29
 
 ## Context

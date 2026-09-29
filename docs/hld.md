@@ -1,6 +1,6 @@
 # Shopping Minion — High-Level Design (v0)
 
-- **Status:** Draft
+- **Status:** Approved (2026-09-29)
 - **Date:** 2026-09-29
 - **Scope:** v0, with the direction for what comes after. Decisions that are costly to reverse are listed in [§12](#12-proposed-adrs) as ADRs to write; this document references them but does not replace them.
 

@@ -1,6 +1,6 @@
 # ADR-0005: The model decides, a deterministic executor acts
 
-- **Status:** Accepted
+- **Status:** Accepted. Low-confidence clause superseded by [ADR-0008](0008-low-confidence-decisions-added-and-flagged.md); rationale made optional by [ADR-0010](0010-single-pass-typed-resolver.md); "never browses" scoped to shopping time by [ADR-0006](0006-discovery-agent-writes-site-profile.md).
 - **Date:** 2026-09-29
 
 ## Context

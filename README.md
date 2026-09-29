@@ -58,6 +58,7 @@ flowchart TD
 ## Repository layout
 
 ```
+docs/hld.md      High-level design (v0)
 docs/adr/        Architecture Decision Records
 docs/journal/    Build log: what I tried, what I rejected, and why
 src/             Source code (added as components land)
