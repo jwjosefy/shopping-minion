@@ -174,22 +174,4 @@ class RunReport(Contract):
         return counts
 
 
-# --- Store knowledge ---------------------------------------------------------------------------
-
-
-class SiteProfile(Contract):
-    """What discovery learned about a store (ADR-0006).
-
-    Sections stay untyped until discovery (M2/M4) settles their shape; they will get their own
-    models then.
-    """
-
-    store: str
-    version: int = Field(ge=1)
-    base_url: str
-    search: dict[str, object] | None = None
-    product: dict[str, object] | None = None
-    unit_of_sale: dict[str, object] | None = None
-    login: dict[str, object] | None = None
-    cart: dict[str, object] | None = None
-    history: dict[str, object] | None = None
+# Store knowledge (SiteProfile) lives in shopping_minion.catalog.profile (ADR-0006).
