@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Revisar lista · Shopping Minion{% endblock %}
+{% block content %}
+<h2>Revisar lista</h2>
+<p class="muted">Confira cada item contra a foto. Edite, divida, junte, remova ou adicione linhas. Nada é buscado antes de confirmar.</p>
+<div class="grid review">
+  <figure class="photo">
+    <a href="/runs/{{ run_id }}/photo" target="_blank"><img src="/runs/{{ run_id }}/photo" alt="Foto da lista"></a>
+    <figcaption class="muted">Toque para ampliar.</figcaption>
+  </figure>
+  <form method="post" action="/runs/{{ run_id }}/confirm">
+    <div class="overflow-auto">
+      <table class="items">
+        <thead><tr><th>Item</th><th>Qtd</th><th>Un.</th><th>Restrições</th><th>?</th><th></th></tr></thead>
+        <tbody id="rows">
+          {% for key, item in rows %}{% include "_row.html" %}{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="grid">
+      <button type="button" class="secondary outline" hx-get="/runs/{{ run_id }}/row" hx-target="#rows" hx-swap="beforeend">+ Adicionar item</button>
+      <button type="submit">Confirmar {{ rows | length }} itens</button>
+    </div>
+    <small class="muted">“?” marca itens que precisam de esclarecimento; eles não serão comprados nesta versão.</small>
+  </form>
+</div>
+{% endblock %}

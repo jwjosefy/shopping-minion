@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Shopping Minion{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.yellow.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"></script>
+  <style>
+    .review { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; }
+    .photo { position: sticky; top: 1rem; margin: 0; }
+    .photo img { width: 100%; max-height: calc(100vh - 6rem); object-fit: contain;
+                 border-radius: var(--pico-border-radius); background: #fff; }
+    .items input { margin-bottom: 0; padding: .4rem .6rem; height: auto; }
+    .items td { padding: .35rem .3rem; vertical-align: top; }
+    .items th:nth-child(2), .items th:nth-child(3) { width: 5rem; }
+    .items th:nth-child(5), .items th:nth-child(6) { width: 2.5rem; }
+    .items td.check { text-align: center; padding-top: .7rem; }
+    .items button { padding: .35rem .6rem; margin: 0; }
+    .items small { display: block; margin-top: .2rem; }
+    tr.clarify input[name$="-name"] { border-color: var(--pico-del-color); }
+    .muted { color: var(--pico-muted-color); }
+    @media (max-width: 768px) {
+      .review { grid-template-columns: 1fr; }
+      .photo { position: static; }
+      .photo img { max-height: 45vh; }
+      .items thead { display: none; }
+      .items, .items tbody { display: block; }
+      .items tr { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: .35rem;
+                  padding: .9rem 0; border-bottom: 1px solid var(--pico-muted-border-color); }
+      .items td { display: block; padding: 0; border: 0; }
+      .items td:nth-child(1), .items td:nth-child(4) { grid-column: 1 / -1; }
+      .items td:nth-child(4) { grid-row: 3; }
+      .items td.check { padding-top: .5rem; }
+      .items input[name$="-quantity"]::placeholder,
+      .items input[name$="-unit"]::placeholder,
+      .items input[name$="-constraints"]::placeholder { color: var(--pico-muted-color); }
+    }
+  </style>
+</head>
+<body>
+  <header class="container">
+    <nav>
+      <ul><li><a href="/" class="contrast"><strong>Shopping Minion</strong></a></li></ul>
+    </nav>
+  </header>
+  <main class="container">{% block content %}{% endblock %}</main>
+</body>
+</html>

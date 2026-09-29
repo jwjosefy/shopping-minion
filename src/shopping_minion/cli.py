@@ -29,7 +29,21 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("url", nargs="?", default=ANDORINHA_URL)
     check.add_argument("--headed", action="store_true", help="show the browser window")
 
+    serve = commands.add_parser("serve", help="start the web app")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument(
+        "--lan", action="store_true", help="listen on all interfaces so a phone can connect"
+    )
+
     args = parser.parse_args(argv)
     if args.command == "browser-check":
         return asyncio.run(_browser_check(args.url, headless=not args.headed))
+    if args.command == "serve":
+        import uvicorn
+
+        from shopping_minion.web.app import create_app
+
+        host = "0.0.0.0" if args.lan else "127.0.0.1"
+        uvicorn.run(create_app(), host=host, port=args.port)
+        return 0
     return 2

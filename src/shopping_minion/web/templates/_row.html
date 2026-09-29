@@ -1,0 +1,12 @@
+<tr class="{{ 'clarify' if item and item.needs_clarification }}">
+  <td>
+    <input name="items-{{ key }}-name" value="{{ item.name if item }}" aria-label="Item" required>
+    {% if item and item.source_line %}<small class="muted">“{{ item.source_line }}”</small>{% endif %}
+    <input type="hidden" name="items-{{ key }}-source" value="{{ item.source_line if item and item.source_line }}">
+  </td>
+  <td><input name="items-{{ key }}-quantity" value="{{ item.quantity | fmt_qty if item }}" inputmode="decimal" aria-label="Quantidade" placeholder="qtd"></td>
+  <td><input name="items-{{ key }}-unit" value="{{ item.unit if item and item.unit }}" aria-label="Unidade" placeholder="un."></td>
+  <td><input name="items-{{ key }}-constraints" value="{{ item.constraints | join(', ') if item }}" aria-label="Restrições" placeholder="restrições, marca…"></td>
+  <td class="check"><input type="checkbox" name="items-{{ key }}-clarify" aria-label="Precisa esclarecer" {{ 'checked' if item and item.needs_clarification }}></td>
+  <td><button type="button" class="outline secondary" aria-label="Remover" hx-on:click="this.closest('tr').remove()">✕</button></td>
+</tr>

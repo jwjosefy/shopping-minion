@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Lista confirmada · Shopping Minion{% endblock %}
+{% block content %}
+<article>
+  <header><h2>Lista confirmada: {{ confirmed.items | length }} itens</h2></header>
+  <ul>
+    {% for item in confirmed.items %}
+    <li>
+      {{ item.name }}{% if item.quantity %} — {{ item.quantity | fmt_qty }} {{ item.unit or '' }}{% endif %}
+      {% if item.constraints %}<small class="muted">({{ item.constraints | join(', ') }})</small>{% endif %}
+      {% if item.needs_clarification %}<mark>esclarecer</mark>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <footer>
+    <p class="muted">A busca e o carrinho chegam nos próximos marcos (M2–M5). Esta execução fica salva em <code>data/runs/{{ run_id }}/</code>.</p>
+    <a href="/runs/{{ run_id }}/review" role="button" class="secondary outline">Voltar à revisão</a>
+    <a href="/" role="button">Nova lista</a>
+  </footer>
+</article>
+{% endblock %}

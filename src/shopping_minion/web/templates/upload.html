@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+  <header><h2>Nova lista</h2></header>
+  <p>Envie a foto da lista. O próximo passo é revisar o que foi lido antes de qualquer busca.</p>
+  <form hx-post="/runs" hx-encoding="multipart/form-data" hx-target="#result"
+        hx-disabled-elt="find button"
+        hx-on::before-request="this.querySelector('button').setAttribute('aria-busy', 'true')"
+        hx-on::after-request="this.querySelector('button').removeAttribute('aria-busy')">
+    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+    <button type="submit">Ler lista</button>
+  </form>
+  <div id="result"></div>
+</article>
+{% endblock %}
