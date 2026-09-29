@@ -55,6 +55,19 @@ flowchart TD
 3. **Humans at the two points where errors hide.** The transcribed list is reviewed before anything is searched ([ADR-0002](docs/adr/0002-human-review-of-transcribed-list.md)), and nothing is ever purchased automatically.
 4. **Store-agnostic core.** Store-specific code lives behind a catalog adapter ([ADR-0004](docs/adr/0004-store-catalog-adapters.md)). The first adapter targets one supermarket in São Paulo.
 
+## Getting started
+
+Requires [uv](https://docs.astral.sh/uv/). No Docker ([ADR-0007](docs/adr/0007-browser-runtime-playwright-local-cdp-later.md)).
+
+```bash
+uv sync
+uv run playwright install chromium   # Playwright's pinned Chromium, never the system Chrome
+uv run shopping-minion browser-check # opens the store's home page headless
+uv run pytest                        # add `-m live` for tests that hit real sites
+```
+
+Set `BROWSER_CDP_URL` to use a remote browser instead of the local one.
+
 ## Repository layout
 
 ```
