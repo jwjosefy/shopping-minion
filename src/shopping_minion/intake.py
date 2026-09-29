@@ -9,13 +9,13 @@ from __future__ import annotations
 import base64
 from typing import Protocol
 
-from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
 from shopping_minion.config import ChatRole
 from shopping_minion.contracts import TranscribedItem, TranscribedList
+from shopping_minion.models import chat_model
 
 SUPPORTED_MEDIA_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # API limit per image
@@ -108,5 +108,4 @@ def _to_contract(item: _LLMItem) -> TranscribedItem:
 
 
 def build_intake(role: ChatRole) -> LLMIntake:
-    # TODO(glm): GLM 5.3 needs its own provider integration before it can be selected here.
-    return LLMIntake(init_chat_model(role.model, model_provider=role.provider, max_tokens=16000))
+    return LLMIntake(chat_model(role))

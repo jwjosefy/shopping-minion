@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 
 DEFAULT_MODELS_PATH = Path("config/models.yaml")
 
-# TODO(glm): add "glm" once the provider integration exists.
+# OpenAI-compatible APIs (GLM, local servers) use provider "openai" plus `base_url`.
 ChatProvider = Literal["anthropic", "openai", "google_genai", "ollama"]
 
 
@@ -21,6 +21,15 @@ class _Config(BaseModel):
 class ChatRole(_Config):
     provider: ChatProvider
     model: str
+    base_url: str | None = None  # for OpenAI-compatible APIs such as GLM
+    api_key_env: str | None = None  # name of the env var holding the key; never the key itself
+    max_tokens: int | None = None
+
+    @model_validator(mode="after")
+    def _compatible_api_needs_key_env(self) -> ChatRole:
+        if self.base_url and not self.api_key_env:
+            raise ValueError("a role with base_url must name its api_key_env")
+        return self
 
 
 class ResolverRole(_Config):

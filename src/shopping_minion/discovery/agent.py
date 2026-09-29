@@ -15,12 +15,12 @@ from pathlib import Path
 from typing import Any
 
 from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
 
 from shopping_minion.browser import BrowserProvider
 from shopping_minion.catalog.profile import PROFILES_DIR, HttpSearch, SiteProfile, save_profile
 from shopping_minion.config import ChatRole
 from shopping_minion.discovery.tools import DiscoverySession, build_tools, registrable_domain
+from shopping_minion.models import chat_model
 
 MAX_STEPS = 120  # LangGraph recursion limit: roughly 60 tool calls
 
@@ -91,7 +91,7 @@ async def discover_search(
     browser: BrowserProvider,
     log: Callable[[str], None] = print,
 ) -> DiscoveryResult:
-    model = init_chat_model(role.model, model_provider=role.provider, max_tokens=16000)
+    model = chat_model(role)
 
     async with browser.session() as context:
         page = await context.new_page()
