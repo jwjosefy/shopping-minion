@@ -66,7 +66,9 @@ def test_parse_results_maps_fields():
 
 
 def test_unit_of_sale_weight_step_in_grams():
-    [c] = parse_results(SPEC, payload(item(title="Filé de peito de frango", saleUnit="KG", step=0.5)))
+    [c] = parse_results(
+        SPEC, payload(item(title="Filé de peito de frango", saleUnit="KG", step=0.5))
+    )
     assert c.unit_of_sale.kind == "weight_step" and c.unit_of_sale.step_size_g == 500
 
 
