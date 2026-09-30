@@ -190,13 +190,15 @@ flowchart LR
 | 1 | T1, T2, T3, T4 | review and merge |
 | 2 | T5 | review and merge |
 | 3 | T6, T8 | review and merge |
-| 3b | T7, T11 | review and merge |
-| 4 | T9 | review; then S1 with Johann |
-| 5 | T10 | review; then S2 and S3 with Johann |
+| 4 | T9, T11 | review and merge; then S1 with Johann |
+| 5 | T7 | review and merge |
+| 6 | T10 | review; then S2 and S3 with Johann |
 
 Tasks in the same wave touch different files, so each runs in its own git worktree and merges without conflicts. `cli.py` is touched by T7, T9, T10 and T11: T7 and T11 are in the same wave, so T11 adds only the run options and T7 only the `login` command, in separate functions.
 
 **Correction, 2026-09-30:** the first version of this plan ran T5 and T6 in parallel. They aren't independent: both need the code that runs a profile's steps and reads items from a page, so T5 writes it (`catalog/page.py`) and T6 follows. The shared data models used by T2 and T3 were added the same way, in `catalog/mapping.py`, before wave 1.
+
+**Second correction, 2026-09-30:** T9 moved ahead of T7 (approved by Johann): S1, the first real run of the catalog and discovery, depends only on T9, while login is only verified in S2. T9 puts its `discover` command in `discovery/cli.py` so that T9 and T11 don't both edit `cli.py`.
 
 **Who runs them** (Johann, 2026-09-30): sub-agents in worktrees, one per task, on Sonnet 5.5, reviewed by Johann after each wave.
 
