@@ -4,7 +4,7 @@
 - **Scope:** what is missing for v0 ([HLD §1](hld.md#1-goal)): searching the store, the discovery agent, login, the cart, and wiring them into the app. What is already built is listed in `CLAUDE.md`.
 - **Rules it follows:** [ADR-0012](adr/0012-the-store-is-used-through-its-site-in-a-browser.md) (the store is used through its site, in a browser, as a user would), [ADR-0006](adr/0006-discovery-agent-writes-site-profile.md), [ADR-0005](adr/0005-model-decides-executor-acts.md).
 
-Open questions for Johann are in [§8](#8-open-questions-for-johann). Answer them inline with `>>johann:`.
+Johann answered the first round of questions on 2026-09-30; the answers are in [§8](#8-questions). One question is still open there.
 
 ## 1. What is missing
 
@@ -18,15 +18,14 @@ Open questions for Johann are in [§8](#8-open-questions-for-johann). Answer the
 
 ## 2. Design
 
-### 2.1 A fake store for tests
+### 2.1 How this is tested
 
-A small local site (`tests/fakestore/`, served on localhost by a pytest fixture) that behaves like a real store's front end:
+There is no fake store (Johann, 2026-09-30). Two kinds of tests:
 
-- a search page whose JavaScript fetches results as JSON and renders them;
-- product cards with an add button and a quantity stepper (by unit and by weight step);
-- a login form and a cart page.
+- **Pure code** (profile schema, reading results into `Candidate`s, quantity rules): unit tests with small samples written in the test files. These run by default.
+- **Browser-driven code** (catalog, cart executor, discovery tools): tests against the real store, **not logged in**, marked `live`. They don't run by default (`uv run pytest -m live`). Adding to the anonymous cart of the real store is harmless (Johann, 2026-09-30), so cart tests need no credentials.
 
-Every browser-driven component is tested against it: deterministic, no credentials, no real store, no model cost. It has a switch to change its markup, to test that a site change is detected.
+Live tests are slower and can fail because the store changed or is down. A failure there is information about the store, not only about the code.
 
 ### 2.2 Browser provider
 
@@ -88,7 +87,7 @@ The parsing (field map, unit rules, paths) is pure code with no browser, in `cat
 
 `BrowserCartExecutor(profile, context).add_to_cart(candidate, sale)`:
 
-1. Make sure the session is logged in (§2.6).
+1. If the run is for an account, make sure the session is logged in (§2.6). The cart also works without login.
 2. Find the product the way a user would: search for its name, locate the card whose id or name matches the candidate.
 3. Click add, then step the quantity to `sale.steps_or_units` (clicks on the stepper, or typing in the quantity field, as the profile says).
 4. Read the cart back (same three sources as search) and check the line: product and quantity.
@@ -101,7 +100,7 @@ Rules:
 
 ### 2.6 Login
 
-Part of the executor. If `logged_in_when` isn't true on the page:
+A separate step, used when the cart should be the user's own. If `logged_in_when` isn't true on the page:
 
 1. Run `login.steps`, filling `STORE_EMAIL` and `STORE_PASSWORD` from the environment (dotenvx). Values are never logged.
 2. If the site asks for something the profile doesn't cover (captcha, a code by e-mail or SMS), stop with a clear error: the user logs in once in a visible browser (`shopping-minion login <store>`), and the saved session is reused.
@@ -133,7 +132,7 @@ If the agent can't produce a working profile, the run stops and reports why. **N
 ### 2.8 Wiring
 
 - `default_services()` builds `BrowserCatalog`, the configured resolver backend, and `BrowserCartExecutor`, inside one browser session for the whole run.
-- A `--dry-run` option keeps the current behaviour (decide, don't add).
+- Runs add to the real cart by default: without login it is an anonymous cart. A `--dry-run` option decides without adding.
 - The report's "rediscovery needed" message says which command to run.
 - CLI: `discover <store> [--part search|cart]`, `login <store>`, `search <store> <query>`.
 
@@ -143,20 +142,20 @@ Each task is small enough for one agent with a clean context. Every brief given 
 
 | # | Task | Depends on | Files it may touch | Done when |
 |---|---|---|---|---|
-| **T1** | Fake store | none | `tests/fakestore/`, `tests/conftest.py` | A pytest fixture serves it; a test searches, adds with a stepper, logs in and reads the cart through Playwright. A flag changes its markup. |
-| **T2** | Browser provider: user agent and session storage | none | `src/.../browser.py`, `config/browser.yaml`, `tests/test_browser.py` | A test shows the configured user agent is what a local server receives; a session saved in one context is present in the next. |
-| **T3** | Profile schema (user steps) | none | `src/.../catalog/profile.py`, `tests/test_profile.py` | The §2.3 example validates; the three rules of §2.3 are rejected with clear errors. |
-| **T4** | Reading results (pure) | none | `src/.../catalog/reading.py`, `tests/test_reading.py` | From a JSON payload and from an HTML string to `Candidate`s, with unit, pack and weight-step cases, tested without a browser. |
-| **T5** | Catalog | T1, T2, T3, T4 | `src/.../catalog/browser_catalog.py`, `tests/test_browser_catalog.py` | Against the fake store: results from response, from DOM when the response is absent, empty list for no results, `SiteChangedError` when the markup flag is on. |
-| **T6** | Cart executor and login | T1, T2, T3, T4 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Against the fake store: logs in, adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises on a changed site. |
-| **T7** | Discovery tools | T1, T3, T5 | `src/.../discovery/tools.py`, `tests/test_discovery_tools.py` | Each tool tested against the fake store; guardrails tested; no tool can send a request of its own. |
-| **T8** | Discovery agent, session 1 (search) | T7 | `src/.../discovery/agent.py`, `cli.py` (discover) | With a scripted fake model, the agent loop produces a valid `search` section for the fake store. |
-| **T9** | Discovery, session 2 (login and cart) | T6, T8 | `src/.../discovery/`, `cli.py` | Same, for `login` and `cart`, on the fake store. |
-| **T10** | Wiring and CLI | T5, T6 | `services.py`, `cli.py`, `web/`, tests | The web flow runs end to end against the fake store with a stub resolver; `--dry-run` works. |
-| **T11** | Docs alignment | none | `docs/hld.md`, `README.md` | HLD §4.5 and §9 match ADR-0013 (once accepted); README describes the commands that exist. |
-| **S1** | Discover Andorinha's search | T8 | `profiles/andorinha/` | **Supervised by Johann.** The agent's profile returns sensible candidates for the three v0 items. |
-| **S2** | Discover Andorinha's login and cart | T9, S1 | `profiles/andorinha/` | **Supervised by Johann**, with his credentials. A test item is added, read back and removed. |
-| **S3** | v0 acceptance | T10, S2 | none | **Supervised by Johann.** One real photo, three items, a correct cart and report. |
+| **T1** | Browser provider: user agent and session storage | none | `src/.../browser.py`, `config/browser.yaml`, `tests/test_browser.py` | A test shows the configured user agent is what the browser reports; a session saved in one context is present in the next. Live: the store's search page shows results in headless mode. |
+| **T2** | Profile schema (user steps) | none | `src/.../catalog/profile.py`, `tests/test_profile.py` | The §2.3 example validates; the three rules of §2.3 are rejected with clear errors. |
+| **T3** | Reading results (pure) | none | `src/.../catalog/reading.py`, `tests/test_reading.py` | From a JSON payload and from an HTML string to `Candidate`s, with unit, pack and weight-step cases, tested without a browser. |
+| **T4** | Docs alignment | none | `docs/hld.md`, `README.md` | HLD §4.5 and §9 match ADR-0013 (once accepted); README describes the commands that exist. |
+| **T5** | Catalog | T1, T2, T3 | `src/.../catalog/browser_catalog.py`, `tests/test_browser_catalog.py` | See the open question in §8: how it is verified before a profile exists. |
+| **T6** | Cart executor (anonymous cart) | T1, T2, T3 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Same open question. Target behaviour: adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises `SiteChangedError` when an element is missing. |
+| **T7** | Login | T6 | `src/.../executor/login.py`, `cli.py` (login), tests | Session saved and reused; clear stop when the site asks for something the profile doesn't cover. Verified only in S2. |
+| **T8** | Discovery tools | T2, T5 | `src/.../discovery/tools.py`, `tests/test_discovery_tools.py` | Guardrails unit-tested; live: each tool works on the real store, not logged in; no tool can send a request of its own. |
+| **T9** | Discovery agent, session 1 (search) | T8 | `src/.../discovery/agent.py`, `cli.py` (discover) | The agent loop runs with a scripted fake model (no cost) and writes a profile file from what the script submits. |
+| **T10** | Discovery, session 2 (cart and login) | T6, T7, T9 | `src/.../discovery/`, `cli.py` | Same, for the `cart` and `login` sections. |
+| **T11** | Wiring and CLI | T5, T6 | `services.py`, `cli.py`, `web/`, tests | `default_services()` builds the real catalog and executor; the web flow runs with stubs in the default tests; `--dry-run` works. |
+| **S1** | Discover Andorinha's search | T9 | `profiles/andorinha/` | **Supervised by Johann**, paid model. The agent's profile returns sensible candidates for the three v0 items; the catalog's live tests pass with it. |
+| **S2** | Discover Andorinha's cart and login | T10, S1 | `profiles/andorinha/` | **Supervised by Johann.** Anonymous cart first: a test item is added, read back and removed. Then login, with his credentials. |
+| **S3** | v0 acceptance | T11, S2 | none | **Supervised by Johann.** One real photo, three items, a correct cart and report. |
 
 Not in these tasks: calibrating the confidence thresholds (needs more eval cases and model credit), and anything from v1.
 
@@ -164,26 +163,25 @@ Not in these tasks: calibrating the confidence thresholds (needs more eval cases
 
 ```mermaid
 flowchart LR
-    T1[T1 fake store] --> T5[T5 catalog]
-    T2[T2 browser provider] --> T5
-    T3[T3 profile schema] --> T5
-    T4[T4 reading] --> T5
-    T1 --> T6[T6 cart + login]
+    T1[T1 browser provider] --> T5[T5 catalog]
+    T2[T2 profile schema] --> T5
+    T3[T3 reading] --> T5
+    T1 --> T6[T6 cart executor]
     T2 --> T6
     T3 --> T6
-    T4 --> T6
-    T5 --> T7[T7 discovery tools]
-    T7 --> T8[T8 discovery: search]
-    T6 --> T9[T9 discovery: cart]
-    T8 --> T9
-    T5 --> T10[T10 wiring]
-    T6 --> T10
-    T8 --> S1([S1 Andorinha search])
-    T9 --> S2([S2 Andorinha cart])
+    T6 --> T7[T7 login]
+    T5 --> T8[T8 discovery tools]
+    T8 --> T9[T9 discovery: search]
+    T7 --> T10[T10 discovery: cart + login]
+    T9 --> T10
+    T5 --> T11[T11 wiring]
+    T6 --> T11
+    T9 --> S1([S1 Andorinha search])
+    T10 --> S2([S2 Andorinha cart + login])
     S1 --> S2
-    T10 --> S3([S3 v0 acceptance])
+    T11 --> S3([S3 v0 acceptance])
     S2 --> S3
-    T11[T11 docs]
+    T4[T4 docs]
 
     classDef human fill:#fde68a,stroke:#b45309,color:#1f2937
     class S1,S2,S3 human
@@ -191,23 +189,26 @@ flowchart LR
 
 | Wave | In parallel | Then |
 |---|---|---|
-| 1 | T1, T2, T3, T4, T11 | review and merge |
+| 1 | T1, T2, T3, T4 | review and merge |
 | 2 | T5, T6 | review and merge |
-| 3 | T7, T10 | review and merge |
-| 4 | T8 | review; then S1 with Johann |
-| 5 | T9 | review; then S2 and S3 with Johann |
+| 3 | T7, T8, T11 | review and merge |
+| 4 | T9 | review; then S1 with Johann |
+| 5 | T10 | review; then S2 and S3 with Johann |
 
-Tasks in the same wave touch different files, so they can run in separate git worktrees and merge without conflicts. `cli.py` is touched by T8, T9 and T10, which are in different waves.
+Tasks in the same wave touch different files, so each runs in its own git worktree and merges without conflicts. `cli.py` is touched by T7, T9, T10 and T11: T7 and T11 are in the same wave, so T11 adds only the run options and T7 only the `login` command, in separate functions.
+
+**Who runs them** (Johann, 2026-09-30): sub-agents in worktrees, one per task, on Sonnet 5.5, reviewed by Johann after each wave.
 
 ## 5. Checkpoints
 
 Work stops for Johann's review:
 
+- before anything starts: he is setting up OpenRouter billing and will say when to begin;
 - after each wave, before merging;
 - at S1, S2 and S3, which he runs or watches;
 - whenever a task's agent meets one of the stop conditions in §6.
 
-Costs: waves 1 to 3 call no model and touch no real store. T8 and T9 are tested with a scripted fake model. Real model calls and the real store happen only in S1, S2 and S3.
+Costs: no task before S1 calls a paid model (T9 and T10 use a scripted fake model). Live tests open the real store, not logged in, a few pages per test. Paid model calls happen in S1, S2 and S3, through OpenRouter.
 
 ## 6. Brief template for a task agent
 
@@ -230,15 +231,29 @@ Commit on your branch. Don't push.
 
 ## 7. Risks
 
-- **The profile format may not fit what discovery finds** on a real site. T3 keeps it small; S1 is the first real test, and a format change after S1 goes back through T3 to T5.
+- **The profile format may not fit what discovery finds** on a real site. T2 keeps it small; S1 is the first real test, and a format change after S1 goes back through T2, T3 and T5.
+- **Without a fake store, browser-driven code is only verified against the real site.** Tests depend on the store being up and unchanged, and whatever isn't covered before S1 gets debugged during a supervised session.
 - **Login may need a captcha or a code.** The design then falls back to a one-time manual login (§2.6). Unknown until S2.
 - **Finding a product again to add it** (§2.5, step 2) depends on the site's search returning it for its own name. If not, the profile needs another way to reach a product; unknown until S2.
 - **The discovery agent failed on its first attempts** (different approach, since removed). Whether it succeeds under ADR-0012 is what S1 tests.
 
-## 8. Open questions for Johann
+## 8. Questions
 
-1. **`url_matches` in the profile (§2.3):** to read "the responses the page itself receives", the adapter has to recognise which response carries the results. Is a path pattern (no host, no ids, never called) acceptable under ADR-0012?
-2. **Fake store (§2.1):** agreed as the test bed for everything browser-driven?
-3. **Model for discovery (S1, S2):** OpenRouter has no credit and `ANTHROPIC_API_KEY` is empty. Which one will you fund?
-4. **Who runs the tasks:** sub-agents in worktrees, one per task, reviewed by you after each wave, as in §4 and §5? And with which model?
-5. **`--dry-run` as the default** until S3 passes, so no run touches the real cart by accident?
+### Open
+
+**How are the catalog (T5) and the cart executor (T6) verified before discovery has produced a profile?** They need a profile to run, the profile comes from discovery (S1, S2), and discovery needs them to try its drafts. Options:
+
+- **(a) Not verified before S1.** T5 and T6 are written and reviewed by reading, with unit tests only for their pure parts. S1 is the first time they run against the store. Simplest, but more to debug during the supervised sessions.
+- **(b) A test-only profile.** A minimal profile for Andorinha's search and anonymous cart, written from what was observed on the site, kept under `tests/` and used only by the `live` tests. The real profile in `profiles/` still comes from discovery. T5 and T6 are then verified in wave 2.
+
+Claude's recommendation: (b), because it finds problems in wave 2 instead of in S1. It needs Johann's agreement, since it is a hand-written description of the store, even if only for tests.
+
+### Resolved (Johann, 2026-09-30)
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | May the profile hold a path pattern (`url_matches`) to recognise the response with the results? | Yes. |
+| 2 | A fake store as the test bed? | No. Dropped entirely for now. |
+| 3 | Which model provider for discovery? | OpenRouter. Billing isn't set up yet: no work starts until Johann says so. |
+| 4 | Who runs the tasks? | Sub-agents in worktrees, on Sonnet 5.5. |
+| 5 | `--dry-run` by default? | No. Using the real cart while not logged in is harmless. |
