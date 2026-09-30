@@ -72,7 +72,7 @@ async def default_services(
     if profile.cart is None and not dry_run:
         raise ProfileNotDiscoveredError(
             f"the site profile for {store!r} has no 'cart' section, so it can't add to the cart. "
-            f"Run: shopping-minion discover {store} --part cart, or use --dry-run"
+            f"Its cart hasn't been discovered yet (discovery session 2); until then, use --dry-run"
         )
 
     provider = provider or browser_provider()

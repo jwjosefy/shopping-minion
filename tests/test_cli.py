@@ -32,3 +32,12 @@ def test_candidate_line_has_price_unit_name_brand_and_stock():
     assert line == "R$ 9.50 | pack of 3 | Atum | Gomes | OUT OF STOCK"
     weight = format_candidate(_cand(UnitOfSale(kind="weight_step", step_size_g=100)))
     assert weight == "no price | weight step 100 g | Atum | -"
+
+
+def test_discover_command_is_registered():
+    from shopping_minion.cli import build_parser
+
+    args = build_parser().parse_args(
+        ["discover", "andorinha", "--url", "https://andorinhaonline.com.br/"]
+    )
+    assert args.command == "discover" and args.store == "andorinha"

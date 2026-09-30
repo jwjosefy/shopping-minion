@@ -86,7 +86,9 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("store")
     search.add_argument("query")
 
-    # Registered here as they land: from shopping_minion.discovery.cli import add_parser
+    from shopping_minion.discovery.cli import add_parser as add_discover_parser
+
+    add_discover_parser(commands)
     return parser
 
 
@@ -96,6 +98,10 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_browser_check(args.url, headless=not args.headed))
     if args.command == "search":
         return asyncio.run(_search(args.store, args.query))
+    if args.command == "discover":
+        from shopping_minion.discovery.cli import run as run_discover
+
+        return asyncio.run(run_discover(args))
     if args.command == "serve":
         import uvicorn
 
