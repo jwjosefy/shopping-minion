@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import re
 from collections.abc import Callable
+from contextlib import AbstractAsyncContextManager
 from functools import cache
 from pathlib import Path
 from secrets import token_hex
@@ -46,9 +47,16 @@ class RunState:
 def create_app(
     store: RunStore | None = None,
     intake_factory: Callable[[], Intake] = _default_intake,
-    services_factory: ServicesFactory = default_services,
+    services_factory: ServicesFactory | None = None,
+    store_name: str = "andorinha",
+    dry_run: bool = False,
 ) -> FastAPI:
     store = store or RunStore()
+    if services_factory is None:
+
+        def services_factory() -> AbstractAsyncContextManager[Services]:
+            return default_services(store_name, dry_run=dry_run)
+
     running: dict[str, RunState] = {}
     tasks: set[asyncio.Task[None]] = set()
     get_intake = cache(intake_factory)  # built on first upload, so the app starts without keys
@@ -175,6 +183,7 @@ def create_app(
         report = store.load(run_id, "report", RunReport)
         context = {
             "run_id": run_id,
+            "store": store_name,
             "state": state,
             "report": report,
             "finished": state is None or state.finished,

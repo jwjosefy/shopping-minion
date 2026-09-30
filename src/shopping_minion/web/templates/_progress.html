@@ -49,7 +49,7 @@
           {% elif d.status.value == 'ADDED_LOW_CONFIDENCE' %}⚠️ adicionado — conferir
           {% elif d.status.value == 'NOT_SURE' %}❓ não tenho certeza — não adicionado
           {% elif d.status.value == 'NOT_FOUND' %}🔍 não encontrado
-          {% else %}❌ falhou{% if 'REDISCOVERY_NEEDED' in d.flags | map(attribute='value') | list %} — o site mudou, refazer discovery{% endif %}{% endif %}
+          {% else %}❌ falhou{% if 'REDISCOVERY_NEEDED' in d.flags | map(attribute='value') | list %} — o site mudou, refazer a descoberta: <code>shopping-minion discover {{ store }}</code>{% endif %}{% endif %}
         </td>
       </tr>
     {% endfor %}

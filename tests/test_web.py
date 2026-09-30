@@ -3,7 +3,17 @@ import re
 import pytest
 from fastapi.testclient import TestClient
 
-from shopping_minion.contracts import ConfirmedList, TranscribedItem, TranscribedList
+from shopping_minion.contracts import (
+    ConfirmedItem,
+    ConfirmedList,
+    Decision,
+    DecisionFlag,
+    DecisionStatus,
+    ReportItem,
+    RunReport,
+    TranscribedItem,
+    TranscribedList,
+)
 from shopping_minion.runs import RunStore
 from shopping_minion.web.app import create_app
 
@@ -238,3 +248,40 @@ def test_failed_run_shows_the_error_instead_of_spinning(store):
         client.post(f"/runs/{run_id}/start", follow_redirects=False)
         response = _wait_until_finished(client, run_id)
     assert "profile missing" in response.text
+
+
+def test_default_services_get_the_store_and_dry_run_setting(store, monkeypatch):
+    calls = []
+
+    def fake_default_services(store_name, *, dry_run=False):
+        calls.append((store_name, dry_run))
+        return _services()
+
+    monkeypatch.setattr("shopping_minion.web.app.default_services", fake_default_services)
+    app = create_app(store, lambda: FakeIntake(), store_name="other", dry_run=True)
+    with TestClient(app) as client:
+        run_id = _confirmed_run(client)
+        client.post(f"/runs/{run_id}/start", follow_redirects=False)
+        _wait_until_finished(client, run_id)
+    assert calls == [("other", True)]
+
+
+def test_rediscovery_message_names_the_command_for_the_store(store):
+    run_id = store.create()
+    report = RunReport(
+        run_id=run_id,
+        items=[
+            ReportItem(
+                decision=Decision(
+                    item=ConfirmedItem(name="atum"),
+                    status=DecisionStatus.FAILED,
+                    flags=[DecisionFlag.REDISCOVERY_NEEDED],
+                    rationale="selector missing",
+                )
+            )
+        ],
+    )
+    store.save(run_id, "report", report)
+    with TestClient(create_app(store, lambda: FakeIntake(), store_name="lojax")) as client:
+        text = client.get(f"/runs/{run_id}/progress").text
+    assert "shopping-minion discover lojax" in text
