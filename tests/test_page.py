@@ -59,6 +59,15 @@ def test_find_does_not_match_on_host_and_clear_forgets():
     assert log.find("/search") is None
 
 
+def test_records_returns_a_copy_of_what_was_recorded():
+    log = ResponseLog([("https://a.example/one", {"n": 1})])
+    log.add("https://a.example/two", {"n": 2})
+    records = log.records()
+    assert records == [("https://a.example/one", {"n": 1}), ("https://a.example/two", {"n": 2})]
+    records.clear()
+    assert len(log.records()) == 2
+
+
 # --- forbidden steps --------------------------------------------------------------------------
 
 
