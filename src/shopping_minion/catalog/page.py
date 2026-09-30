@@ -212,6 +212,10 @@ class ResponseLog:
         if self._pending:
             await asyncio.gather(*self._pending, return_exceptions=True)
 
+    def records(self) -> list[tuple[str, Any]]:
+        """A copy of what was recorded, oldest first (observation only)."""
+        return list(self._records)
+
     def clear(self) -> None:
         for task in self._pending:
             task.cancel()

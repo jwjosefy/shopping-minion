@@ -211,14 +211,6 @@ def parse_search_section(section_yaml: str, store: str, base_url: str) -> SitePr
 # --- the session ------------------------------------------------------------------------------
 
 
-class RecordingLog(ResponseLog):
-    """A ResponseLog that can list what it recorded (observation only)."""
-
-    @property
-    def records(self) -> list[tuple[str, Any]]:
-        return list(self._records)
-
-
 @dataclass
 class DiscoverySession:
     context: BrowserContext
@@ -226,8 +218,10 @@ class DiscoverySession:
     store: str
     base_url: str
     test_queries: list[str]
-    log: RecordingLog = field(default_factory=RecordingLog)
+    log: ResponseLog = field(default_factory=ResponseLog)
     accepted: Search | None = None
+    # What the accepted section returned for each test query (public catalog data, kept as fixtures).
+    candidates: dict[str, list[Candidate]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.page is not None:
@@ -360,7 +354,7 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
     async def page_responses(contains: str = "", last: int = 10) -> str:
         """List the JSON responses the page received since the last action (observation only)."""
         await session.log.settle()
-        return format_responses(session.log.records, contains, last)
+        return format_responses(session.log.records(), contains, last)
 
     async def run_draft(
         section_yaml: str, query: str
@@ -391,6 +385,7 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
     async def submit_search(section_yaml: str) -> str:
         """Run a draft `search` section for every test query; accepted only if all return results."""
         lines = []
+        found: dict[str, list[Candidate]] = {}
         for query in session.test_queries:
             candidates, error = await run_draft(section_yaml, query)
             if error is not None:
@@ -398,10 +393,12 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
             assert candidates is not None
             if not candidates:
                 return f"rejected: query {query!r}: no candidates"
+            found[query] = candidates
             lines.append(f"query {query!r}: {format_candidates(candidates, shown=2)}")
         profile = parse_search_section(section_yaml, session.store, session.base_url)
         assert isinstance(profile, SiteProfile)
         session.accepted = profile.search
+        session.candidates = found
         return truncate("accepted\n" + "\n".join(lines))
 
     return [
