@@ -34,3 +34,20 @@ def test_decision_backend_without_model_is_fine():
         }
     )
     assert config.resolver.model is None
+
+
+def test_fallback_cannot_have_its_own_fallback():
+    role = {"provider": "anthropic", "model": "m"}
+    with pytest.raises(ValidationError, match="one level"):
+        ModelsConfig.model_validate(
+            {
+                "intake": role | {"fallback": role | {"fallback": role}},
+                "resolver": {"backend": "julia1"},
+                "discovery": role,
+            }
+        )
+
+
+def test_repo_config_has_intake_fallback():
+    config = load_models_config(REPO_ROOT / "config" / "models.yaml")
+    assert config.intake.fallback is not None

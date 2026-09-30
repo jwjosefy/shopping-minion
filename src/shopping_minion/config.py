@@ -24,11 +24,14 @@ class ChatRole(_Config):
     base_url: str | None = None  # for OpenAI-compatible APIs such as GLM
     api_key_env: str | None = None  # name of the env var holding the key; never the key itself
     max_tokens: int | None = None
+    fallback: ChatRole | None = None  # tried once when the primary fails (ADR-0011)
 
     @model_validator(mode="after")
     def _compatible_api_needs_key_env(self) -> ChatRole:
         if self.base_url and not self.api_key_env:
             raise ValueError("a role with base_url must name its api_key_env")
+        if self.fallback and self.fallback.fallback:
+            raise ValueError("only one level of fallback is supported")
         return self
 
 
@@ -47,7 +50,6 @@ class ModelsConfig(_Config):
     intake: ChatRole
     resolver: ResolverRole
     discovery: ChatRole
-    # fallback: reserved, not configured in v0 (ADR-0009)
 
 
 def load_models_config(path: Path = DEFAULT_MODELS_PATH) -> ModelsConfig:

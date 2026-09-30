@@ -7,6 +7,7 @@ support); the result is then validated into the stricter `TranscribedList` contr
 from __future__ import annotations
 
 import base64
+import logging
 from typing import Protocol
 
 from langchain_core.language_models import BaseChatModel
@@ -16,6 +17,8 @@ from pydantic import BaseModel, Field
 from shopping_minion.config import ChatRole
 from shopping_minion.contracts import TranscribedItem, TranscribedList
 from shopping_minion.models import chat_model
+
+log = logging.getLogger(__name__)
 
 SUPPORTED_MEDIA_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # API limit per image
@@ -65,8 +68,19 @@ class Intake(Protocol):
 
 
 class LLMIntake:
-    def __init__(self, model: BaseChatModel) -> None:
-        self._structured = model.with_structured_output(_LLMList, method="json_schema")
+    """Transcribes with the primary model; on any error, tries the fallback once (ADR-0011)."""
+
+    def __init__(
+        self,
+        model: BaseChatModel,
+        fallback: BaseChatModel | None = None,
+        names: tuple[str, str | None] = ("primary", "fallback"),
+    ) -> None:
+        self._models = [(names[0], model.with_structured_output(_LLMList, method="json_schema"))]
+        if fallback is not None:
+            structured = fallback.with_structured_output(_LLMList, method="json_schema")
+            self._models.append((names[1] or "fallback", structured))
+        self.answered_by: str | None = None
 
     def transcribe(self, image: bytes, media_type: str) -> TranscribedList:
         validate_image(image, media_type)
@@ -83,9 +97,20 @@ class LLMIntake:
                 ]
             ),
         ]
-        result = self._structured.invoke(messages)
-        assert isinstance(result, _LLMList)
-        return TranscribedList(items=[_to_contract(item) for item in result.items])
+        for index, (name, structured) in enumerate(self._models):
+            try:
+                result = structured.invoke(messages)
+            except Exception as e:
+                if index == len(self._models) - 1:
+                    raise
+                log.warning(
+                    "intake: %s failed (%s: %s); trying fallback", name, type(e).__name__, e
+                )
+                continue
+            assert isinstance(result, _LLMList)
+            self.answered_by = name
+            return TranscribedList(items=[_to_contract(item) for item in result.items])
+        raise AssertionError("unreachable")
 
 
 def validate_image(image: bytes, media_type: str) -> None:
@@ -108,4 +133,12 @@ def _to_contract(item: _LLMItem) -> TranscribedItem:
 
 
 def build_intake(role: ChatRole) -> LLMIntake:
-    return LLMIntake(chat_model(role))
+    fallback = role.fallback
+    return LLMIntake(
+        chat_model(role),
+        chat_model(fallback) if fallback else None,
+        names=(
+            f"{role.provider}:{role.model}",
+            f"{fallback.provider}:{fallback.model}" if fallback else None,
+        ),
+    )

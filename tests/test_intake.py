@@ -63,3 +63,34 @@ def test_llm_intake_sends_image_and_returns_contract(monkeypatch):
     assert [i.name for i in result.items] == ["feijão"]
     image_block = stub.messages[1].content[0]
     assert image_block["type"] == "image" and image_block["mime_type"] == "image/jpeg"
+
+
+def test_fallback_answers_when_primary_fails(monkeypatch):
+    class Failing:
+        def invoke(self, messages):
+            raise RuntimeError("429 RESOURCE_EXHAUSTED")
+
+    ok = _StructuredStub(_LLMList(items=[]))
+    primary = GenericFakeChatModel(messages=iter([]))
+    fallback = GenericFakeChatModel(messages=iter([]))
+    stubs = {id(primary): Failing(), id(fallback): ok}
+    monkeypatch.setattr(
+        GenericFakeChatModel, "with_structured_output", lambda self, *a, **k: stubs[id(self)]
+    )
+
+    intake = LLMIntake(primary, fallback, names=("gemini", "glm"))
+    assert intake.transcribe(b"\xff\xd8", "image/jpeg").items == []
+    assert intake.answered_by == "glm"
+
+
+def test_error_is_raised_when_fallback_also_fails(monkeypatch):
+    class Failing:
+        def invoke(self, messages):
+            raise RuntimeError("down")
+
+    monkeypatch.setattr(
+        GenericFakeChatModel, "with_structured_output", lambda self, *a, **k: Failing()
+    )
+    model = GenericFakeChatModel(messages=iter([]))
+    with pytest.raises(RuntimeError, match="down"):
+        LLMIntake(model, GenericFakeChatModel(messages=iter([]))).transcribe(b"x", "image/jpeg")
