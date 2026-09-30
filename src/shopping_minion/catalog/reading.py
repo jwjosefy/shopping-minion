@@ -54,7 +54,14 @@ def candidates_from_response(
     items = get_path(payload, source.items)
     if not isinstance(items, list):
         raise ReadingError(f"expected a list at {source.items!r} in the response, found none")
-    return _map_items(items, source.fields, source.unit_of_sale, base_url)
+    return candidates_from_items(source.fields, source.unit_of_sale, items, base_url=base_url)
+
+
+def candidates_from_items(
+    fields: FieldMap, unit_of_sale: UnitRule, items: list[Any], *, base_url: str
+) -> list[Candidate]:
+    """Map a plain list of items (dicts) into Candidates; items without id or name are skipped."""
+    return _map_items(items, fields, unit_of_sale, base_url)
 
 
 def candidates_from_html(source: DomSource, html: str, *, base_url: str) -> list[Candidate]:
