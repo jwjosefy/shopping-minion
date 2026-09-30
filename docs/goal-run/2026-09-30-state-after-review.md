@@ -24,7 +24,7 @@ This replaces the summary in [the goal-run log](2026-09-30-goal-run-log.md). Tha
 
 ## Waiting for Johann
 
-1. **Review ADR-0012 (Draft)** and answer its two open questions: whether the adapter may read the responses the page itself received, and how the browser should be launched.
+1. **Accept or change ADR-0012 (Draft).** Its two open questions were answered by Johann on 2026-09-30 and are now part of the text, with the browser test that followed.
 2. **Decide whether the quantity question comes back.** The resolver derives the target quantity from the list, then the preferences, then 1 unit flagged as assumed (a deviation from HLD §4.5).
 3. **Read journal drafts 0005, 0006 and 0007.** They are written by Claude in your voice.
 4. **Whole-project review**, before any work is split into smaller tasks.
@@ -33,7 +33,7 @@ This replaces the summary in [the goal-run log](2026-09-30-goal-run-log.md). Tha
 
 - **OpenRouter has no credit** (free tier): the GLM intake fallback and the Haiku resolver fail with `402` on anything but tiny calls.
 - **`STORE_EMAIL`, `STORE_PASSWORD` and `ANTHROPIC_API_KEY` are empty.**
-- **Andorinha's search page shows no results in Playwright's default headless mode.** It worked with the full Chromium and a visible window. Other configurations weren't tested.
+- **Andorinha's search page shows no results when the browser sends `HeadlessChrome` in its user agent** (Playwright's default). With a regular desktop user agent it works, headless included. The six configurations tested are in ADR-0012. The browser provider doesn't set a user agent yet.
 
 ## Things to know
 

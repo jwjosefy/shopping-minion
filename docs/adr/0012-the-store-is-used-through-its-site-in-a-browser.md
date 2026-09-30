@@ -37,16 +37,33 @@ That code and its profile were removed. The account of what happened is in the [
 Option 2.
 
 - The store is reached only by driving its site in a browser. The adapter never builds requests to the site's endpoints, with an HTTP client or with `fetch()`.
-- A site profile ([ADR-0006](0006-discovery-agent-writes-site-profile.md)) describes **user steps**: how to search, how to read a result, how to log in, how to add to the cart. It doesn't describe endpoints, hosts, ids or request parameters.
-- How the browser is launched (with or without a window, which Chromium build, user agent) is configuration and Johann's choice. This ADR doesn't restrict it.
+- A site profile ([ADR-0006](0006-discovery-agent-writes-site-profile.md)) describes **user steps**: how to search, how to read a result, how to log in, how to add to the cart. It doesn't describe endpoints to call, hosts, ids or request parameters.
+- **Reading results** (Johann, 2026-09-30), in order of preference:
+  1. listen to the responses the page itself receives (observing, never sending);
+  2. fall back to the DOM;
+  3. where a React-like app keeps its data in a global store and not in the DOM, inject JavaScript to read that store.
+- **Browser configuration** (Johann, 2026-09-30): whether the browser has a window is irrelevant. The server only sees the HTTP bytes it receives, so what matters is what the browser sends. The browser runs headless with a regular desktop user agent.
 
-## Open questions for Johann
+## What was tested
 
-1. **Reading results:** from the DOM only, or may the adapter also read the responses the page itself received (observing, never sending)? The second is more robust to layout changes but reads data the user doesn't see.
-2. **Browser configuration:** Playwright's default headless mode uses a separate "headless shell" binary. With it, Andorinha's search page showed no results; with the full Chromium and a visible window it worked. Only those two were tested. Not tested: the full Chromium without a window, the system Chrome (which ADR-0007 excludes and the earlier prototype used), or a changed user agent.
+On 2026-09-30, the store's search page (`/busca/atum`) was opened as a user would, under six configurations. The page makes its own search call; nothing was requested by hand.
+
+| Configuration | User agent sent | The page's search call | Items shown |
+|---|---|---|---|
+| A. Headless shell (Playwright's default) | `HeadlessChrome/153` | failed | 0 |
+| **B. Headless shell + desktop user agent** | `Chrome/153` | **200** | **32** |
+| C. Playwright's Chromium, no window | `HeadlessChrome/153` | failed | 0 |
+| D. System Chromium, no window | `HeadlessChrome/152` | failed | 0 |
+| E. System Chromium, with a window | `Chrome/152` | 200 | 32 |
+| F. Playwright's Chromium, with a window | `Chrome/153` | 200 | 32 |
+
+Every configuration that sends `HeadlessChrome` in the `User-Agent` header fails, whatever the binary. Every one that sends `Chrome` works, with or without a window. B is the same binary as A with only the user agent changed. In B the `sec-ch-ua` header still said "HeadlessChrome", so on this site the `User-Agent` header alone decides.
+
+This was one site, one query, one run per configuration.
 
 ## Consequences
 
 - No host lists, ids or request parameters in profiles, and no bot-protection workarounds for hand-built requests.
-- Searching is slower (seconds per item instead of a fraction of a second) and depends on the page's structure.
+- Searching is slower (seconds per item instead of a fraction of a second). Reading the page's own responses first makes it depend less on the page's layout.
+- The browser provider needs a user agent setting ([ADR-0007](0007-browser-runtime-playwright-local-cdp-later.md) doesn't have one). No window and no display are needed, which also suits a hosted setup.
 - The adapter, the discovery agent and the Andorinha profile have to be built again under this rule. Contracts, intake, resolver, workflow, report and evals are unaffected.
