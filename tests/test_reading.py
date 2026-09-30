@@ -293,3 +293,17 @@ def test_missing_url_placeholder_is_empty():
     source = _source_with_url("{base_url}p/{nope}")
     [c] = candidates_from_response(source, with_items({"id": 1, "title": "A"}), base_url=BASE)
     assert c.url == "https://loja.example/p/"
+
+
+def test_candidates_from_items_maps_a_plain_list_like_a_response():
+    from shopping_minion.catalog.reading import candidates_from_items
+
+    items = [
+        {"id": 1, "title": "Atum 170g", "brand": {"name": "Marca"}, "prices": [{"value": 9.5}]},
+        {"id": 2},  # no name: skipped
+    ]
+    got = candidates_from_items(RESPONSE.fields, RESPONSE.unit_of_sale, items, base_url=BASE)
+    assert [c.id for c in got] == ["1"]
+    assert got[0].brand == "Marca" and got[0].price == Decimal("9.5")
+    payload = {"data": {"products": items}}
+    assert got == candidates_from_response(RESPONSE, payload, base_url=BASE)
