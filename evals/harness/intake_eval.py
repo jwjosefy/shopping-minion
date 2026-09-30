@@ -3,6 +3,12 @@
     dotenvx run -- uv run python evals/harness/intake_eval.py inbox/list.jpg evals/fixtures/list-001.yaml
     uv run python evals/harness/intake_eval.py --transcription data/evals/<file>.json evals/fixtures/list-001.yaml
 
+Override the configured intake model to compare candidates without editing config/models.yaml:
+
+    dotenvx run -- uv run python evals/harness/intake_eval.py inbox/list.jpg evals/fixtures/list-001.yaml \
+        --provider openai --model z-ai/glm-5.3-flash \
+        --base-url https://openrouter.ai/api/v1 --api-key-env OPENROUTER_API_KEY
+
 Names are matched loosely (accents and case ignored, similarity >= 0.75, or one name contained in
 the other), because "filtro" vs. "filtro de café" is a wording difference, not a reading error.
 Transcriptions are saved under data/evals/ (git-ignored) so they can be re-scored for free.
@@ -21,7 +27,7 @@ from pathlib import Path
 
 import yaml
 
-from shopping_minion.config import load_models_config
+from shopping_minion.config import ChatRole, load_models_config
 from shopping_minion.contracts import TranscribedItem, TranscribedList
 from shopping_minion.intake import build_intake
 
@@ -137,6 +143,10 @@ def main() -> None:
     source.add_argument("photo", nargs="?", type=Path)
     source.add_argument("--transcription", type=Path)
     parser.add_argument("fixture", type=Path)
+    parser.add_argument("--provider")
+    parser.add_argument("--model")
+    parser.add_argument("--base-url")
+    parser.add_argument("--api-key-env")
     args = parser.parse_args()
 
     if args.transcription:
@@ -144,10 +154,21 @@ def main() -> None:
         label = str(args.transcription)
     else:
         role = load_models_config().intake
+        overrides = {
+            "provider": args.provider,
+            "model": args.model,
+            "base_url": args.base_url,
+            "api_key_env": args.api_key_env,
+        }
+        if any(overrides.values()):
+            role = ChatRole.model_validate(
+                role.model_dump() | {k: v for k, v in overrides.items() if v}
+            )
         media_type = mimetypes.guess_type(args.photo.name)[0] or "image/jpeg"
         got = build_intake(role).transcribe(args.photo.read_bytes(), media_type)
         OUT_DIR.mkdir(parents=True, exist_ok=True)
-        out = OUT_DIR / f"{datetime.now(UTC):%Y%m%d-%H%M%S}-{role.provider}-{role.model}.json"
+        slug = f"{role.provider}-{role.model}".replace("/", "_")
+        out = OUT_DIR / f"{datetime.now(UTC):%Y%m%d-%H%M%S}-{slug}.json"
         out.write_text(got.model_dump_json(indent=2), encoding="utf-8")
         label = f"{role.provider}:{role.model} -> {out}"
 
