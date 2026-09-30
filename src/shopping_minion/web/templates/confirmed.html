@@ -13,7 +13,10 @@
     {% endfor %}
   </ul>
   <footer>
-    <p class="muted">A busca e o carrinho chegam nos próximos marcos (M2–M5). Esta execução fica salva em <code>data/runs/{{ run_id }}/</code>.</p>
+    <p class="muted">Esta execução fica salva em <code>data/runs/{{ run_id }}/</code>.</p>
+    <form method="post" action="/runs/{{ run_id }}/start" style="display:inline">
+      <button type="submit">Buscar produtos</button>
+    </form>
     <a href="/runs/{{ run_id }}/review" role="button" class="secondary outline">Voltar à revisão</a>
     <a href="/" role="button">Nova lista</a>
   </footer>

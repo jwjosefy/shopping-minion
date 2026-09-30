@@ -137,3 +137,104 @@ def test_add_row_returns_an_empty_row(store):
     run_id = upload(client).headers["location"].split("/")[2]
     row = client.get(f"/runs/{run_id}/row")
     assert "<tr" in row.text and 'name="items-' in row.text
+
+
+# --- run + report ---------------------------------------------------------------------------
+
+import time
+from contextlib import asynccontextmanager
+from decimal import Decimal
+
+from shopping_minion.contracts import Candidate, CartLine, UnitOfSale
+from shopping_minion.preferences import Preferences
+from shopping_minion.resolver import ProductChoice
+from shopping_minion.services import Services
+
+
+class _Catalog:
+    async def search(self, query):
+        return [
+            Candidate(
+                id="1",
+                name=f"{query.title()} Premium",
+                brand="Marca",
+                unit_of_sale=UnitOfSale(kind="unit"),
+                price=Decimal("9.5"),
+                url="https://s/1",
+            )
+        ]
+
+
+class _Backend:
+    name = "stub"
+
+    def choose(self, item, candidates, preference):
+        return ProductChoice("1", 0.9, rationale="matches the request")
+
+
+class _Executor:
+    async def add_to_cart(self, candidate, sale):
+        return CartLine(product_id=candidate.id, quantity=sale.steps_or_units, verified=False)
+
+
+@asynccontextmanager
+async def _services():
+    yield Services(_Catalog(), _Backend(), _Executor(), Preferences({}), dry_run=True)
+
+
+@asynccontextmanager
+async def _broken_services():
+    raise RuntimeError("profile missing")
+    yield
+
+
+def _confirmed_run(client, names=("atum", "papel")):
+    run_id = upload(client).headers["location"].split("/")[2]
+    data = {f"items-{i}-name": n for i, n in enumerate(names)}
+    client.post(f"/runs/{run_id}/confirm", data=data, follow_redirects=False)
+    return run_id
+
+
+def _wait_until_finished(client, run_id):
+    for _ in range(50):
+        response = client.get(f"/runs/{run_id}/progress")
+        if response.status_code == 286:  # htmx: stop polling
+            return response
+        time.sleep(0.1)
+    raise AssertionError("run did not finish")
+
+
+# `with TestClient(...)` keeps one event loop alive, so the background run isn't cancelled
+# when the request that started it returns (uvicorn behaves like that too).
+
+
+def test_confirmed_page_offers_to_start(store):
+    with TestClient(create_app(store, lambda: FakeIntake(), _services)) as client:
+        run_id = _confirmed_run(client)
+        assert f'action="/runs/{run_id}/start"' in client.get(f"/runs/{run_id}").text
+
+
+def test_start_requires_a_confirmed_list(store):
+    with TestClient(create_app(store, lambda: FakeIntake(), _services)) as client:
+        run_id = upload(client).headers["location"].split("/")[2]
+        assert client.post(f"/runs/{run_id}/start", follow_redirects=False).status_code == 409
+
+
+def test_run_finishes_and_report_shows_products_and_dry_run_notice(store):
+    with TestClient(create_app(store, lambda: FakeIntake(), _services)) as client:
+        run_id = _confirmed_run(client)
+        assert client.post(f"/runs/{run_id}/start", follow_redirects=False).status_code == 303
+        response = _wait_until_finished(client, run_id)
+
+    assert "Atum Premium" in response.text and "Papel Premium" in response.text
+    assert "Simulação" in response.text and "90%" in response.text
+    assert "quantidade assumida" in response.text
+    assert "R$ 19.00" in response.text
+
+
+def test_failed_run_shows_the_error_instead_of_spinning(store):
+    with TestClient(create_app(store, lambda: FakeIntake(), _broken_services)) as client:
+        run_id = _confirmed_run(client)
+        client.post(f"/runs/{run_id}/start", follow_redirects=False)
+        response = _wait_until_finished(client, run_id)
+    assert "profile missing" in response.text

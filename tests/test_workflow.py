@@ -149,3 +149,15 @@ def test_report_is_saved_to_the_run_folder(tmp_path):
     saved = store.load(run_id, "report", RunReport)
     assert saved is not None and isinstance(saved.items[0], ReportItem)
     assert saved.items[0].cart_line.verified
+
+
+def test_report_carries_candidate_details_and_total(tmp_path):
+    catalog = FakeCatalog({"atum": [cand("1", "Atum Sólido")], "papel": [cand("2", "Papel")]})
+    report, *_ = run(
+        [ConfirmedItem(name="atum"), ConfirmedItem(name="papel", quantity=2, unit="un")],
+        catalog,
+        FakeExecutor(),
+        tmp_path=tmp_path,
+    )
+    assert report.items[0].candidate.name == "Atum Sólido"
+    assert report.cart_total == Decimal(15)  # 5 x 1 + 5 x 2

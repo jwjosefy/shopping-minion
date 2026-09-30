@@ -20,6 +20,9 @@
     .items small { display: block; margin-top: .2rem; }
     tr.clarify input[name$="-name"] { border-color: var(--pico-del-color); }
     .muted { color: var(--pico-muted-color); }
+    table.report td { vertical-align: top; }
+    tr.st-not_sure td, tr.st-added_low_confidence td { background: color-mix(in srgb, var(--pico-mark-background-color) 25%, transparent); }
+    tr.st-failed td, tr.st-not_found td { background: color-mix(in srgb, var(--pico-del-color) 12%, transparent); }
     @media (max-width: 768px) {
       .review { grid-template-columns: 1fr; }
       .photo { position: static; }

@@ -1,0 +1,59 @@
+{% if state and state.error %}
+  <p role="alert"><mark>A execução falhou: {{ state.error }}</mark></p>
+{% elif state and not state.finished %}
+  <progress value="{{ state.done }}" max="{{ state.total }}"></progress>
+  <p class="muted">{{ state.done }} de {{ state.total }} itens processados…</p>
+{% endif %}
+
+{% if report %}
+  {% if report.dry_run %}
+  <p><mark>Simulação: nada foi adicionado ao carrinho da loja.</mark></p>
+  {% endif %}
+  <p>
+    {% set c = report.counts %}
+    <strong>{{ c['ADDED'] }}</strong> adicionados ·
+    <strong>{{ c['ADDED_LOW_CONFIDENCE'] }}</strong> adicionados com risco ·
+    <strong>{{ c['NOT_SURE'] }}</strong> incertos ·
+    <strong>{{ c['NOT_FOUND'] }}</strong> não encontrados ·
+    <strong>{{ c['FAILED'] }}</strong> com falha
+    {% if report.cart_total is not none %} · total <strong>R$ {{ '%.2f' | format(report.cart_total) }}</strong>{% endif %}
+  </p>
+  <div class="overflow-auto">
+  <table class="report">
+    <thead><tr><th>Pedido</th><th>Produto</th><th>Qtd</th><th>Confiança</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for row in report.items %}
+      {% set d = row.decision %}
+      <tr class="st-{{ d.status.value | lower }}">
+        <td>{{ d.item.name }}{% if d.item.constraints %}<br><small class="muted">{{ d.item.constraints | join(', ') }}</small>{% endif %}</td>
+        <td>
+          {% if row.candidate %}
+            <a href="{{ row.candidate.url }}" target="_blank" rel="noopener">{{ row.candidate.name }}</a>
+            <br><small class="muted">{{ row.candidate.brand or '' }}{% if row.candidate.price is not none %} · R$ {{ '%.2f' | format(row.candidate.price) }}{% endif %}</small>
+          {% else %}<span class="muted">—</span>{% endif %}
+          {% if d.rationale %}<br><small class="muted">{{ d.rationale }}</small>{% endif %}
+          {% if row.alternative_candidates %}
+            <br><small class="muted">Alternativas: {% for alt in row.alternative_candidates %}{{ alt.name }}{% if not loop.last %}; {% endif %}{% endfor %}</small>
+          {% endif %}
+        </td>
+        <td>
+          {% if row.sale_quantity %}
+            {{ row.sale_quantity.steps_or_units }}{% if row.sale_quantity.effective_unit == 'g' %} × {{ '%g' | format(row.sale_quantity.effective_amount / row.sale_quantity.steps_or_units) }} g{% endif %}
+          {% elif d.target_quantity %}<span class="muted">{{ d.target_quantity.label }}</span>{% endif %}
+          {% if 'QUANTITY_ASSUMED' in d.flags | map(attribute='value') | list %}<br><mark>quantidade assumida</mark>{% endif %}
+          {% if 'QUANTITY_INEXACT' in d.flags | map(attribute='value') | list %}<br><mark>quantidade aproximada</mark>{% endif %}
+        </td>
+        <td>{% if d.confidence is not none %}{{ (d.confidence * 100) | round | int }}%{% else %}—{% endif %}</td>
+        <td>
+          {% if d.status.value == 'ADDED' %}✅ adicionado
+          {% elif d.status.value == 'ADDED_LOW_CONFIDENCE' %}⚠️ adicionado — conferir
+          {% elif d.status.value == 'NOT_SURE' %}❓ não tenho certeza — não adicionado
+          {% elif d.status.value == 'NOT_FOUND' %}🔍 não encontrado
+          {% else %}❌ falhou{% if 'REDISCOVERY_NEEDED' in d.flags | map(attribute='value') | list %} — o site mudou, refazer discovery{% endif %}{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endif %}

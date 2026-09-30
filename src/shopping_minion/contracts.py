@@ -164,6 +164,8 @@ class CartLine(Contract):
 
 class ReportItem(Contract):
     decision: Decision
+    candidate: Candidate | None = None  # the product picked (or the one that would have been)
+    alternative_candidates: list[Candidate] = Field(default_factory=list)
     sale_quantity: SaleQuantity | None = None
     cart_line: CartLine | None = None
 
@@ -171,7 +173,20 @@ class ReportItem(Contract):
 class RunReport(Contract):
     run_id: str
     items: list[ReportItem]
-    cart_total: Decimal | None = None
+    dry_run: bool = False  # True when nothing was really added to a cart
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def cart_total(self) -> Decimal | None:
+        """Sum of price x quantity for lines that were added; None when a price is unknown."""
+        total = Decimal(0)
+        for item in self.items:
+            if item.cart_line is None:
+                continue
+            if item.candidate is None or item.candidate.price is None:
+                return None
+            total += item.candidate.price * item.cart_line.quantity
+        return total
 
     @computed_field  # type: ignore[prop-decorator]
     @property

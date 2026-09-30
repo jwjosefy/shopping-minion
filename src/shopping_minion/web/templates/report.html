@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Relatório · Shopping Minion{% endblock %}
+{% block content %}
+<h2>Execução</h2>
+<div id="progress" hx-get="/runs/{{ run_id }}/progress" hx-trigger="load, every 2s" hx-swap="innerHTML">
+  <p aria-busy="true">Iniciando…</p>
+</div>
+{% endblock %}

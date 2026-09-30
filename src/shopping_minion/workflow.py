@@ -117,6 +117,7 @@ async def run_list(
     run_id: str,
     thresholds: Thresholds = DEFAULT_THRESHOLDS,
     on_progress: Progress | None = None,
+    dry_run: bool = False,
 ) -> RunReport:
     graph = build_item_graph(catalog, backend, executor, preferences, thresholds)
     items: list[ReportItem] = []
@@ -129,11 +130,7 @@ async def run_list(
             continue
         try:
             state = await graph.ainvoke({"item": item})
-            report_item = ReportItem(
-                decision=state["decision"],
-                sale_quantity=state.get("sale"),
-                cart_line=state.get("cart_line"),
-            )
+            report_item = _report_item(state)
         except SiteChangedError as e:
             log.warning("site changed while handling %r: %s", item.name, e)
             stopped = True
@@ -147,11 +144,25 @@ async def run_list(
             )
         items.append(report_item)
         await _emit(on_progress, index + 1, total, report_item)
-        store.save(run_id, "report", RunReport(run_id=run_id, items=items))
+        store.save(run_id, "report", RunReport(run_id=run_id, items=items, dry_run=dry_run))
 
-    report = RunReport(run_id=run_id, items=items)
+    report = RunReport(run_id=run_id, items=items, dry_run=dry_run)
     store.save(run_id, "report", report)
     return report
+
+
+def _report_item(state: _State) -> ReportItem:
+    decision = state["decision"]
+    by_id = {c.id: c for c in state.get("candidates", [])}
+    return ReportItem(
+        decision=decision,
+        candidate=by_id.get(decision.candidate_id) if decision.candidate_id else None,
+        alternative_candidates=[
+            by_id[a.candidate_id] for a in decision.alternatives if a.candidate_id in by_id
+        ],
+        sale_quantity=state.get("sale"),
+        cart_line=state.get("cart_line"),
+    )
 
 
 def _not_attempted(item: ConfirmedItem) -> ReportItem:
