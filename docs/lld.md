@@ -146,8 +146,8 @@ Each task is small enough for one agent with a clean context. Every brief given 
 | **T2** | Profile schema (user steps) | none | `src/.../catalog/profile.py`, `tests/test_profile.py` (shared models are in `catalog/mapping.py`) | The §2.3 example validates; the three rules of §2.3 are rejected with clear errors. |
 | **T3** | Reading results (pure) | none | `src/.../catalog/reading.py`, `tests/test_reading.py` | From a JSON payload and from an HTML string to `Candidate`s, with unit, pack and weight-step cases, tested without a browser. |
 | **T4** | Docs alignment | none | `docs/hld.md`, `README.md` | HLD §4.5 and §9 match ADR-0013 (once accepted); README describes the commands that exist. |
-| **T5** | Catalog | T1, T2, T3 | `src/.../catalog/browser_catalog.py`, `tests/test_browser_catalog.py` | Written to §2.4, with unit tests for anything that doesn't need a page. Not run against the store before S1 (§8, question 6). |
-| **T6** | Cart executor (anonymous cart) | T1, T2, T3 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Written to §2.5, unit tests for pure parts only; first run against the store in S2 (§8, question 6). Target behaviour: adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises `SiteChangedError` when an element is missing. |
+| **T5** | Catalog, and the shared page helpers (run steps, read items) | T1, T2, T3 | `src/.../catalog/page.py`, `src/.../catalog/browser_catalog.py`, tests | Written to §2.4, with unit tests for anything that doesn't need a page. Not run against the store before S1 (§8, question 6). |
+| **T6** | Cart executor (anonymous cart) | T1, T2, T3, T5 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Written to §2.5, unit tests for pure parts only; first run against the store in S2 (§8, question 6). Target behaviour: adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises `SiteChangedError` when an element is missing. |
 | **T7** | Login | T6 | `src/.../executor/login.py`, `cli.py` (login), tests | Session saved and reused; clear stop when the site asks for something the profile doesn't cover. Verified only in S2. |
 | **T8** | Discovery tools | T2, T5 | `src/.../discovery/tools.py`, `tests/test_discovery_tools.py` | Guardrails unit-tested; live: each tool works on the real store, not logged in; no tool can send a request of its own. |
 | **T9** | Discovery agent, session 1 (search) | T8 | `src/.../discovery/agent.py`, `cli.py` (discover) | The agent loop runs with a scripted fake model (no cost) and writes a profile file from what the script submits. |
@@ -166,9 +166,7 @@ flowchart LR
     T1[T1 browser provider] --> T5[T5 catalog]
     T2[T2 profile schema] --> T5
     T3[T3 reading] --> T5
-    T1 --> T6[T6 cart executor]
-    T2 --> T6
-    T3 --> T6
+    T5 --> T6[T6 cart executor]
     T6 --> T7[T7 login]
     T5 --> T8[T8 discovery tools]
     T8 --> T9[T9 discovery: search]
@@ -190,12 +188,15 @@ flowchart LR
 | Wave | In parallel | Then |
 |---|---|---|
 | 1 | T1, T2, T3, T4 | review and merge |
-| 2 | T5, T6 | review and merge |
-| 3 | T7, T8, T11 | review and merge |
+| 2 | T5 | review and merge |
+| 3 | T6, T8 | review and merge |
+| 3b | T7, T11 | review and merge |
 | 4 | T9 | review; then S1 with Johann |
 | 5 | T10 | review; then S2 and S3 with Johann |
 
 Tasks in the same wave touch different files, so each runs in its own git worktree and merges without conflicts. `cli.py` is touched by T7, T9, T10 and T11: T7 and T11 are in the same wave, so T11 adds only the run options and T7 only the `login` command, in separate functions.
+
+**Correction, 2026-09-30:** the first version of this plan ran T5 and T6 in parallel. They aren't independent: both need the code that runs a profile's steps and reads items from a page, so T5 writes it (`catalog/page.py`) and T6 follows. The shared data models used by T2 and T3 were added the same way, in `catalog/mapping.py`, before wave 1.
 
 **Who runs them** (Johann, 2026-09-30): sub-agents in worktrees, one per task, on Sonnet 5.5, reviewed by Johann after each wave.
 
