@@ -1,0 +1,1256 @@
+{
+ "query": "filé de peito de frango",
+ "payload": {
+  "hits": [
+   {
+    "id": "6157177",
+    "categories": [
+     "store1327:Carnes e Aves",
+     "store1327:Carnes e Aves > Aves"
+    ],
+    "brandName": "Frigo Medeiros",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/cE8S4YgBQHUDzmZpfnqY_Ix2u-c=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/7ab0b785-design-sem-nome.png",
+    "name": "Filé De Peito Frango Resf Kg",
+    "pricing": {
+     "price": 27.99,
+     "promotion": false,
+     "promotionalPrice": 27.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.1,
+     "inStock": 720.09,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.1,
+     "sellByWeightAndUnit": true
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "file-de-peito-frango-resf-kg",
+    "tags": [],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 3999,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6157177s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134669",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves",
+     "store1327:Carnes e Aves > Aves",
+     "store1327:Carnes e Aves > Aves > Filé de Peito de Frango"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/9b-luYBE2OZQi5D4mCpmSpXnQxA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284158958dc18e55a3bff00/12046-a31d1c8f.jpg",
+    "name": "Frango Filé Peito Sadia Pacote 1KG",
+    "pricing": {
+     "price": 22.99,
+     "promotion": false,
+     "promotionalPrice": 22.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 3185,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "frango-file-peito-sadia-pacote-1kg",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2299,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6134669s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134756",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/F6FI4nUSIYc9tPw-NyOucFEacJ8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284158958dc1de45932f306/12900-5ad04b38.jpg",
+    "name": "Filezinho Sassami Sadia Congelado 1KG",
+    "pricing": {
+     "price": 21.99,
+     "promotion": true,
+     "promotionalPrice": 18.99,
+     "discount": 13,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 8119,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "filezinho-sassami-sadia-congelado-1kg",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1235,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6134756s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6136009",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves",
+     "store1327:Carnes e Aves > Aves",
+     "store1327:Carnes e Aves > Aves > Sassami"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/onmWQmKKUHQLuLCki_cMK_SQsrU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/c4d22911-salgadinhos-11.png",
+    "name": "Filezinho Seara Peito Frango Sassami 1KG",
+    "pricing": {
+     "price": 22.99,
+     "promotion": false,
+     "promotionalPrice": 22.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 211,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "filezinho-seara-peito-frango-sassami-1kg",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1304,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6136009s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134745",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves",
+     "store1327:Carnes e Aves > Aves",
+     "store1327:Carnes e Aves > Aves > Filé de Peito de Frango"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/uQIjEZtiqhY2vILPefCrrlZLVRM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284158958dc1ced5d36fb04/13461-b4fa18d3.jpg",
+    "name": "Filé de Peito Frango Sadia 1KG",
+    "pricing": {
+     "price": 24.99,
+     "promotion": false,
+     "promotionalPrice": 24.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 233,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "file-de-peito-frango-sadia-1kg",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 698,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6134745s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6132978",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Perdigao",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/XoONJu7jj3c60x76q0RY-fwYaSk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178c59d91ce65f33f907/16659-234f7ec8.jpg",
+    "name": "Filezinho de Frango Perdigão Pacote 800G",
+    "pricing": {
+     "price": 19.99,
+     "promotion": false,
+     "promotionalPrice": 19.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 7571,
+     "max": 20,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "filezinho-de-frango-perdigao-pacote-800g",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 945,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6132978s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6140902",
+    "categories": [
+     "store1327:Carnes e Aves",
+     "store1327:Carnes e Aves > Aves"
+    ],
+    "brandName": "Andorinha",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/IgsOKoB7bvZyh8bjNlCWVjWgNLQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/3642bc14-tamanho-512x512-2.png",
+    "name": "Peito De Frango S/Osso Resf Kg",
+    "pricing": {
+     "price": 23.99,
+     "promotion": false,
+     "promotionalPrice": 23.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.9,
+     "inStock": 1268.68,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.9,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "peito-de-frango-sosso-resf-kg",
+    "tags": [],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 4380,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6140902s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6132977",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Perdigao",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/tp4AJF_Lx_O_2AGrhZfepl_wXO4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178c59d91ce65f33fa00/37282-515a1e8b.jpg",
+    "name": "Frango Congelado Perdigão Filé de Peito Embalagem 800G",
+    "pricing": {
+     "price": 18.99,
+     "promotion": false,
+     "promotionalPrice": 18.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 5961,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "frango-congelado-perdigao-file-de-peito-embalagem-800g",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1383,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6132977s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6120795",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Lar",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/k8-QfvWU8h_PHLw802RCbJcuwrA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108d59d51fe45933f90c/28355-b5de11bd.jpg",
+    "name": "Filezinho Sassami Lar Empanado 700G",
+    "pricing": {
+     "price": 25.99,
+     "promotion": true,
+     "promotionalPrice": 19.99,
+     "discount": 23,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 370,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "filezinho-sassami-lar-empanado-700g",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 139,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6120795s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6133161",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/doVkFTftXyzJ4XfQ_WxxpQOVFg8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/da5de6f4-capia-de-capia-de-presutos-queijos-2.png",
+    "name": "Filé Peito De Frango Bifes Cong Sadia 800g",
+    "pricing": {
+     "price": 25.99,
+     "promotion": false,
+     "promotionalPrice": 25.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 341,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "file-peito-de-frango-bifes-cong-sadia-800g",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 260,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6133161s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6879049",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/HANbyZ1siy0Xaxf4MNYDYNauz4M=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284128058d818e45a3aff0c/100229-17be84fa.jpg",
+    "name": "Filezinho De Frango Cong Seara Bdj 1kg",
+    "pricing": {
+     "price": 23.99,
+     "promotion": false,
+     "promotionalPrice": 23.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2306,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "filezinho-de-frango-cong-seara-bdj-1kg",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 170,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6879049s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6135989",
+    "categories": [
+     "store1327:Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados",
+     "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados",
+     "store1327:Carnes e Aves"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/vVxRBoDvoomMYBgBBbcZJ84cQQo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/864e7487-capia-de-capia-de-presutos-queijos-2.png",
+    "name": "Frango Congelado Seara Filé de Peito 1KG",
+    "pricing": {
+     "price": 23.99,
+     "promotion": true,
+     "promotionalPrice": 19.99,
+     "discount": 16,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 148,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "frango-congelado-seara-file-de-peito-1kg",
+    "tags": [
+     "congelado"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 610,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "_id": "p6135989s1327",
+    "installmentGroup": null
+   }
+  ],
+  "total": 269,
+  "nextFrom": 12,
+  "extraData": {
+   "categories": [
+    {
+     "doc_count": 120,
+     "key": "store1327:Congelados"
+    },
+    {
+     "doc_count": 97,
+     "key": "store1327:Congelados > Carnes e Peixes Congelados"
+    },
+    {
+     "doc_count": 85,
+     "key": "store1327:Congelados > Carnes e Peixes Congelados > Aves Congelados"
+    },
+    {
+     "doc_count": 75,
+     "key": "store1327:Carnes e Aves"
+    },
+    {
+     "doc_count": 60,
+     "key": "store1327:Petshop"
+    },
+    {
+     "doc_count": 53,
+     "key": "store1327:Petshop > Alimentos para Cães"
+    },
+    {
+     "doc_count": 50,
+     "key": "store1327:Carnes e Aves > Aves"
+    },
+    {
+     "doc_count": 29,
+     "key": "store1327:Congelados > Petiscos e Salgados Congelados"
+    },
+    {
+     "doc_count": 27,
+     "key": "store1327:Petshop > Alimentos para Cães > Ração para Raças Específicas"
+    },
+    {
+     "doc_count": 25,
+     "key": "store1327:Congelados > Pratos Prontos Congelados"
+    },
+    {
+     "doc_count": 24,
+     "key": "store1327:Congelados > Petiscos e Salgados Congelados > Empanados"
+    },
+    {
+     "doc_count": 22,
+     "key": "store1327:Churrasco"
+    },
+    {
+     "doc_count": 22,
+     "key": "store1327:Mercearia"
+    },
+    {
+     "doc_count": 17,
+     "key": "store1327:Carnes e Aves > Aves > Coxa e Sobrecoxa de Frango"
+    },
+    {
+     "doc_count": 15,
+     "key": "store1327:Churrasco > Aves"
+    },
+    {
+     "doc_count": 15,
+     "key": "store1327:Laticínios e Frios"
+    },
+    {
+     "doc_count": 14,
+     "key": "store1327:Petshop > Alimentos para Gatos"
+    },
+    {
+     "doc_count": 12,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas"
+    },
+    {
+     "doc_count": 12,
+     "key": "store1327:Congelados > Pratos Prontos Congelados > Refeições Congeladas"
+    },
+    {
+     "doc_count": 12,
+     "key": "store1327:Petshop > Alimentos para Cães > Sachê"
+    },
+    {
+     "doc_count": 11,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru"
+    },
+    {
+     "doc_count": 11,
+     "key": "store1327:Petshop > Alimentos para Cães > Ração Úmida"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Carnes e Aves > Aves > Linguiça de Frango"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Congelados > Pratos Prontos Congelados > Lanches Congelados"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Petshop > Alimentos para Cães > Pedaços em Molho"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Petshop > Alimentos para Gatos > Sachê"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Pizzas Congeladas"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Churrasco > Bovinos"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Churrasco > Suínos"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Massas Congeladas"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru > Peito de Frango"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Mercearia > Temperos em Pó"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Carnes e Aves > Aves > Filé de Peito de Frango"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Tortas Salgadas Congeladas"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Laticínios e Frios > Mortadela e Patê"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru > Peito de Peru"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Mercearia > Massas"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Mercearia > Temperos Secos"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Petshop > Alimentos para Gatos > Ração Úmida"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Carnes e Aves > Aves > Coxinha de Asa"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Carnes e Aves > Aves > Frango Desfiado"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Carnes e Aves > Aves > Frango à Passarinho"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Carnes e Aves > Carnes Bovinas Prata"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Churrasco > Aperitivos"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Congelados > Carnes e Peixes Congelados > Hambúrgueres"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Lasanhas Congeladas"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Laticínios e Frios > Mortadela e Patê > Patês"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Salgadinhos de Batata"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Salgadinhos de Batata > Chips de Batata"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Sopas Instantâneas"
+    }
+   ],
+   "brands": [
+    {
+     "key": "sadia",
+     "doc_count": 44
+    },
+    {
+     "key": "seara",
+     "doc_count": 40
+    },
+    {
+     "key": "andorinha",
+     "doc_count": 19
+    },
+    {
+     "key": "dog chow",
+     "doc_count": 17
+    },
+    {
+     "key": "aurora",
+     "doc_count": 16
+    },
+    {
+     "key": "pedigree",
+     "doc_count": 14
+    },
+    {
+     "key": "perdigao",
+     "doc_count": 14
+    },
+    {
+     "key": "korin",
+     "doc_count": 12
+    },
+    {
+     "key": "prime full",
+     "doc_count": 5
+    },
+    {
+     "key": "whiskas",
+     "doc_count": 5
+    },
+    {
+     "key": "honey pet",
+     "doc_count": 4
+    },
+    {
+     "key": "lar",
+     "doc_count": 4
+    },
+    {
+     "key": "na brasa",
+     "doc_count": 4
+    },
+    {
+     "key": "dreamies",
+     "doc_count": 3
+    },
+    {
+     "key": "friskies",
+     "doc_count": 3
+    },
+    {
+     "key": "lays",
+     "doc_count": 3
+    },
+    {
+     "key": "maracaia",
+     "doc_count": 3
+    },
+    {
+     "key": "massa leve",
+     "doc_count": 3
+    },
+    {
+     "key": "papapa",
+     "doc_count": 3
+    },
+    {
+     "key": "vono",
+     "doc_count": 3
+    },
+    {
+     "key": "catupiry",
+     "doc_count": 2
+    },
+    {
+     "key": "ceratti",
+     "doc_count": 2
+    },
+    {
+     "key": "champ",
+     "doc_count": 2
+    },
+    {
+     "key": "dom massas",
+     "doc_count": 2
+    },
+    {
+     "key": "fancy feast",
+     "doc_count": 2
+    },
+    {
+     "key": "forno de minas",
+     "doc_count": 2
+    },
+    {
+     "key": "frigo medeiros",
+     "doc_count": 2
+    },
+    {
+     "key": "keldog",
+     "doc_count": 2
+    },
+    {
+     "key": "kim",
+     "doc_count": 2
+    },
+    {
+     "key": "mezzani",
+     "doc_count": 2
+    },
+    {
+     "key": "nissin",
+     "doc_count": 2
+    },
+    {
+     "key": "ajinomoto",
+     "doc_count": 1
+    },
+    {
+     "key": "alpo",
+     "doc_count": 1
+    },
+    {
+     "key": "br spices",
+     "doc_count": 1
+    },
+    {
+     "key": "cesar",
+     "doc_count": 1
+    },
+    {
+     "key": "chuchups",
+     "doc_count": 1
+    },
+    {
+     "key": "crocantíssimo",
+     "doc_count": 1
+    },
+    {
+     "key": "da terrinha",
+     "doc_count": 1
+    },
+    {
+     "key": "daniella",
+     "doc_count": 1
+    },
+    {
+     "key": "doguitos",
+     "doc_count": 1
+    },
+    {
+     "key": "fazenda futuro",
+     "doc_count": 1
+    },
+    {
+     "key": "flamboia",
+     "doc_count": 1
+    },
+    {
+     "key": "glico",
+     "doc_count": 1
+    },
+    {
+     "key": "kelcat",
+     "doc_count": 1
+    },
+    {
+     "key": "kitano",
+     "doc_count": 1
+    },
+    {
+     "key": "kitekat",
+     "doc_count": 1
+    },
+    {
+     "key": "knorr",
+     "doc_count": 1
+    },
+    {
+     "key": "luxpet",
+     "doc_count": 1
+    },
+    {
+     "key": "maggi",
+     "doc_count": 1
+    },
+    {
+     "key": "marilan",
+     "doc_count": 1
+    }
+   ],
+   "tags": [
+    {
+     "key": "congelado",
+     "doc_count": 103
+    },
+    {
+     "key": "petshop",
+     "doc_count": 30
+    },
+    {
+     "key": "resfriado",
+     "doc_count": 28
+    },
+    {
+     "key": "caes",
+     "doc_count": 18
+    },
+    {
+     "key": "estou pronta so me colocar no forno",
+     "doc_count": 16
+    },
+    {
+     "key": "hora do cafe",
+     "doc_count": 13
+    },
+    {
+     "key": "mercearia",
+     "doc_count": 13
+    },
+    {
+     "key": "gatos",
+     "doc_count": 12
+    },
+    {
+     "key": "receita pronta so precisa me aquecer",
+     "doc_count": 11
+    },
+    {
+     "key": "mercearia basica",
+     "doc_count": 10
+    },
+    {
+     "key": "100 carne suina",
+     "doc_count": 6
+    },
+    {
+     "key": "perfeita para churrasco",
+     "doc_count": 3
+    },
+    {
+     "key": "petiscos",
+     "doc_count": 3
+    },
+    {
+     "key": "cortes prata",
+     "doc_count": 2
+    },
+    {
+     "key": "light",
+     "doc_count": 2
+    },
+    {
+     "key": "orgânico",
+     "doc_count": 2
+    },
+    {
+     "key": "os melhores cortes estao aqui",
+     "doc_count": 2
+    },
+    {
+     "key": "childhood",
+     "doc_count": 1
+    },
+    {
+     "key": "cuidados com meu pet",
+     "doc_count": 1
+    },
+    {
+     "key": "producao propria",
+     "doc_count": 1
+    },
+    {
+     "key": "tudo fresquinho todos os dias",
+     "doc_count": 1
+    }
+   ],
+   "max_price": 139.89999389648438,
+   "min_price": 1.9900000095367432
+  },
+  "hasNext": true,
+  "hasPrevious": false
+ }
+}

@@ -1,0 +1,35 @@
+store: andorinha
+version: 1
+base_url: https://andorinhaonline.com.br/
+headed: true # the search API's Cloudflare protection rejects headless Chromium
+search:
+  kind: http
+  transport: page # fetch() from a store page; a plain HTTP client gets 403 and headless Chromium a CORS error
+  page_url: https://andorinhaonline.com.br/
+  method: GET
+  # 269 = tenant, 1327 = the store the site selects by default (not chosen by us)
+  url: https://sense.osuper.com.br/269/1327/search?brands=&categories=&tags=&size={limit}&from=0&search={query}&sortField=_score&sortOrder=desc
+  results_path: hits
+  fields:
+    id: id
+    name: name
+    # product cards navigate with JavaScript, so there is no stable product URL: link to the search
+    url: https://andorinhaonline.com.br/busca/{name}
+    brand: brandName
+    price: pricing.promotionalPrice
+    in_stock:
+      path: quantity.inStock # a stock count: any non-zero value is in stock
+  unit_of_sale:
+    weight_when:
+      path: saleUnit
+      equals: [KG]
+    step_g: # quantity.fraction is the stepper increment in kg (0.1 filé, 0.3 presunto, 0.9 peça)
+      path: quantity.fraction
+      scale: 1000
+    pack_size: # packs are only visible in the name: "C/16 Rolos", "Lv12 Pg11"
+      path: name
+      regex: (?:c/|lv)\s*(\d+)
+notes: >-
+  Written by hand from a network probe on 2026-09-30, not produced by the discovery agent: its
+  first runs could not find the search call because the API lives on another host (osuper.com.br)
+  and only answers a real page. See docs/goal-run/. Cart and login are not covered yet (M4).
