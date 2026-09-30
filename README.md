@@ -9,9 +9,11 @@
 
 An agent that turns a handwritten grocery list into a ready-to-review online shopping cart.
 
-You take a photo of the list stuck to the fridge. Shopping Minion reads it, figures out which catalog product each line actually means (based on your purchase history and preferences), works out the right quantity for each product's unit of sale, and fills the cart. It stops before checkout: **a human always reviews and places the order.**
+You take a photo of the list stuck to the fridge. Shopping Minion reads it, figures out which catalog product each line actually means (based on your preferences), works out the right quantity for each product's unit of sale, and fills the cart. It stops before checkout: **a human always reviews and places the order.**
 
 > Status: **v0 in progress.** This repo is built in the open; the reasoning behind each decision lives in [`docs/`](docs/).
+>
+> Today the app can't run a real list: searching the store isn't built, so the app starts a run only in tests and previews. Built so far: intake, the review web app, the resolver, quantity conversion and the workflow. Not built: the store catalog adapter, login and the cart executor, so nothing is added to a cart yet.
 
 ## Why this is harder than it looks
 
@@ -33,7 +35,7 @@ flowchart TD
     history[/"Purchase history"/] --> prefs["Preferences"]
     prefs --> catalog["Catalog<br/>(search + normalize, deterministic)"]
     catalog -- structured candidates --> resolver["Resolver<br/>(LLM, structured output)"]
-    resolver -- "decision: product + quantity + rationale" --> executor["Executor<br/>(deterministic, validates, then acts)"]
+    resolver -- "decision: product + target quantity" --> executor["Executor<br/>(deterministic, validates, then acts)"]
     executor --> cart["Cart"]
     cart --> review2(["Human review"])
     review2 --> checkout(["Checkout<br/>(manual)"])
@@ -47,6 +49,8 @@ flowchart TD
 ```
 
 <sub>🟨 human step · 🟦 LLM · 🟩 deterministic code</sub>
+
+This is the design. The catalog, the executor and the cart are not built yet, and the purchase history step is planned for v1: v0 reads a hand-written preferences file. The model picks the product; the quantity is derived by rule (the list, then the preferences, then 1 unit flagged for review, [ADR-0013](docs/adr/0013-target-quantity-is-derived-not-asked.md)).
 
 **Design principles**
 
@@ -68,7 +72,7 @@ uv run pytest                        # add `-m live` for tests that hit real sit
 
 Set `BROWSER_CDP_URL` to use a remote browser instead of the local one.
 
-Start the web app (needs `ANTHROPIC_API_KEY` in the encrypted `.env`, see [ADR-0001](docs/adr/0001-secrets-with-dotenvx.md)):
+Start the web app, where you can upload a photo and review the transcribed list (needs `ANTHROPIC_API_KEY` in the encrypted `.env`, see [ADR-0001](docs/adr/0001-secrets-with-dotenvx.md)):
 
 ```bash
 dotenvx run -- uv run shopping-minion serve        # http://127.0.0.1:8000
@@ -92,6 +96,7 @@ Run with `uv run --no-sync ...` afterwards: a plain `uv sync` removes packages t
 
 ```
 docs/hld.md      High-level design (v0)
+docs/lld.md      Low-level design: the tasks left for v0
 docs/adr/        Architecture Decision Records
 docs/journal/    Build log: what I tried, what I rejected, and why
 src/             Source code (added as components land)

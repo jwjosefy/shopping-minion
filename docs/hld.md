@@ -2,6 +2,7 @@
 
 - **Status:** Approved (2026-09-29)
 - **Date:** 2026-09-29
+- **Updated:** 2026-09-30, to match [ADR-0012](adr/0012-the-store-is-used-through-its-site-in-a-browser.md) and [ADR-0013](adr/0013-target-quantity-is-derived-not-asked.md).
 - **Scope:** v0, with the direction for what comes after. Decisions that are costly to reverse are listed in [§12](#12-proposed-adrs) as ADRs to write; this document references them but does not replace them.
 
 ## 1. Goal
@@ -127,24 +128,22 @@ This implements the `CatalogAdapter` protocol from [ADR-0004](adr/0004-store-cat
 
 ### 4.5 Resolver
 
-It makes **one call per item**, containing two typed multiple-choice questions over a single shared state:
+It makes **one call per item**, with one typed multiple-choice question over a state:
 
 - **The state:** the requested item, its constraints, its preferences, and the full candidate details.
-- **The questions:**
-  1. **Product:** which of the ≤ 20 candidates matches the requested item?
-  2. **Target quantity:** how much of the item is wanted, expressed independently of any product. For example: `1 unit`, `2 units`, `~500 g`, `~1 kg`, `~1.5 kg`. The options come from the quantity written on the list (e.g., "600 g").
+- **The question:** which of the ≤ 20 candidates matches the requested item?
 
-When the list gives no quantity, the question isn't asked. The target is `default_quantity` from the preferences, or **1 unit** when the preferences don't define one either. In that last case the item carries a `QUANTITY_ASSUMED` flag and is highlighted in the report for review, whatever its confidence. Post-v0, the user's corrections to those items feed back into the preferences.
+The model doesn't choose the quantity. The **target quantity** is derived by rule, in this order ([ADR-0013](adr/0013-target-quantity-is-derived-not-asked.md)):
 
-Why one call instead of two:
-- The model sees all the product information in the same context when it judges quantity.
-- It halves the latency per item.
+- **A.** the quantity written on the list;
+- **B.** otherwise, `default_quantity` from the preferences;
+- **C.** otherwise, **1 unit**, and the item carries a `QUANTITY_ASSUMED` flag and is highlighted in the report for review, whatever its confidence. Post-v0, the user's corrections to those items feed back into the preferences.
 
-Julia-1 takes several questions in one `predict`; an LLM backend returns both fields in one structured output.
+The target is expressed independently of any product (`1 unit`, `~500 g`, `~1 kg`). A unit the system doesn't know ("2 latas") is counted as that many units and flagged `QUANTITY_ASSUMED`. The executor converts the target into the chosen product's unit of sale (§4.6), so the model never does unit arithmetic.
 
-The quantity question asks for the *target amount*, not for a product-specific sale quantity. The product isn't chosen yet when the question is asked, so options like "2 trays" would be meaningless at that point. Asking for the amount also keeps the options under 20: pairing every candidate with every quantity would exceed the limit. The executor converts the target amount into the chosen product's unit of sale deterministically (§4.6), so the model never does unit arithmetic.
+The answer comes with a probability, which is the decision's confidence (§5).
 
-Each answer comes with a probability. The decision's confidence is the lower of the two, or just the product probability when the quantity question wasn't asked (§5).
+Julia-1 takes the question in one `predict`; an LLM backend returns the choice in one structured output.
 
 The resolver sits behind a `DecisionBackend` interface with interchangeable implementations. The evaluation harness (§8) decides which one becomes the default:
 
@@ -160,12 +159,12 @@ The resolver sits behind a `DecisionBackend` interface with interchangeable impl
 
 This is the only component that writes to the store.
 
-1. **Converts** the target amount into the chosen product's unit of sale. For example, `~1 kg` of a product sold in ~500 g trays becomes 2 trays, and `~600 g` on a 200 g stepper becomes 3 steps. The rounding rule is explicit and unit-tested. When it's inexact (e.g., `~1 kg` of a 700 g pack), the report shows it.
+1. **Converts** the target quantity (§4.5) into the chosen product's unit of sale. For example, `~1 kg` of a product sold in ~500 g trays becomes 2 trays, and `~600 g` on a 200 g stepper becomes 3 steps. The rounding rule is explicit and unit-tested. When it's inexact (e.g., `~1 kg` of a 700 g pack), the item is flagged `QUANTITY_INEXACT` and the report shows it. A weight asked of a product sold by unit, or a count asked of a product sold by weight, becomes 1 unit or 1 step, flagged the same way.
 2. **Validates** the decision: the candidate exists, the converted quantity is within bounds for its unit of sale, and it's in stock.
-3. **Applies** the decision through the adapter, which clicks steppers or calls the cart endpoint as the site profile describes.
+3. **Applies** the decision through the adapter, which uses the site's cart in the browser (clicking steppers, for example) as the site profile describes.
 4. **Verifies** by reading the cart back and checking that the line matches.
 
-When a step fails in a way that points to the site itself (a selector not found, an unexpected page, a changed API response), the executor marks the item `FAILED`, stops the run, and records that **rediscovery is needed**. It does not retry with improvised actions.
+When a step fails in a way that points to the site itself (a selector not found, an unexpected page, a page that no longer shows what the profile expects), the executor marks the item `FAILED`, stops the run, and records that **rediscovery is needed**. It does not retry with improvised actions.
 
 Login happens here, only when the cart needs it, using `STORE_EMAIL` / `STORE_PASSWORD` from the dotenvx-encrypted `.env` ([ADR-0001](adr/0001-secrets-with-dotenvx.md)). The browser session state is kept in `.auth/`, which is git-ignored.
 
@@ -234,7 +233,7 @@ JSON files in v0. The structure will settle as the code does, and nothing querie
 
 ## 5. Confidence policy
 
-Two thresholds, both configurable, turn a decision's confidence (`min(p_product, p_quantity)`) into a status:
+Two thresholds, both configurable, turn a decision's confidence (the product probability, [ADR-0013](adr/0013-target-quantity-is-derived-not-asked.md)) into a status:
 
 | Confidence | Status | Cart | Report |
 |---|---|---|---|
@@ -242,7 +241,7 @@ Two thresholds, both configurable, turn a decision's confidence (`min(p_product,
 | ≥ `skip` and < `high` | `ADDED_LOW_CONFIDENCE` | **added** | flagged as a risk, with the top alternatives |
 | < `skip`, or `needs_clarification` | `NOT_SURE` | **skipped** | shown as "not sure", with the top candidates |
 | no candidates | `NOT_FOUND` | skipped | shown |
-| any of the above, with quantity assumed as 1 unit (§4.5) | adds the `QUANTITY_ASSUMED` flag | unchanged | highlighted for review |
+| any of the above, with the target quantity assumed as 1 unit (rule C, §4.5) | adds the `QUANTITY_ASSUMED` flag | unchanged | highlighted for review |
 | execution failed | `FAILED` | skipped | shown, with "rediscovery needed" when the site changed |
 
 This **changes ADR-0005**, which says low-confidence decisions go to human review instead of being applied. In v0 they are applied and flagged; the user reviews them in the cart before checkout anyway. A new ADR supersedes that clause (§12). Threshold values are set from eval results, not guessed.
@@ -279,15 +278,15 @@ sequenceDiagram
         G->>C: search(item)
         C->>S: search (no login)
         C-->>G: ≤ 20 candidates
-        G->>R: one call: candidates + product question + target-quantity question
-        R-->>G: product choice + p, quantity choice + p
-        alt min(p) ≥ skip
-            G->>E: decision
+        G->>R: one call: candidates + product question
+        R-->>G: product choice + p
+        alt p ≥ skip
+            G->>E: decision + target quantity (from the list, preferences, or 1 unit assumed)
             E->>E: convert target amount to unit of sale
             E->>S: login if needed, add to cart
             E->>S: read cart
             E-->>G: verified CartLine
-        else min(p) < skip
+        else p < skip
             G-->>G: NOT_SURE, skip
         end
     end
@@ -313,8 +312,8 @@ ConfirmedItem     same fields, after human review
 Candidate         id, name, brand, size, unit_of_sale, price, in_stock, url
 UnitOfSale        kind: unit | pack | weight_step, step_size?, pack_size?
 TargetQuantity    id, label, amount, unit (unit | g | kg | pack), product-independent
-Decision          item, candidate_id, target_quantity, p_product, p_quantity?,
-                  confidence = min(p_product, p_quantity?), status, flags[], rationale?, alternatives[]
+Decision          item, candidate_id, target_quantity, p_product, p_quantity? (unused, ADR-0013),
+                  confidence = p_product, status, flags[], rationale?, alternatives[]
 SaleQuantity      candidate_id, steps_or_units, effective_amount, exact: bool   (executor output)
 CartLine          product_id, quantity, verified
 RunReport         run_id, items[Decision + CartLine], counts, cart_total
@@ -348,9 +347,10 @@ Everything in [ADR-0001](adr/0001-secrets-with-dotenvx.md) and `CLAUDE.md` still
 | 0007 | Browser runtime: Playwright-managed Chromium locally, remote CDP later; no Docker in v0 | New |
 | 0008 | Low-confidence decisions are added and flagged; below the skip threshold, items are skipped as NOT_SURE | Supersedes 0005's low-confidence clause |
 | 0009 | Workflow on LangGraph as a deterministic graph; one configurable model per role, no fallback in v0 | New |
-| 0010 | Resolver makes one call per item with two typed multiple-choice questions (product, product-independent target quantity) behind a `DecisionBackend`; the executor converts quantity to unit of sale; rationale optional; backend chosen by evals | Amends 0005's rationale requirement |
+| 0010 | Resolver makes one call per item with two typed multiple-choice questions (product, product-independent target quantity) behind a `DecisionBackend`; the executor converts quantity to unit of sale; rationale optional; backend chosen by evals | Amends 0005's rationale requirement. Its quantity question was superseded by 0013. |
 | 0011 | Intake falls back to a second model when the first fails (added after approval, 2026-09-30) | Supersedes 0009's no-fallback clause |
 | 0012 | The store is used through its site, in a browser, the way a user would; endpoints are never called directly (added after approval, 2026-09-30) | Closes 0007's raw-HTTP opening |
+| 0013 | The target quantity is derived by rule (list, then preferences, then 1 unit flagged `QUANTITY_ASSUMED`), not asked of the model; the resolver asks one question, the product (added after approval, 2026-09-30) | Supersedes 0010's quantity question |
 
 ## 13. Build plan
 
@@ -361,7 +361,7 @@ Discovery and the v0 shopping path are built together. The first adapter comes f
 | M0 | Package skeleton, contracts (§9), `config/models.yaml`, `BrowserProvider` | Tests pass, and a headless Chromium opens Andorinha |
 | M1 | Web app: upload → intake → review | The `list-001` photo becomes an editable list |
 | M2 | Discovery, part 1: search + unit of sale → profile v1 | Profile-driven search returns normalized candidates for the three items |
-| M3 | Resolver (single call, Haiku backend) + executor quantity conversion | Offline eval on recorded candidates for the three items; conversion unit-tested |
+| M3 | Resolver (single call, Haiku backend, quantity by rule) + executor quantity conversion | Offline eval on recorded candidates for the three items; conversion unit-tested |
 | M4 | Discovery, part 2: login + cart → profile v2. Executor add/verify | The three items are in the cart and verified |
 | M5 | LangGraph workflow, confidence policy, report, run store | Full v0 flow from the web app |
 | M6 | Julia-1 backend + resolver eval comparison | Numbers for both backends, and thresholds set from data |
@@ -373,7 +373,7 @@ Asked in the first draft and answered by Johann during review. The answers are a
 | # | Question | Decision |
 |---|---|---|
 | 1 | Haiku's role in evals: baseline resolver, LLM judge, or both? | Baseline resolver only, compared with Julia-1 and Jev. |
-| 2 | Target quantity when the list says nothing? | `default_quantity` from preferences, or 1 unit when undefined. An assumed quantity is flagged for review in the report. Later, user feedback updates the preferences. |
+| 2 | Target quantity when the list says nothing? | `default_quantity` from preferences, or 1 unit when undefined. An assumed quantity is flagged for review in the report. Later, user feedback updates the preferences. Now a rule, not a model question: [ADR-0013](adr/0013-target-quantity-is-derived-not-asked.md). |
 | 3 | Site profiles: committed or local-only? | Committed, after a check for personal data. |
 | 4 | Julia-1 is three days old: include it? | Yes, as one more backend in the evals. |
 | 5 | GLM 5.3 for intake in v0? | Not in v0. Marked with `TODO(glm)` stubs so it's easy to add later. |
