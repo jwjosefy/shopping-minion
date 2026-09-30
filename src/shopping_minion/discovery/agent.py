@@ -123,7 +123,16 @@ Example searching by typing in the box and reading the DOM:
 ```
 
 `fields` paths are dotted paths inside one item (`pricing.price`, `images[0]`). `url` is a template
-of a page of the store. In `from_dom`, `extract` names the values read inside one card and
+of a page of the store. Its placeholders are fields of the item (for example `{{name}}`, or an id or
+a slug, as in the examples), never `{{query}}`: `{{query}}` is not a field of an item, so the url
+would lose the product.
+
+A page may load more results in a second response, a moment after the first. The catalog reads the
+first response that matches `url_matches`, which is the first page of results, so write the
+section for that one. `url_matches` cannot tell the two apart and must not try to.
+
+Reading the first page follows from this: what you see with `response_detail` should be the first
+matching response. In `from_dom`, `extract` names the values read inside one card and
 `fields` points to those names.
 
 # Units of sale
@@ -151,15 +160,24 @@ so in your final message instead of working around it.
 1. Explore: `open_page` the home page, `read_page`, `inspect` the search box. Search once by hand
    (`type_text`, or open the search page) and look at `page_responses` to see whether a response
    carries the products.
-2. Draft a `search` section.
-3. `try_search` it for each test query and read the result. Fix what is wrong: missing items,
-   wrong names, prices, units of sale, a `wait_for` that times out when nothing is found.
-4. `submit_search` with the section. It runs every test query and accepts only if all return
+2. Once a response carries the products, look at one item with `response_detail` (its number from
+   `page_responses`, and a path such as `hits[0]`) before writing any field path. Use paths that
+   exist in that item: do not guess names for the price, the stock or the unit of sale. Prefer the
+   response over the DOM: once a response source works, do not spend many steps on `inspect`.
+3. Draft a `search` section.
+4. `try_search` it for each test query and read the result. Check that the candidates have prices,
+   stock and units of sale that look right, and compare with what the page shows, before you
+   submit. Fix what is wrong: missing items, wrong names, prices, units of sale, a `wait_for` that
+   times out when nothing is found.
+5. `submit_search` with the section. It runs every test query and accepts only if all return
    results. If it is rejected, read why, fix, and submit again.
-5. When it is accepted, reply with a short, factual report for the reviewer: which source was
+6. When it is accepted, reply with a short, factual report for the reviewer: which source was
    used (response, DOM or script) and why, how units of sale are read (unit, pack, weight step)
    and for which products you saw each, and anything uncertain or not checked. Do not claim
    anything you did not see. Then stop.
+
+Your steps are limited, so go to `try_search` early with a first draft and fix it from its output,
+instead of exploring for a long time before the first draft.
 
 If you cannot produce a section that works, say why in your final message. Do not invent one.
 """

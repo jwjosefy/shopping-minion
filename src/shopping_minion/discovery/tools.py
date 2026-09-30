@@ -23,6 +23,7 @@ from pydantic import ValidationError
 from shopping_minion.catalog.browser_catalog import BrowserCatalog
 from shopping_minion.catalog.page import ResponseLog
 from shopping_minion.catalog.profile import ClickStep, FillStep, Search, SiteProfile
+from shopping_minion.catalog.reading import _MISSING, get_path
 from shopping_minion.contracts import Candidate
 from shopping_minion.workflow import SiteChangedError
 
@@ -129,18 +130,54 @@ def format_response(url: str, body: Any) -> str:
 
 
 def format_responses(records: list[tuple[str, Any]], contains: str = "", last: int = 10) -> str:
-    """The most recent `last` responses whose path and query contain `contains`."""
+    """The most recent `last` responses whose path and query contain `contains`.
+
+    Each is numbered by its place in `records` (from 1), not in the filtered list, so the number
+    stays the same whatever the filter and is the `index` that `response_detail` takes.
+    """
     shown = [
-        (url, body)
-        for url, body in records
+        (index, url, body)
+        for index, (url, body) in enumerate(records, 1)
         if not contains or contains.lower() in _path_and_query(url).lower()
     ]
     if not shown:
         return "no JSON responses" + (f" matching {contains!r}" if contains else "") + "."
     shown = shown[-max(last, 1) :]
-    lines = [f"{len(shown)} of {len(records)} JSON responses:"]
-    lines += [f"{i}. {format_response(url, body)}" for i, (url, body) in enumerate(shown, 1)]
+    lines = [f"{len(shown)} of {len(records)} JSON responses (numbers are for response_detail):"]
+    lines += [f"{index}. {format_response(url, body)}" for index, url, body in shown]
     return truncate("\n".join(lines))
+
+
+def _json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, indent=2, default=str)
+
+
+def format_detail(records: list[tuple[str, Any]], index: int, path: str = "") -> str:
+    """Part of one recorded response: the value at `path` (see `reading.get_path`) as JSON.
+
+    A list shows its length and its first item in full, an object its keys first. Reads what was
+    recorded; nothing is requested.
+    """
+    if not 1 <= index <= len(records):
+        have = f"1 to {len(records)}" if records else "none recorded"
+        return f"error: no response number {index} ({have}); see page_responses"
+    url, body = records[index - 1]
+    value = get_path(body, path.strip())
+    where = f"response {index} ({_path_and_query(url)})" + (
+        f" at {path.strip()!r}" if path.strip() else ""
+    )
+    if value is _MISSING:
+        return f"error: nothing at {path.strip()!r} in {where}; check the keys one level up"
+    if isinstance(value, dict):
+        keys = ", ".join(str(key) for key in list(value)[:60])
+        head = f"{where}: an object with {len(value)} keys: {keys}\n"
+        return truncate(head + _json(value))
+    if isinstance(value, list):
+        head = f"{where}: a list of {len(value)} items"
+        if not value:
+            return head
+        return truncate(f"{head}; the first item in full:\n{_json(value[0])}")
+    return truncate(f"{where}: {_json(value)}")
 
 
 def format_unit(candidate: Candidate) -> str:
@@ -356,6 +393,17 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
         await session.log.settle()
         return format_responses(session.log.records(), contains, last)
 
+    @tool
+    @_errors_to_model
+    async def response_detail(index: int, path: str = "") -> str:
+        """Show part of a response the page received, by its number in page_responses (observation).
+
+        `path` is a dotted path with [n] for list positions (`hits[0].pricing`); empty shows the
+        whole body. A list shows its length and first item in full; an object, its keys first.
+        """
+        await session.log.settle()
+        return format_detail(session.log.records(), index, path)
+
     async def run_draft(
         section_yaml: str, query: str
     ) -> tuple[list[Candidate], None] | tuple[None, str]:
@@ -408,6 +456,7 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
         click,
         type_text,
         page_responses,
+        response_detail,
         try_search,
         submit_search,
     ]

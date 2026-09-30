@@ -46,17 +46,30 @@ def test_find_returns_the_most_recent_match_on_path_and_query():
             ("https://api.example/search?page=2", {"n": 3}),
         ]
     )
-    assert log.find(r"/search") == {"n": 3}
-    assert log.find(r"page=1") == {"n": 1}
-    assert log.find(r"/nothing") is None
+    assert log.find(r"/search", which="last") == {"n": 3}
+    assert log.find(r"page=1", which="last") == {"n": 1}
+    assert log.find(r"/nothing", which="last") is None
+
+
+def test_find_first_returns_the_earliest_match_when_the_page_loads_more():
+    log = ResponseLog(
+        [
+            ("https://api.example/other", {"n": 0}),
+            ("https://api.example/search?page=1", {"n": 1}),
+            ("https://api.example/search?page=2", {"n": 2}),
+        ]
+    )
+    assert log.find(r"/search", which="first") == {"n": 1}
+    assert log.find(r"/search", which="last") == {"n": 2}
+    assert log.find(r"/nothing", which="first") is None
 
 
 def test_find_does_not_match_on_host_and_clear_forgets():
     log = ResponseLog([("https://searchhost.example/x", {"n": 1})])
-    assert log.find("searchhost") is None
+    assert log.find("searchhost", which="first") is None
     log.add("https://a.example/search", {"n": 2})
     log.clear()
-    assert log.find("/search") is None
+    assert log.find("/search", which="first") is None
 
 
 def test_records_returns_a_copy_of_what_was_recorded():

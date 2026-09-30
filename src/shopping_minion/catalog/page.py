@@ -13,7 +13,7 @@ import os
 import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import quote as _url_quote
 from urllib.parse import urlsplit
 
@@ -222,10 +222,15 @@ class ResponseLog:
         self._pending.clear()
         self._records.clear()
 
-    def find(self, url_matches: str) -> Any | None:
-        """Body of the most recent response whose URL path (plus query) matches the regex."""
+    def find(self, url_matches: str, *, which: Literal["first", "last"]) -> Any | None:
+        """Body of a response whose URL path (plus query) matches the regex.
+
+        `"first"` is the earliest match recorded since the log was last cleared (the first page of
+        results of the search just run, when the page then loads more); `"last"` the most recent.
+        """
         pattern = re.compile(url_matches)
-        for url, body in reversed(self._records):
+        records = self._records if which == "first" else reversed(self._records)
+        for url, body in records:
             parts = urlsplit(url)
             target = parts.path + (f"?{parts.query}" if parts.query else "")
             if pattern.search(target):
@@ -325,6 +330,7 @@ async def _observe(
     sources: SearchResults | CartRead,
     log: ResponseLog,
     timeout_ms: int,
+    which: Literal["first", "last"],
 ) -> tuple[Any | None, str | None, ScriptOutcome | None]:
     """Wait for `wait_for`, then gather what each configured source needs from the page."""
     if sources.wait_for:
@@ -337,7 +343,9 @@ async def _observe(
             ) from error
 
     await log.settle()
-    body = log.find(sources.from_response.url_matches) if sources.from_response else None
+    body = (
+        log.find(sources.from_response.url_matches, which=which) if sources.from_response else None
+    )
     html = await _page_html(page) if sources.from_dom else None
     script = await _run_script(page, sources.from_script.script) if sources.from_script else None
     return body, html, script
@@ -352,7 +360,7 @@ async def read_candidates(
     timeout_ms: int = DEFAULT_TIMEOUT_MS,
 ) -> list[Candidate]:
     """Wait for `wait_for`, then read the page with the sources in order (see select_candidates)."""
-    body, html, script = await _observe(page, sources, log, timeout_ms)
+    body, html, script = await _observe(page, sources, log, timeout_ms, "first")
     return select_candidates(
         sources, base_url=base_url, response_body=body, html=html, script=script
     )
@@ -437,7 +445,7 @@ async def read_cart_lines(
     the elements a filled one does. Use it only where an empty cart is a normal answer.
     """
     try:
-        body, html, script = await _observe(page, sources, log, timeout_ms)
+        body, html, script = await _observe(page, sources, log, timeout_ms, "last")
         return select_lines(
             sources, base_url=base_url, response_body=body, html=html, script=script
         )

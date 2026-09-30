@@ -12,6 +12,7 @@ from shopping_minion.discovery.tools import (
     click_blocked,
     field_blocked,
     format_candidates,
+    format_detail,
     format_responses,
     on_store_domain,
     parse_search_section,
@@ -141,6 +142,46 @@ def test_format_responses_shows_path_not_host():
     assert "https://" not in text
 
 
+def test_format_responses_numbers_are_stable_under_filter_and_last():
+    records = [(f"https://h.example/r{i}", {"i": i}) for i in range(1, 6)]
+    text = format_responses(records, contains="r4")
+    assert "4. /r4" in text
+    assert "5. /r5" in format_responses(records, last=1)
+
+
+ITEM = {"name": "Tuna can", "pricing": {"price": 4.5, "unit": "UN"}, "tags": ["a", "b"]}
+DETAIL_RECORDS = [
+    ("https://h.example/search", {"total": 2, "hits": [ITEM, {"name": "Second"}]}),
+    ("https://h.example/other", {"x": 1}),
+]
+
+
+def test_format_detail_list_shows_length_and_first_item_in_full():
+    text = format_detail(DETAIL_RECORDS, 1, "hits")
+    assert "a list of 2 items" in text
+    assert '"price": 4.5' in text
+    assert "Second" not in text
+
+
+def test_format_detail_object_lists_keys_first_and_paths_use_brackets():
+    text = format_detail(DETAIL_RECORDS, 1)
+    assert "an object with 2 keys: total, hits" in text
+    nested = format_detail(DETAIL_RECORDS, 1, "hits[0].pricing")
+    assert "an object with 2 keys: price, unit" in nested
+    assert "4.5" in format_detail(DETAIL_RECORDS, 1, "hits[0].pricing.price")
+    assert "/search" in text and "h.example" not in text
+
+
+def test_format_detail_errors_and_truncation():
+    assert "no response number 3" in format_detail(DETAIL_RECORDS, 3)
+    assert "no response number 0" in format_detail(DETAIL_RECORDS, 0)
+    assert "none recorded" in format_detail([], 1)
+    assert "nothing at 'hits[5]'" in format_detail(DETAIL_RECORDS, 1, "hits[5]")
+    assert "nothing at 'hits.name'" in format_detail(DETAIL_RECORDS, 1, "hits.name")
+    big = [("https://h.example/big", {"items": [{"v": "x" * 20000}]})]
+    assert "truncated" in format_detail(big, 1, "items")
+
+
 def test_format_responses_filter_last_and_truncation():
     records = [(f"https://s.example/r{i}", {"k": "x" * 2000}) for i in range(5)]
     assert format_responses(records, contains="r3").count("keys:") == 1
@@ -225,6 +266,7 @@ EXPECTED_TOOLS = {
     "click": {"selector"},
     "type_text": {"selector", "text", "press_enter"},
     "page_responses": {"contains", "last"},
+    "response_detail": {"index", "path"},
     "try_search": {"section_yaml", "query"},
     "submit_search": {"section_yaml"},
 }
