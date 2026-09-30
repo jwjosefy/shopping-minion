@@ -1,6 +1,8 @@
 # 2026-09-30 — First numbers for the resolver
 
-_Draft written during an unattended run on 2026-09-30. Johann to review before publishing._
+_Draft written by Claude during an unattended run on 2026-09-30._
+
+> **Note, 2026-09-30 (after review):** the numbers below stand. The recorded store responses they were measured on are now normalized candidate lists in `evals/fixtures/candidates/`; the store profile mentioned here was removed. See [entry 0007](2026-09-30-0007-goal-run-and-review.md).
 
 The resolver ([ADR-0010](../adr/0010-single-pass-typed-resolver.md)) chooses one product among the store's search results. Two backends now run on the same recorded cases, so the comparison ADR-0010 promised has a first data point.
 

@@ -1,5 +1,7 @@
 # Goal run — 2026-09-30
 
+> **Superseded by [state after review](2026-09-30-state-after-review.md).** After Johann's review, the catalog adapter, the discovery agent, the Andorinha profile and the ADR-0012 this log mentions were removed: they called the store's endpoints directly. This log is kept as it was written at the end of the run. Don't follow its "What to do in the morning" list.
+
 Goal from Johann: advance every milestone (M2 to M6) unattended, document minor blockers here for
 morning review, and stop and document at a major one. This file is the log and the summary.
 

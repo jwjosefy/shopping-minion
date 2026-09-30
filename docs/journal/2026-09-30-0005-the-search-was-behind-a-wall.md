@@ -1,6 +1,8 @@
 # 2026-09-30 — The search was behind a wall the agent couldn't see
 
-_Draft written during an unattended run on 2026-09-30. Johann to review before publishing._
+_Draft written by Claude during an unattended run on 2026-09-30._
+
+> **Correction, 2026-09-30 (after review):** the approach this entry describes, calling the store's search endpoint directly, was a departure from the project's thesis (drive the browser as a user). The code, the profile and the ADR-0012 cited below were removed. The entry is kept as written, as a record of what the run believed. See [entry 0007](2026-09-30-0007-goal-run-and-review.md).
 
 The discovery agent ([ADR-0006](../adr/0006-discovery-agent-writes-site-profile.md)) got its first real job: learn how Andorinha's search works. It failed three times, and the reasons say more about the design than a success would have.
 
@@ -22,7 +24,7 @@ The discovery agent ([ADR-0006](../adr/0006-discovery-agent-writes-site-profile.
 
 The difference is the browser's identity: headless Chromium announces itself as `HeadlessChrome`, and the protection rejects that. Nothing was spoofed to get through: the same browser with a window is a normal browser. [ADR-0007](../adr/0007-browser-runtime-playwright-local-cdp-later.md) had named this risk ("sites that fingerprint headless browsers may block the pinned Chromium"), and it showed up on the first real site.
 
-What changed in the design ([ADR-0012](../adr/0012-stores-may-need-a-visible-browser-and-page-requests.md), proposed):
+What changed in the design (ADR-0012 "stores may need a visible browser and page requests", proposed at the time, since deleted):
 
 - A profile can say `headed: true` and `transport: page`: the request is made with `fetch()` from inside a page of the store, in a visible browser.
 - A human can allow an extra API host for search specs (`--allow-domain osuper.com.br`). The agent still can't browse or click outside the store's domain.
