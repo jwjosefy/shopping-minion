@@ -6,6 +6,9 @@ import argparse
 import asyncio
 
 from shopping_minion.browser import browser_provider
+from shopping_minion.catalog.browser_catalog import BrowserCatalog
+from shopping_minion.catalog.profile import load_profile
+from shopping_minion.contracts import Candidate
 
 ANDORINHA_URL = "https://andorinhaonline.com.br/"
 
@@ -21,7 +24,47 @@ async def _browser_check(url: str, headless: bool) -> int:
         return 0 if status is not None and status < 400 else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def describe_unit(candidate: Candidate) -> str:
+    unit = candidate.unit_of_sale
+    if unit.kind == "pack":
+        return f"pack of {unit.pack_size}"
+    if unit.kind == "weight_step":
+        return f"weight step {unit.step_size_g:g} g"
+    return "unit"
+
+
+def format_candidate(candidate: Candidate) -> str:
+    price = f"R$ {candidate.price:.2f}" if candidate.price is not None else "no price"
+    parts = [price, describe_unit(candidate), candidate.name, candidate.brand or "-"]
+    if not candidate.in_stock:
+        parts.append("OUT OF STOCK")
+    return " | ".join(parts)
+
+
+async def _search(store: str, query: str) -> int:
+    try:
+        profile = load_profile(store)  # before the browser starts: a missing profile fails fast
+    except FileNotFoundError:
+        print(
+            f"store {store!r} hasn't been discovered yet. "
+            f"Run: shopping-minion discover {store} --url <home page>"
+        )
+        return 1
+    async with browser_provider().session(store=store) as context:
+        catalog = BrowserCatalog(profile, context)
+        try:
+            candidates = await catalog.search(query)
+        finally:
+            await catalog.close()
+    for candidate in candidates:
+        print(format_candidate(candidate))
+    if not candidates:
+        print("no results")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """One place to register commands; other modules add theirs with `add_parser(subparsers)`."""
     parser = argparse.ArgumentParser(prog="shopping-minion")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -34,16 +77,33 @@ def main(argv: list[str] | None = None) -> int:
     serve.add_argument(
         "--lan", action="store_true", help="listen on all interfaces so a phone can connect"
     )
+    serve.add_argument("--store", default="andorinha", help="which store's profile to use")
+    serve.add_argument(
+        "--dry-run", action="store_true", help="decide what to add, without adding to the cart"
+    )
 
-    args = parser.parse_args(argv)
+    search = commands.add_parser("search", help="search a store and print the candidates")
+    search.add_argument("store")
+    search.add_argument("query")
+
+    # Registered here as they land: from shopping_minion.discovery.cli import add_parser
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     if args.command == "browser-check":
         return asyncio.run(_browser_check(args.url, headless=not args.headed))
+    if args.command == "search":
+        return asyncio.run(_search(args.store, args.query))
     if args.command == "serve":
         import uvicorn
 
         from shopping_minion.web.app import create_app
 
         host = "0.0.0.0" if args.lan else "127.0.0.1"
-        uvicorn.run(create_app(), host=host, port=args.port)
+        uvicorn.run(
+            create_app(store_name=args.store, dry_run=args.dry_run), host=host, port=args.port
+        )
         return 0
     return 2

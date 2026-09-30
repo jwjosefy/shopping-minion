@@ -4,7 +4,7 @@
 
 `run_list` walks the confirmed list one item at a time (the cart is shared state on a single
 browser session), saves progress after every item, and stops the run when the executor says the
-site changed (HLD §4.6). Nothing here talks to a store or a model directly: it uses the `Catalog`,
+site changed (HLD §4.6). A cart conflict on one item fails that item only. Nothing here talks to a store or a model directly: it uses the `Catalog`,
 `DecisionBackend` and `CartExecutor` interfaces.
 """
 
@@ -119,6 +119,8 @@ async def run_list(
     on_progress: Progress | None = None,
     dry_run: bool = False,
 ) -> RunReport:
+    from shopping_minion.executor.browser_cart import CartConflictError  # circular at import time
+
     graph = build_item_graph(catalog, backend, executor, preferences, thresholds)
     items: list[ReportItem] = []
     total = len(confirmed.items)
@@ -141,6 +143,11 @@ async def run_list(
                     flags=[DecisionFlag.REDISCOVERY_NEEDED],
                     rationale=str(e),
                 )
+            )
+        except CartConflictError as e:  # this item only: the run goes on
+            log.warning("cart conflict while handling %r: %s", item.name, e)
+            report_item = ReportItem(
+                decision=Decision(item=item, status=DecisionStatus.FAILED, rationale=str(e))
             )
         items.append(report_item)
         await _emit(on_progress, index + 1, total, report_item)

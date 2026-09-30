@@ -12,6 +12,7 @@ from shopping_minion.contracts import (
     RunReport,
     UnitOfSale,
 )
+from shopping_minion.executor.browser_cart import CartConflictError
 from shopping_minion.preferences import Preferences
 from shopping_minion.resolver import ProductChoice
 from shopping_minion.runs import RunStore
@@ -48,12 +49,14 @@ class FakeBackend:
 
 
 class FakeExecutor:
-    def __init__(self, fail_on=None):
-        self.added, self.fail_on = [], fail_on
+    def __init__(self, fail_on=None, conflict_on=None):
+        self.added, self.fail_on, self.conflict_on = [], fail_on, conflict_on
 
     async def add_to_cart(self, candidate, sale):
         if candidate.id == self.fail_on:
             raise SiteChangedError("selector .add-to-cart not found")
+        if candidate.id == self.conflict_on:
+            raise CartConflictError("already in the cart with 3")
         self.added.append((candidate.id, sale.steps_or_units))
         return CartLine(product_id=candidate.id, quantity=sale.steps_or_units, verified=True)
 
@@ -139,6 +142,18 @@ def test_site_change_stops_the_run_and_flags_rediscovery(tmp_path):
     assert "not attempted" in report.items[2].decision.rationale
     assert catalog.queries == ["a", "b"]  # "c" was never searched
     assert report.counts[DecisionStatus.FAILED] == 2
+
+
+def test_cart_conflict_fails_that_item_only_and_the_run_continues(tmp_path):
+    catalog = FakeCatalog({n: [cand(n, n)] for n in ("a", "b", "c")})
+    executor = FakeExecutor(conflict_on="b")
+    items = [ConfirmedItem(name=n) for n in ("a", "b", "c")]
+    report, *_ = run(items, catalog, executor, tmp_path=tmp_path)
+
+    assert statuses(report) == [DecisionStatus.ADDED, DecisionStatus.FAILED, DecisionStatus.ADDED]
+    assert report.items[1].decision.rationale == "already in the cart with 3"
+    assert DecisionFlag.REDISCOVERY_NEEDED not in report.items[1].decision.flags
+    assert catalog.queries == ["a", "b", "c"] and executor.added == [("a", 1), ("c", 1)]
 
 
 def test_report_is_saved_to_the_run_folder(tmp_path):
