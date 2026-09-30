@@ -48,16 +48,18 @@ def get_path(data: Any, path: str) -> Any:
     return current
 
 
-def candidates_from_response(source: ResponseSource, payload: Any) -> list[Candidate]:
+def candidates_from_response(
+    source: ResponseSource, payload: Any, *, base_url: str
+) -> list[Candidate]:
     items = get_path(payload, source.items)
     if not isinstance(items, list):
         raise ReadingError(f"expected a list at {source.items!r} in the response, found none")
-    return _map_items(items, source.fields, source.unit_of_sale)
+    return _map_items(items, source.fields, source.unit_of_sale, base_url)
 
 
-def candidates_from_html(source: DomSource, html: str) -> list[Candidate]:
+def candidates_from_html(source: DomSource, html: str, *, base_url: str) -> list[Candidate]:
     items = [_extract(card, source.extract) for card in HTMLParser(html).css(source.item)]
-    return _map_items(items, source.fields, source.unit_of_sale)
+    return _map_items(items, source.fields, source.unit_of_sale, base_url)
 
 
 def _extract(card: Any, extract: dict[str, DomField]) -> dict[str, str]:
@@ -75,16 +77,18 @@ def _extract(card: Any, extract: dict[str, DomField]) -> dict[str, str]:
     return item
 
 
-def _map_items(items: list[Any], fields: FieldMap, rule: UnitRule) -> list[Candidate]:
+def _map_items(
+    items: list[Any], fields: FieldMap, rule: UnitRule, base_url: str
+) -> list[Candidate]:
     candidates = []
     for item in items:
-        candidate = _to_candidate(fields, rule, item)
+        candidate = _to_candidate(fields, rule, item, base_url)
         if candidate is not None:
             candidates.append(candidate)
     return candidates
 
 
-def _to_candidate(f: FieldMap, rule: UnitRule, item: Any) -> Candidate | None:
+def _to_candidate(f: FieldMap, rule: UnitRule, item: Any, base_url: str) -> Candidate | None:
     product_id, name = get_path(item, f.id), get_path(item, f.name)
     if product_id in (_MISSING, None, "") or name in (_MISSING, None, ""):
         return None
@@ -97,7 +101,7 @@ def _to_candidate(f: FieldMap, rule: UnitRule, item: Any) -> Candidate | None:
         unit_of_sale=unit_of_sale(rule, item, name),
         price=_price(get_path(item, f.price) if f.price else _MISSING),
         in_stock=_holds(f.in_stock, item) if f.in_stock else True,
-        url=_template(f.url, item),
+        url=_template(f.url, item, base_url),
     )
 
 
@@ -166,9 +170,16 @@ def _price(value: Any) -> Decimal | None:
         return None
 
 
-def _template(template: str, item: Any) -> str:
+def _template(template: str, item: Any, base_url: str) -> str:
+    """Fill `{path}` placeholders (URL-quoted); `{base_url}` is used as it is."""
+
     def replace(match: re.Match[str]) -> str:
+        if match[1] == "base_url":
+            return base_url
         value = get_path(item, match[1])
         return "" if value is _MISSING else quote(str(value), safe="")
 
-    return re.sub(r"\{([^}]+)\}", replace, template)
+    url = re.sub(r"\{([^}]+)\}", replace, template)
+    if url.startswith("/") and not url.startswith("//"):
+        url = base_url.rstrip("/") + url
+    return url

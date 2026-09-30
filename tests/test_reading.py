@@ -12,6 +12,7 @@ from shopping_minion.catalog.reading import (
 )
 from shopping_minion.contracts import Candidate, UnitOfSale
 
+BASE = "https://loja.example/"
 UNIT_RULE = {
     "weight_when": {"path": "sold_by", "equals": ["KG"]},
     "step_g": {"path": "step", "scale": 1000},
@@ -129,7 +130,7 @@ def with_items(*items):
 
 
 def test_response_maps_unit_pack_and_weight_step():
-    unit, pack, weight = candidates_from_response(RESPONSE, PAYLOAD)
+    unit, pack, weight = candidates_from_response(RESPONSE, PAYLOAD, base_url=BASE)
     assert unit.unit_of_sale == UnitOfSale(kind="unit")
     assert (unit.id, unit.brand, unit.size, unit.price) == ("101", "Tio Ze", "1 kg", Decimal("8.9"))
     assert pack.unit_of_sale == UnitOfSale(kind="pack", pack_size=16)
@@ -137,15 +138,15 @@ def test_response_maps_unit_pack_and_weight_step():
 
 
 def test_html_maps_unit_pack_and_weight_step():
-    unit, pack, weight = candidates_from_html(DOM, HTML)
+    unit, pack, weight = candidates_from_html(DOM, HTML, base_url=BASE)
     assert unit.unit_of_sale.kind == "unit" and unit.name == "Feijao Carioca Tio Ze 1kg"
     assert pack.unit_of_sale.pack_size == 16 and pack.size is None
     assert weight.unit_of_sale.step_size_g == 500
 
 
 def test_same_product_in_json_and_html_gives_equal_candidates():
-    from_json = candidates_from_response(RESPONSE, PAYLOAD)
-    from_html = candidates_from_html(DOM, HTML)
+    from_json = candidates_from_response(RESPONSE, PAYLOAD, base_url=BASE)
+    from_html = candidates_from_html(DOM, HTML, base_url=BASE)
     assert from_html == from_json
     assert all(isinstance(c, Candidate) for c in from_html)
 
@@ -164,13 +165,13 @@ def test_html_extracts_attributes_and_skips_missing_elements():
             "fields": {"id": "id", "name": "name", "url": "/x/{id}", "brand": "brand"},
         }
     )
-    [c] = candidates_from_html(source, html)
+    [c] = candidates_from_html(source, html, base_url=BASE)
     assert (c.id, c.name, c.brand, c.size) == ("/p/1", "Name", None, None)
-    assert c.url == "/x/%2Fp%2F1"
+    assert c.url == "https://loja.example/x/%2Fp%2F1"
 
 
 def test_url_values_are_quoted():
-    weight = candidates_from_response(RESPONSE, PAYLOAD)[2]
+    weight = candidates_from_response(RESPONSE, PAYLOAD, base_url=BASE)[2]
     assert weight.url == "https://loja.example/p/file%20de%20frango%2Fkg"
 
 
@@ -191,17 +192,19 @@ def test_price_parsing(raw, expected):
 
 
 def test_price_missing_gives_none():
-    [c] = candidates_from_response(RESPONSE, with_items({"id": 1, "title": "A", "prices": []}))
+    [c] = candidates_from_response(
+        RESPONSE, with_items({"id": 1, "title": "A", "prices": []}), base_url=BASE
+    )
     assert c.price is None
 
 
 def test_stock_condition_and_default():
-    pack = candidates_from_response(RESPONSE, PAYLOAD)[1]
+    pack = candidates_from_response(RESPONSE, PAYLOAD, base_url=BASE)[1]
     assert not pack.in_stock
     no_condition = RESPONSE.model_copy(
         update={"fields": RESPONSE.fields.model_copy(update={"in_stock": None})}
     )
-    assert candidates_from_response(no_condition, PAYLOAD)[1].in_stock
+    assert candidates_from_response(no_condition, PAYLOAD, base_url=BASE)[1].in_stock
 
 
 def test_condition_without_equals_or_matches_is_truthiness():
@@ -213,37 +216,47 @@ def test_condition_without_equals_or_matches_is_truthiness():
         {"id": 2, "title": "B", "qty": 0},
         {"id": 3, "title": "C"},
     )
-    assert [c.in_stock for c in candidates_from_response(source, payload)] == [True, False, False]
+    assert [c.in_stock for c in candidates_from_response(source, payload, base_url=BASE)] == [
+        True,
+        False,
+        False,
+    ]
 
 
 def test_items_without_id_or_name_are_skipped():
     payload = with_items({"title": "no id"}, {"id": 2}, {"id": 3, "title": "ok"})
-    assert [c.id for c in candidates_from_response(RESPONSE, payload)] == ["3"]
-    assert len(candidates_from_html(DOM, HTML)) == 3  # the card without id is skipped
+    assert [c.id for c in candidates_from_response(RESPONSE, payload, base_url=BASE)] == ["3"]
+    assert (
+        len(candidates_from_html(DOM, HTML, base_url=BASE)) == 3
+    )  # the card without id is skipped
 
 
 def test_pack_of_one_is_a_unit():
-    [c] = candidates_from_response(RESPONSE, with_items({"id": 1, "title": "Papel 1 rolos"}))
+    [c] = candidates_from_response(
+        RESPONSE, with_items({"id": 1, "title": "Papel 1 rolos"}), base_url=BASE
+    )
     assert c.unit_of_sale.kind == "unit"
 
 
 def test_pack_size_from_name_lowercase():
-    [c] = candidates_from_response(RESPONSE, with_items({"id": 1, "title": "Papel 12 rolos"}))
+    [c] = candidates_from_response(
+        RESPONSE, with_items({"id": 1, "title": "Papel 12 rolos"}), base_url=BASE
+    )
     assert c.unit_of_sale == UnitOfSale(kind="pack", pack_size=12)
 
 
 def test_items_path_that_is_not_a_list_is_a_reading_error():
     with pytest.raises(ReadingError, match=r"list at 'data\.products'"):
-        candidates_from_response(RESPONSE, {"data": {"products": {"a": 1}}})
+        candidates_from_response(RESPONSE, {"data": {"products": {"a": 1}}}, base_url=BASE)
     with pytest.raises(ReadingError, match="list"):
-        candidates_from_response(RESPONSE, {"other": []})
+        candidates_from_response(RESPONSE, {"other": []}, base_url=BASE)
 
 
 @pytest.mark.parametrize("step", [None, 0, "abc"])
 def test_weight_product_without_step_is_a_reading_error(step):
     payload = with_items({"id": 1, "title": "Carne", "sold_by": "KG", "step": step})
     with pytest.raises(ReadingError, match="step_g"):
-        candidates_from_response(RESPONSE, payload)
+        candidates_from_response(RESPONSE, payload, base_url=BASE)
 
 
 def test_reading_error_is_a_value_error():
@@ -254,3 +267,29 @@ def test_get_path_reads_nested_dicts_and_lists():
     data = {"a": {"b": [{"c": 1}, {"c": 2}]}}
     assert get_path(data, "a.b[1].c") == 2
     assert get_path(data, "a.b[5].c") is get_path(data, "a.x")
+
+
+def _source_with_url(url):
+    data = RESPONSE.model_dump()
+    data["fields"]["url"] = url
+    return ResponseSource.model_validate(data)
+
+
+def test_both_url_forms_give_the_same_absolute_url():
+    payload = with_items({"id": 7, "title": "A"})
+    for url in ("{base_url}p/{id}", "/p/{id}"):
+        [c] = candidates_from_response(_source_with_url(url), payload, base_url=BASE)
+        assert c.url == "https://loja.example/p/7"
+
+
+def test_base_url_is_not_quoted_but_item_values_are():
+    payload = with_items({"id": "a b", "title": "A", "slug": "pão de açúcar"})
+    source = _source_with_url("{base_url}p/{slug}/{id}")
+    [c] = candidates_from_response(source, payload, base_url="https://loja.example/x y/")
+    assert c.url == "https://loja.example/x y/p/p%C3%A3o%20de%20a%C3%A7%C3%BAcar/a%20b"
+
+
+def test_missing_url_placeholder_is_empty():
+    source = _source_with_url("{base_url}p/{nope}")
+    [c] = candidates_from_response(source, with_items({"id": 1, "title": "A"}), base_url=BASE)
+    assert c.url == "https://loja.example/p/"
