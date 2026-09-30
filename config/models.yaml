@@ -13,14 +13,13 @@ resolver:
   model: claude-haiku-4-5 # only used by LLM backends
 
 discovery:
-  provider: google_genai # free tier: 20 requests/day/model, not enough for a full run
-  model: gemini-3.5-flash
-  max_tokens: 16000
-  # GLM via its OpenAI-compatible API (fill in once the key and model are confirmed):
-  # provider: openai
-  # model: glm-5.3
-  # base_url: https://api.z.ai/api/paas/v4
-  # api_key_env: ZAI_API_KEY
+  provider: openai # OpenRouter's OpenAI-compatible API
+  model: z-ai/glm-5.3-flash
+  base_url: https://openrouter.ai/api/v1
+  api_key_env: OPENROUTER_API_KEY
+  # Gemini free tier (20 requests/day/model) wasn't enough for a full run:
+  # provider: google_genai
+  # model: gemini-3.5-flash
   # Planned default (ADR-0009):
   # provider: anthropic
   # model: claude-opus-5-5
