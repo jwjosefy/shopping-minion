@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from enum import StrEnum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
@@ -17,6 +17,14 @@ Probability = float  # always validated to [0, 1] where used
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _ignore_computed_fields(cls, data: Any) -> Any:
+        """Saved JSON includes computed fields (confidence, counts); reading it back drops them."""
+        if isinstance(data, dict):
+            return {k: v for k, v in data.items() if k not in cls.model_computed_fields}
+        return data
 
 
 # --- Intake and review -------------------------------------------------------------------------

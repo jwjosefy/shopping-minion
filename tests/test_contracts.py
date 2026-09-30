@@ -75,3 +75,11 @@ def test_report_counts_every_status():
 def test_contracts_reject_unknown_fields():
     with pytest.raises(ValidationError):
         ConfirmedItem(name="atum", brand="Gomes da Costa")
+
+
+def test_computed_fields_survive_a_json_round_trip():
+    decision = Decision(item=ITEM, p_product=0.9, p_quantity=0.6, status=DecisionStatus.ADDED)
+    report = RunReport(run_id="r", items=[ReportItem(decision=decision)])
+    text = report.model_dump_json()
+    assert '"confidence":0.6' in text and '"counts"' in text
+    assert RunReport.model_validate_json(text) == report
