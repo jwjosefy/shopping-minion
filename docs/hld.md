@@ -350,6 +350,7 @@ Everything in [ADR-0001](adr/0001-secrets-with-dotenvx.md) and `CLAUDE.md` still
 | 0009 | Workflow on LangGraph as a deterministic graph; one configurable model per role, no fallback in v0 | New |
 | 0010 | Resolver makes one call per item with two typed multiple-choice questions (product, product-independent target quantity) behind a `DecisionBackend`; the executor converts quantity to unit of sale; rationale optional; backend chosen by evals | Amends 0005's rationale requirement |
 | 0011 | Intake falls back to a second model when the first fails (added after approval, 2026-09-30) | Supersedes 0009's no-fallback clause |
+| 0012 | A store profile may require a visible browser and requests made from a page (proposed, added after approval, 2026-09-30) | Extends 0007 and 0006 |
 
 ## 13. Build plan
 
