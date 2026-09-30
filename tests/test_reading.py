@@ -307,3 +307,61 @@ def test_candidates_from_items_maps_a_plain_list_like_a_response():
     assert got[0].brand == "Marca" and got[0].price == Decimal("9.5")
     payload = {"data": {"products": items}}
     assert got == candidates_from_response(RESPONSE, payload, base_url=BASE)
+
+
+# --- cart lines: candidate plus quantity ------------------------------------------------------
+
+CART_FIELDS = {"id": "id", "name": "name", "url": "/p/{id}"}
+
+
+def test_quantity_from_item_reads_numbers_and_texts():
+    from shopping_minion.catalog.reading import quantity_from_item
+
+    item = {"n": 3, "t": "2 un", "c": "1,5 kg", "line": {"qty": 4.0}, "b": True, "x": "abc"}
+    assert quantity_from_item(item, "n") == 3.0
+    assert quantity_from_item(item, "t") == 2.0
+    assert quantity_from_item(item, "c") == 1.5
+    assert quantity_from_item(item, "line.qty") == 4.0
+    assert quantity_from_item(item, "b") is None
+    assert quantity_from_item(item, "x") is None
+    assert quantity_from_item(item, "missing") is None
+    assert quantity_from_item(item, None) is None
+
+
+def test_lines_from_response_keep_the_quantity_of_the_same_item():
+    from shopping_minion.catalog.reading import lines_from_response
+
+    source = ResponseSource.model_validate(
+        {"url_matches": "/cart", "items": "lines", "fields": CART_FIELDS}
+    )
+    payload = {
+        "lines": [
+            {"id": "1", "name": "Leite", "qty": 2},
+            {"id": "2", "name": "Café"},
+            {"name": "sem id", "qty": 1},
+        ]
+    }
+    lines = lines_from_response(source, payload, base_url=BASE, quantity="qty")
+    assert [(line.candidate.id, line.quantity) for line in lines] == [("1", 2.0), ("2", None)]
+    no_path = lines_from_response(source, payload, base_url=BASE, quantity=None)
+    assert [line.quantity for line in no_path] == [None, None]
+
+
+def test_lines_from_html_read_quantity_from_an_extracted_field():
+    from shopping_minion.catalog.reading import lines_from_html
+
+    source = DomSource.model_validate(
+        {
+            "item": ".line",
+            "extract": {
+                "id": {"selector": ".line", "attr": "data-id"},
+                "name": {"selector": ".name"},
+                "qty": {"selector": "input", "attr": "value"},
+            },
+            "fields": CART_FIELDS,
+        }
+    )
+    html = '<div class="line" data-id="7"><span class="name">Presunto</span><input value="3"></div>'
+    (line,) = lines_from_html(source, html, base_url=BASE, quantity="qty")
+    assert line.candidate.name == "Presunto"
+    assert line.quantity == 3.0

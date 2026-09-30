@@ -7,6 +7,7 @@ one "item" (a dict) per product, mapped with the same `FieldMap` and `UnitRule` 
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any
 from urllib.parse import quote
@@ -65,8 +66,78 @@ def candidates_from_items(
 
 
 def candidates_from_html(source: DomSource, html: str, *, base_url: str) -> list[Candidate]:
-    items = [_extract(card, source.extract) for card in HTMLParser(html).css(source.item)]
-    return _map_items(items, source.fields, source.unit_of_sale, base_url)
+    return _map_items(_html_items(source, html), source.fields, source.unit_of_sale, base_url)
+
+
+def _html_items(source: DomSource, html: str) -> list[dict[str, str]]:
+    return [_extract(card, source.extract) for card in HTMLParser(html).css(source.item)]
+
+
+# --- cart lines: a candidate plus its quantity, read from the same item ------------------------
+
+_NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+@dataclass(frozen=True)
+class ReadLine:
+    """One cart line as the page shows it. `quantity` is None when the profile has no quantity
+    path or it doesn't resolve to a number."""
+
+    candidate: Candidate
+    quantity: float | None
+
+
+def quantity_from_item(item: Any, path: str | None) -> float | None:
+    """The number at `path` in an item: a number, or the first number in a text ("2 un", "1,5")."""
+    if not path:
+        return None
+    value = get_path(item, path)
+    if value is _MISSING or value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int | float):
+        return float(value)
+    found = _NUMBER_RE.search(str(value))
+    return float(found.group(0).replace(",", ".")) if found else None
+
+
+def lines_from_items(
+    fields: FieldMap,
+    unit_of_sale: UnitRule,
+    items: list[Any],
+    *,
+    base_url: str,
+    quantity: str | None,
+) -> list[ReadLine]:
+    """Like `candidates_from_items`, keeping each item's quantity; items without id/name are skipped."""
+    lines = []
+    for item in items:
+        candidate = _to_candidate(fields, unit_of_sale, item, base_url)
+        if candidate is not None:
+            lines.append(ReadLine(candidate, quantity_from_item(item, quantity)))
+    return lines
+
+
+def lines_from_response(
+    source: ResponseSource, payload: Any, *, base_url: str, quantity: str | None
+) -> list[ReadLine]:
+    items = get_path(payload, source.items)
+    if not isinstance(items, list):
+        raise ReadingError(f"expected a list at {source.items!r} in the response, found none")
+    return lines_from_items(
+        source.fields, source.unit_of_sale, items, base_url=base_url, quantity=quantity
+    )
+
+
+def lines_from_html(
+    source: DomSource, html: str, *, base_url: str, quantity: str | None
+) -> list[ReadLine]:
+    return lines_from_items(
+        source.fields,
+        source.unit_of_sale,
+        _html_items(source, html),
+        base_url=base_url,
+        quantity=quantity,
+    )
 
 
 def _extract(card: Any, extract: dict[str, DomField]) -> dict[str, str]:

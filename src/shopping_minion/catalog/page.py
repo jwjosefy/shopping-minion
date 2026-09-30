@@ -18,7 +18,7 @@ from urllib.parse import quote as _url_quote
 from urllib.parse import urlsplit
 
 from playwright.async_api import Error as PlaywrightError
-from playwright.async_api import Page, Response
+from playwright.async_api import Locator, Page, Response
 
 from shopping_minion.catalog.mapping import FieldMap, UnitRule
 from shopping_minion.catalog.profile import (
@@ -34,9 +34,13 @@ from shopping_minion.catalog.profile import (
 )
 from shopping_minion.catalog.reading import (
     ReadingError,
+    ReadLine,
     candidates_from_html,
     candidates_from_items,
     candidates_from_response,
+    lines_from_html,
+    lines_from_items,
+    lines_from_response,
 )
 from shopping_minion.contracts import Candidate
 from shopping_minion.workflow import SiteChangedError
@@ -104,19 +108,35 @@ async def run_steps(
     *,
     never: Sequence[str] = (),
     timeout_ms: int = DEFAULT_TIMEOUT_MS,
+    root: Locator | None = None,
 ) -> None:
     """Run profile steps in order (open, fill, press, click, wait_for).
 
     Every step is checked against `never` first, so a forbidden step stops the run before
     anything happens. A Playwright timeout or missing element raises SiteChangedError.
+
+    With `root` (e.g. one product card), `fill`, `press` (with a field), `click` and `wait_for`
+    act on elements inside it. `open` is refused with ValueError: a page can't be opened inside a
+    card. A `press` without a field goes to the keyboard, as without `root`.
     """
+    opened = next((step for step in steps if isinstance(step, OpenStep)), None)
+    if root is not None and opened is not None:
+        raise ValueError(
+            f"open {opened.open!r} can't run inside a locator: a page can't be opened inside a card"
+        )
     for step in steps:
         check_step_allowed(step, values, never)
     for step in steps:
-        await _run_step(page, step, values, timeout_ms)
+        await _run_step(page, step, values, timeout_ms, root)
 
 
-async def _run_step(page: Page, step: Step, values: Mapping[str, str], timeout_ms: int) -> None:
+async def _run_step(
+    page: Page,
+    step: Step,
+    values: Mapping[str, str],
+    timeout_ms: int,
+    root: Locator | None = None,
+) -> None:
     kind, target = "step", ""
     try:
         if isinstance(step, OpenStep):
@@ -126,19 +146,30 @@ async def _run_step(page: Page, step: Step, values: Mapping[str, str], timeout_m
         elif isinstance(step, FillStep):
             kind, target = "fill", step.fill
             text = _fill_text(step, values)  # a RuntimeError for an unset variable passes through
-            await page.fill(step.fill, text, timeout=timeout_ms)
+            if root is not None:
+                await root.locator(step.fill).fill(text, timeout=timeout_ms)
+            else:
+                await page.fill(step.fill, text, timeout=timeout_ms)
         elif isinstance(step, PressStep):
             kind, target = "press", step.field or step.press
-            if step.field:
+            if step.field and root is not None:
+                await root.locator(step.field).press(step.press, timeout=timeout_ms)
+            elif step.field:
                 await page.press(step.field, step.press, timeout=timeout_ms)
             else:
                 await page.keyboard.press(step.press)
         elif isinstance(step, ClickStep):
             kind, target = "click", step.click
-            await page.click(step.click, timeout=timeout_ms)
+            if root is not None:
+                await root.locator(step.click).click(timeout=timeout_ms)
+            else:
+                await page.click(step.click, timeout=timeout_ms)
         elif isinstance(step, WaitStep):
             kind, target = "wait_for", step.wait_for
-            await page.wait_for_selector(step.wait_for, timeout=timeout_ms)
+            if root is not None:
+                await root.locator(step.wait_for).first.wait_for(timeout=timeout_ms)
+            else:
+                await page.wait_for_selector(step.wait_for, timeout=timeout_ms)
     except PlaywrightError as error:
         # Names the step and its selector or URL, never the typed value or Playwright's text.
         raise SiteChangedError(
@@ -231,6 +262,10 @@ def select_candidates(
     if sources.from_script is not None:
         attempts.append(("from_script", _from_script(sources, script, base_url)))
 
+    return _choose(attempts)
+
+
+def _choose[T](attempts: list[tuple[str, list[T] | str]]) -> list[T]:
     worked = [result for _, result in attempts if not isinstance(result, str)]
     for result in worked:
         if isinstance(result, list) and result:
@@ -241,7 +276,7 @@ def select_candidates(
     raise SiteChangedError(f"no way of reading the results worked ({reasons})")
 
 
-def _attempt(read: Callable[[], list[Candidate]]) -> list[Candidate] | str:
+def _attempt[T](read: Callable[[], list[T]]) -> list[T] | str:
     try:
         return read()
     except ReadingError as error:
@@ -281,15 +316,13 @@ def _from_script(
     return _attempt(lambda: candidates_from_items(fields, rule, items, base_url=base_url))
 
 
-async def read_candidates(
+async def _observe(
     page: Page,
     sources: SearchResults | CartRead,
-    *,
-    base_url: str,
     log: ResponseLog,
-    timeout_ms: int = DEFAULT_TIMEOUT_MS,
-) -> list[Candidate]:
-    """Wait for `wait_for`, then read the page with the sources in order (see select_candidates)."""
+    timeout_ms: int,
+) -> tuple[Any | None, str | None, ScriptOutcome | None]:
+    """Wait for `wait_for`, then gather what each configured source needs from the page."""
     if sources.wait_for:
         try:
             await page.wait_for_selector(sources.wait_for, timeout=timeout_ms)
@@ -303,9 +336,111 @@ async def read_candidates(
     body = log.find(sources.from_response.url_matches) if sources.from_response else None
     html = await _page_html(page) if sources.from_dom else None
     script = await _run_script(page, sources.from_script.script) if sources.from_script else None
+    return body, html, script
+
+
+async def read_candidates(
+    page: Page,
+    sources: SearchResults | CartRead,
+    *,
+    base_url: str,
+    log: ResponseLog,
+    timeout_ms: int = DEFAULT_TIMEOUT_MS,
+) -> list[Candidate]:
+    """Wait for `wait_for`, then read the page with the sources in order (see select_candidates)."""
+    body, html, script = await _observe(page, sources, log, timeout_ms)
     return select_candidates(
         sources, base_url=base_url, response_body=body, html=html, script=script
     )
+
+
+def select_lines(
+    sources: CartRead,
+    *,
+    base_url: str,
+    response_body: Any | None,
+    html: str | None,
+    script: ScriptOutcome | None,
+) -> list[ReadLine]:
+    """Like `select_candidates`, for the cart: each line keeps the quantity read from its item."""
+    quantity = sources.quantity
+    attempts: list[tuple[str, list[ReadLine] | str]] = []
+    if sources.from_response is not None:
+        response = sources.from_response
+        if response_body is None:
+            attempts.append(("from_response", "no response matching url_matches was received"))
+        else:
+            attempts.append(
+                (
+                    "from_response",
+                    _attempt(
+                        lambda: lines_from_response(
+                            response, response_body, base_url=base_url, quantity=quantity
+                        )
+                    ),
+                )
+            )
+    if sources.from_dom is not None:
+        dom = sources.from_dom
+        if html is None:
+            attempts.append(("from_dom", "the page's HTML could not be read"))
+        else:
+            attempts.append(
+                (
+                    "from_dom",
+                    _attempt(
+                        lambda: lines_from_html(dom, html, base_url=base_url, quantity=quantity)
+                    ),
+                )
+            )
+    if sources.from_script is not None:
+        source = sources.from_script
+        if script is None or script.items is None:
+            reason = script.error if script and script.error else "the script returned no list"
+            attempts.append(("from_script", reason))
+        else:
+            items = script.items
+            attempts.append(
+                (
+                    "from_script",
+                    _attempt(
+                        lambda: lines_from_items(
+                            source.fields,
+                            source.unit_of_sale,
+                            items,
+                            base_url=base_url,
+                            quantity=quantity,
+                        )
+                    ),
+                )
+            )
+    return _choose(attempts)
+
+
+async def read_cart_lines(
+    page: Page,
+    sources: CartRead,
+    *,
+    base_url: str,
+    log: ResponseLog,
+    timeout_ms: int = DEFAULT_TIMEOUT_MS,
+    empty_is_ok: bool = False,
+) -> list[ReadLine]:
+    """Wait for `wait_for`, then read the cart's lines (candidate and quantity) like read_candidates.
+
+    With `empty_is_ok`, a cart that shows nothing to read (its `wait_for` never appears, or no
+    source produces anything) is `[]` instead of SiteChangedError: an empty cart may show none of
+    the elements a filled one does. Use it only where an empty cart is a normal answer.
+    """
+    try:
+        body, html, script = await _observe(page, sources, log, timeout_ms)
+        return select_lines(
+            sources, base_url=base_url, response_body=body, html=html, script=script
+        )
+    except SiteChangedError:
+        if empty_is_ok:
+            return []
+        raise
 
 
 async def _page_html(page: Page) -> str | None:

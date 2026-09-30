@@ -59,6 +59,7 @@ login:
     - click: "button[type=submit]"
   logged_in_when: "text=My account"
 cart:
+  product_card: "[data-test=product-card]"
   add:
     - click: "[data-test=add-to-cart]"
     - wait_for: "[data-test=cart-count]"
@@ -66,12 +67,17 @@ cart:
     kind: stepper
     click: "[data-test=qty-plus]"
   read:
+    steps:
+      - open: "{base_url}cart"
     wait_for: "[data-test=cart-line]"
+    quantity: qty
+    quantity_unit: count
     from_dom:
       item: "[data-test=cart-line]"
       extract:
         id: { selector: ".line", attr: data-id }
         name: { selector: ".name" }
+        qty: { selector: "input.qty", attr: value }
       fields: { id: id, name: name, url: "{base_url}p/{id}" }
   remove:
     - click: "[data-test=remove-line]"
@@ -313,4 +319,60 @@ def test_checkout_markers_required_with_cart():
     d = data()
     d["cart"]["checkout_markers"] = []
     with pytest.raises(ValidationError):
+        SiteProfile.model_validate(d)
+
+
+def test_cart_additions_are_read():
+    cart = SiteProfile.model_validate(data()).cart
+    assert cart.product_card == "[data-test=product-card]"
+    assert isinstance(cart.read.steps[0], OpenStep)
+    assert cart.read.quantity == "qty"
+    assert cart.read.quantity_unit == "count"
+
+
+def test_cart_read_defaults_and_units():
+    d = data()
+    for key in ("steps", "quantity", "quantity_unit"):
+        del d["cart"]["read"][key]
+    read = SiteProfile.model_validate(d).cart.read
+    assert read.steps == [] and read.quantity is None and read.quantity_unit == "count"
+    d["cart"]["read"]["quantity_unit"] = "kg"
+    assert SiteProfile.model_validate(d).cart.read.quantity_unit == "kg"
+    d["cart"]["read"]["quantity_unit"] = "lb"
+    with pytest.raises(ValidationError):
+        SiteProfile.model_validate(d)
+
+
+def test_product_card_is_required():
+    d = data()
+    del d["cart"]["product_card"]
+    with pytest.raises(ValidationError):
+        SiteProfile.model_validate(d)
+
+
+def test_cart_read_open_must_be_under_base_url():
+    d = data()
+    d["cart"]["read"]["steps"] = [{"open": "https://elsewhere.example/cart"}]
+    with pytest.raises(ValidationError, match="under base_url"):
+        SiteProfile.model_validate(d)
+
+
+@pytest.mark.parametrize(
+    "where",
+    ["search", "login", "add", "remove", "quantity_then", "read_steps"],
+)
+def test_every_step_list_is_checked_against_checkout_markers(where):
+    d = data()
+    marker = {"click": "text=Checkout"}
+    if where == "search":
+        d["search"]["steps"].append(marker)
+    elif where == "login":
+        d["login"]["steps"].append(marker)
+    elif where == "quantity_then":
+        d["cart"]["quantity"] = {"kind": "field", "fill": "input.qty", "then": [marker]}
+    elif where == "read_steps":
+        d["cart"]["read"]["steps"].append(marker)
+    else:
+        d["cart"][where].append(marker)
+    with pytest.raises(ValidationError, match="checkout_markers"):
         SiteProfile.model_validate(d)

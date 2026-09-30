@@ -162,3 +162,41 @@ def test_a_script_that_returned_no_list_counts_as_failed():
 def test_cart_read_sources_use_the_same_selection():
     got = _pick(_sources("response", cls=CartRead), response_body=BODY)
     assert [c.id for c in got] == ["r1"]
+
+
+# --- run_steps with a root ---------------------------------------------------------------------
+
+
+def test_run_steps_refuses_open_inside_a_root_before_doing_anything():
+    import asyncio
+    from unittest.mock import MagicMock
+
+    from shopping_minion.catalog.page import run_steps
+
+    page, root = MagicMock(), MagicMock()
+    steps = [ClickStep(click=".add"), OpenStep(open="{base_url}cart")]
+    with pytest.raises(ValueError, match="inside a card"):
+        asyncio.run(run_steps(page, steps, VALUES, root=root))
+    root.locator.assert_not_called()
+    page.goto.assert_not_called()
+
+
+def test_select_lines_keeps_quantity_and_falls_back_like_select_candidates():
+    from shopping_minion.catalog.page import select_lines
+
+    sources = CartRead.model_validate(
+        {
+            "quantity": "qty",
+            "from_response": {"url_matches": "/cart", "items": "lines", "fields": FIELDS},
+        }
+    )
+    lines = select_lines(
+        sources,
+        base_url=BASE,
+        response_body={"lines": [{"id": "1", "name": "Leite", "qty": "2"}]},
+        html=None,
+        script=None,
+    )
+    assert [(line.candidate.id, line.quantity) for line in lines] == [("1", 2.0)]
+    with pytest.raises(SiteChangedError, match="no way of reading"):
+        select_lines(sources, base_url=BASE, response_body=None, html=None, script=None)

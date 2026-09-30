@@ -178,7 +178,17 @@ class SearchResults(_Sources):
 
 
 class CartRead(_Sources):
+    """How to see the cart: what a user does (`steps`), what to wait for, and where to read it.
+
+    `quantity` is the path of a line's quantity inside one item (the same item `fields` reads: a
+    JSON object, or the flat dict of `extract` for the DOM); `quantity_unit` says what the number
+    means: a count of units/steps, or an amount in grams or kilograms.
+    """
+
+    steps: list[Step] = []  # e.g. open the cart page, or click the cart icon
     wait_for: str | None = None
+    quantity: str | None = None
+    quantity_unit: Literal["count", "g", "kg"] = "count"
 
 
 class Search(_Model):
@@ -210,6 +220,7 @@ Quantity = Annotated[StepperQuantity | FieldQuantity, Field(discriminator="kind"
 
 
 class Cart(_Model):
+    product_card: str  # CSS selector of one product card on the search results page
     add: Annotated[list[Step], Field(min_length=1)]  # adds one unit of a product on the page
     quantity: Quantity
     read: CartRead
@@ -270,7 +281,7 @@ class SiteProfile(_Model):
         if self.login:
             found += self.login.steps
         if self.cart:
-            found += self.cart.add + self.cart.remove
+            found += self.cart.add + self.cart.remove + self.cart.read.steps
             if isinstance(self.cart.quantity, FieldQuantity):
                 found += self.cart.quantity.then
         return found
