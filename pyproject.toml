@@ -20,6 +20,7 @@ dependencies = [
     "pydantic>=2.13.5",
     "python-multipart>=0.0.32",
     "pyyaml>=6.0.3",
+    "selectolax>=0.4.13",
     "uvicorn>=0.54.0",
 ]
 
