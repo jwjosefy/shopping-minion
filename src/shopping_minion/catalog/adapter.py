@@ -71,7 +71,10 @@ async def _store_page(context: BrowserContext, page_url: str) -> Page:
     return page
 
 
-async def fetch(context: BrowserContext, spec: HttpSearch, query: str, limit: int = 40) -> Any:
+async def fetch(
+    context: BrowserContext, spec: HttpSearch, query: str, limit: int | None = None
+) -> Any:
+    limit = limit or spec.page_size
     url = spec.url.replace("{query}", quote(query)).replace("{limit}", str(limit))
     headers = {"accept": "application/json", **spec.headers}
     body = json.dumps(_fill(spec.body, query, limit)) if spec.body is not None else None
@@ -104,6 +107,11 @@ def parse_results(spec: HttpSearch, payload: Any) -> list[Candidate]:
     items = get_path(payload, spec.results_path)
     if items is _MISSING or not isinstance(items, list):
         raise ProfileError(f"results_path {spec.results_path!r} is not a list in the response")
+    if len(items) > spec.page_size:
+        raise ProfileError(
+            f"the API returned {len(items)} results for page_size {spec.page_size}: it isn't "
+            "answering the search the profile describes (rediscovery needed)"
+        )
     candidates = []
     for item in items:
         candidate = _to_candidate(spec, item)

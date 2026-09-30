@@ -118,7 +118,8 @@ def test_rank_prefers_in_stock_then_query_overlap():
 
 
 def test_rank_caps_at_twenty():
-    many = parse_results(SPEC, payload(*[item(id=i) for i in range(30)]))
+    big = SPEC.model_copy(update={"page_size": 100})
+    many = parse_results(big, payload(*[item(id=i) for i in range(30)]))
     assert len(rank("atum", many)) == 20
 
 
@@ -131,3 +132,15 @@ def test_profiles_refuse_credential_headers(header):
 def test_profiles_refuse_bearer_values():
     with pytest.raises(ValidationError, match="credential"):
         HttpSearch.model_validate({**SPEC.model_dump(), "headers": {"x-token": "Bearer abc"}})
+
+
+def test_response_larger_than_page_size_is_rejected():
+    spec = SPEC.model_copy(update={"page_size": 2})
+    with pytest.raises(ProfileError, match="rediscovery"):
+        parse_results(spec, payload(item(id=1), item(id=2), item(id=3)))
+
+
+def test_page_size_is_part_of_the_profile():
+    assert SPEC.page_size == 20
+    with pytest.raises(ValidationError):
+        HttpSearch.model_validate({**SPEC.model_dump(), "page_size": 0})

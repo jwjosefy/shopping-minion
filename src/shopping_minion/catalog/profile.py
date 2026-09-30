@@ -74,6 +74,9 @@ class HttpSearch(_Model):
     transport: Literal["request", "page"] = "request"
     page_url: str | None = None
     method: Literal["GET", "POST"] = "GET"
+    # How many results to ask for ({limit}). Some APIs misbehave above a size (Andorinha returns a
+    # placeholder catalog from 24 up), so this belongs to the profile, not to the code.
+    page_size: int = Field(default=20, ge=1, le=100)
     url: str = Field(description="May contain {query} (URL-encoded) and {limit}")
     headers: dict[str, str] = Field(default_factory=dict)
     body: Any = Field(default=None, description="JSON body; strings may contain {query}, {limit}")

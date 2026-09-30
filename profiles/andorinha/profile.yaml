@@ -7,6 +7,7 @@ search:
   transport: page # fetch() from a store page; a plain HTTP client gets 403 and headless Chromium a CORS error
   page_url: https://andorinhaonline.com.br/
   method: GET
+  page_size: 20 # size >= 24 makes the API silently return a placeholder catalog (22,408 fake items)
   # 269 = tenant, 1327 = the store the site selects by default (not chosen by us)
   url: https://sense.osuper.com.br/269/1327/search?brands=&categories=&tags=&size={limit}&from=0&search={query}&sortField=_score&sortOrder=desc
   results_path: hits
