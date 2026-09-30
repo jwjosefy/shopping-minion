@@ -1,6 +1,6 @@
 # ADR-0010: The resolver asks typed multiple-choice questions in a single call; backend chosen by evals
 
-- **Status:** Accepted
+- **Status:** Accepted. The quantity question was superseded by [ADR-0013](0013-target-quantity-is-derived-not-asked.md): the target quantity is derived by rule.
 - **Date:** 2026-09-29
 - **Amends:** [ADR-0005](0005-model-decides-executor-acts.md)'s requirement that every decision carries a rationale (it becomes optional).
 

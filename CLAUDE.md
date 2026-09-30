@@ -3,7 +3,7 @@
 ## What this project is
 An agent that turns a photo of a handwritten grocery list into a ready-to-review online cart. Public repo, built in the open: the reasoning is as much a deliverable as the code.
 
-Read before working: `docs/hld.md` (design), `docs/adr/` (decisions), `docs/goal-run/` (current state and what is blocked).
+Read before working: `docs/hld.md` (design), `docs/lld.md` (the tasks for the rest of v0, and the brief template for task agents), `docs/adr/` (decisions), `docs/goal-run/` (state and blockers after unattended work).
 
 ## Architecture
 Photo → Intake (vision model) → human review (web app) → Workflow (LangGraph, fixed steps) → per item: Catalog search → Resolver (decision model picks a product) → Executor (deterministic: converts quantity, validates, adds to cart, verifies) → Report → human checkout.

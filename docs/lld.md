@@ -1,10 +1,10 @@
 # Shopping Minion — Low-Level Design for the rest of v0
 
-- **Status:** Draft. Written by Claude on 2026-09-30 for Johann's review. Nothing here is built.
+- **Status:** Approved by Johann on 2026-09-30 (drafted by Claude).
 - **Scope:** what is missing for v0 ([HLD §1](hld.md#1-goal)): searching the store, the discovery agent, login, the cart, and wiring them into the app. What is already built is listed in `CLAUDE.md`.
 - **Rules it follows:** [ADR-0012](adr/0012-the-store-is-used-through-its-site-in-a-browser.md) (the store is used through its site, in a browser, as a user would), [ADR-0006](adr/0006-discovery-agent-writes-site-profile.md), [ADR-0005](adr/0005-model-decides-executor-acts.md).
 
-Johann answered the first round of questions on 2026-09-30; the answers are in [§8](#8-questions). One question is still open there.
+Johann's answers to the design questions are in [§8](#8-questions).
 
 ## 1. What is missing
 
@@ -143,11 +143,11 @@ Each task is small enough for one agent with a clean context. Every brief given 
 | # | Task | Depends on | Files it may touch | Done when |
 |---|---|---|---|---|
 | **T1** | Browser provider: user agent and session storage | none | `src/.../browser.py`, `config/browser.yaml`, `tests/test_browser.py` | A test shows the configured user agent is what the browser reports; a session saved in one context is present in the next. Live: the store's search page shows results in headless mode. |
-| **T2** | Profile schema (user steps) | none | `src/.../catalog/profile.py`, `tests/test_profile.py` | The §2.3 example validates; the three rules of §2.3 are rejected with clear errors. |
+| **T2** | Profile schema (user steps) | none | `src/.../catalog/profile.py`, `tests/test_profile.py` (shared models are in `catalog/mapping.py`) | The §2.3 example validates; the three rules of §2.3 are rejected with clear errors. |
 | **T3** | Reading results (pure) | none | `src/.../catalog/reading.py`, `tests/test_reading.py` | From a JSON payload and from an HTML string to `Candidate`s, with unit, pack and weight-step cases, tested without a browser. |
 | **T4** | Docs alignment | none | `docs/hld.md`, `README.md` | HLD §4.5 and §9 match ADR-0013 (once accepted); README describes the commands that exist. |
-| **T5** | Catalog | T1, T2, T3 | `src/.../catalog/browser_catalog.py`, `tests/test_browser_catalog.py` | See the open question in §8: how it is verified before a profile exists. |
-| **T6** | Cart executor (anonymous cart) | T1, T2, T3 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Same open question. Target behaviour: adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises `SiteChangedError` when an element is missing. |
+| **T5** | Catalog | T1, T2, T3 | `src/.../catalog/browser_catalog.py`, `tests/test_browser_catalog.py` | Written to §2.4, with unit tests for anything that doesn't need a page. Not run against the store before S1 (§8, question 6). |
+| **T6** | Cart executor (anonymous cart) | T1, T2, T3 | `src/.../executor/browser_cart.py`, `tests/test_browser_cart.py` | Written to §2.5, unit tests for pure parts only; first run against the store in S2 (§8, question 6). Target behaviour: adds by unit and by weight step, verifies the cart, sets (not doubles) an existing line, refuses a step marked as checkout, raises `SiteChangedError` when an element is missing. |
 | **T7** | Login | T6 | `src/.../executor/login.py`, `cli.py` (login), tests | Session saved and reused; clear stop when the site asks for something the profile doesn't cover. Verified only in S2. |
 | **T8** | Discovery tools | T2, T5 | `src/.../discovery/tools.py`, `tests/test_discovery_tools.py` | Guardrails unit-tested; live: each tool works on the real store, not logged in; no tool can send a request of its own. |
 | **T9** | Discovery agent, session 1 (search) | T8 | `src/.../discovery/agent.py`, `cli.py` (discover) | The agent loop runs with a scripted fake model (no cost) and writes a profile file from what the script submits. |
@@ -203,7 +203,6 @@ Tasks in the same wave touch different files, so each runs in its own git worktr
 
 Work stops for Johann's review:
 
-- before anything starts: he is setting up OpenRouter billing and will say when to begin;
 - after each wave, before merging;
 - at S1, S2 and S3, which he runs or watches;
 - whenever a task's agent meets one of the stop conditions in §6.
@@ -239,21 +238,13 @@ Commit on your branch. Don't push.
 
 ## 8. Questions
 
-### Open
-
-**How are the catalog (T5) and the cart executor (T6) verified before discovery has produced a profile?** They need a profile to run, the profile comes from discovery (S1, S2), and discovery needs them to try its drafts. Options:
-
-- **(a) Not verified before S1.** T5 and T6 are written and reviewed by reading, with unit tests only for their pure parts. S1 is the first time they run against the store. Simplest, but more to debug during the supervised sessions.
-- **(b) A test-only profile.** A minimal profile for Andorinha's search and anonymous cart, written from what was observed on the site, kept under `tests/` and used only by the `live` tests. The real profile in `profiles/` still comes from discovery. T5 and T6 are then verified in wave 2.
-
-Claude's recommendation: (b), because it finds problems in wave 2 instead of in S1. It needs Johann's agreement, since it is a hand-written description of the store, even if only for tests.
-
 ### Resolved (Johann, 2026-09-30)
 
 | # | Question | Decision |
 |---|---|---|
 | 1 | May the profile hold a path pattern (`url_matches`) to recognise the response with the results? | Yes. |
 | 2 | A fake store as the test bed? | No. Dropped entirely for now. |
-| 3 | Which model provider for discovery? | OpenRouter. Billing isn't set up yet: no work starts until Johann says so. |
+| 3 | Which model provider for discovery? | OpenRouter. Johann added credit on 2026-09-30 (about US$ 9) and gave the go-ahead. |
 | 4 | Who runs the tasks? | Sub-agents in worktrees, on Sonnet 5.5. |
 | 5 | `--dry-run` by default? | No. Using the real cart while not logged in is harmless. |
+| 6 | How are the catalog (T5) and the cart executor (T6) verified before discovery has produced a profile? | They aren't. They are written and reviewed by reading, with unit tests for their pure parts only, and run against the store for the first time in S1 and S2. No test-only profile is written by hand. |

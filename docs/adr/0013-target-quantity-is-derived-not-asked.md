@@ -1,8 +1,8 @@
 # ADR-0013: The target quantity is derived by rule, not asked of the model
 
-- **Status:** Draft. Written by Claude on 2026-09-30 from Johann's statement of the rule, for his review.
+- **Status:** Accepted (drafted by Claude from Johann's rule, accepted by Johann on 2026-09-30)
 - **Date:** 2026-09-30
-- **Would supersede:** the quantity question of [ADR-0010](0010-single-pass-typed-resolver.md) ("two typed questions in one call"). The rest of ADR-0010 stands: one call per item, typed product question, pluggable backends, optional rationale.
+- **Supersedes:** the quantity question of [ADR-0010](0010-single-pass-typed-resolver.md) ("two typed questions in one call"). The rest of ADR-0010 stands: one call per item, typed product question, pluggable backends, optional rationale.
 
 ## Context
 
@@ -19,7 +19,7 @@ Johann's rule (2026-09-30):
 1. **Keep the quantity question** (ADR-0010 as written). A model call where a rule gives the same answer, plus a second probability that lowers confidence for no gain.
 2. **Derive the quantity by rule (A, B, C).** Deterministic, testable, free.
 
-## Decision (proposed)
+## Decision
 
 Option 2.
 
