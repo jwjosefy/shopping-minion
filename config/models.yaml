@@ -15,13 +15,21 @@ intake:
 
 resolver:
   backend: haiku # haiku | julia1 | jev (ADR-0010; default chosen by evals)
-  model: claude-haiku-4-5 # only used by LLM backends
+  # LLM backends only. Haiku 4.5 through OpenRouter until ANTHROPIC_API_KEY is set:
+  provider: openai
+  model: anthropic/claude-haiku-4.5
+  base_url: https://openrouter.ai/api/v1
+  api_key_env: OPENROUTER_API_KEY
+  max_tokens: 2000
+  # provider: anthropic
+  # model: claude-haiku-4-5
 
 discovery:
   provider: openai # OpenRouter's OpenAI-compatible API
   model: z-ai/glm-5.3-flash
   base_url: https://openrouter.ai/api/v1
   api_key_env: OPENROUTER_API_KEY
+  max_tokens: 8000 # without a cap OpenRouter reserves 131k output tokens per call and returns 402 on a small balance
   # Gemini free tier (20 requests/day/model) wasn't enough for a full run:
   # provider: google_genai
   # model: gemini-3.5-flash

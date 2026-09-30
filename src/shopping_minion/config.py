@@ -38,6 +38,20 @@ class ChatRole(_Config):
 class ResolverRole(_Config):
     backend: Literal["haiku", "julia1", "jev"]
     model: str | None = None
+    provider: ChatProvider = "anthropic"  # LLM backends only
+    base_url: str | None = None
+    api_key_env: str | None = None
+    max_tokens: int | None = None
+
+    def chat_role(self) -> ChatRole:
+        assert self.model is not None
+        return ChatRole(
+            provider=self.provider,
+            model=self.model,
+            base_url=self.base_url,
+            api_key_env=self.api_key_env,
+            max_tokens=self.max_tokens,
+        )
 
     @model_validator(mode="after")
     def _llm_backend_needs_model(self) -> ResolverRole:
