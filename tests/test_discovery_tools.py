@@ -318,4 +318,4 @@ def test_live_page_responses_after_search_page():
             return await tools["page_responses"].ainvoke({})
 
     listing = asyncio.run(go())
-    assert "JSON responses:" in listing, listing
+    assert "JSON responses" in listing, listing
