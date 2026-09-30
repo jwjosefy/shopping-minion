@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 PROFILES_DIR = Path("profiles")
 
@@ -69,6 +69,10 @@ class FieldMap(_Model):
 
 class HttpSearch(_Model):
     kind: Literal["http"] = "http"
+    # "request": Playwright's request context. "page": fetch() from inside a page of the store, for
+    # APIs that bot protection only lets a real page call (CORS + Cloudflare); needs `page_url`.
+    transport: Literal["request", "page"] = "request"
+    page_url: str | None = None
     method: Literal["GET", "POST"] = "GET"
     url: str = Field(description="May contain {query} (URL-encoded) and {limit}")
     headers: dict[str, str] = Field(default_factory=dict)
@@ -76,6 +80,12 @@ class HttpSearch(_Model):
     results_path: str = Field(description="Dotted path to the list of result items")
     fields: FieldMap
     unit_of_sale: UnitRule = Field(default_factory=UnitRule)
+
+    @model_validator(mode="after")
+    def _page_transport_needs_a_page(self) -> HttpSearch:
+        if self.transport == "page" and not self.page_url:
+            raise ValueError("transport 'page' requires page_url")
+        return self
 
     @field_validator("headers")
     @classmethod
@@ -90,6 +100,9 @@ class SiteProfile(_Model):
     store: str
     version: int = Field(ge=1)
     base_url: str
+    # The store's bot protection rejects headless Chromium (HeadlessChrome user agent), so the
+    # browser must run with a visible window. Never spoof the identity to get around it (ADR-0007).
+    headed: bool = False
     search: HttpSearch | None = None
     login: dict[str, Any] | None = None
     cart: dict[str, Any] | None = None

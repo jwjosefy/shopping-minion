@@ -38,8 +38,16 @@ search box, then use network_log/network_entry to find the call that returns the
 - Never put cookies, Authorization headers or tokens in the spec. If the API only works with \
 them, stop and explain.
 
+Where the search API lives: the site's own pages may call an API on another host (a platform \
+vendor's domain). Look at the network log for the call that returns the product list. If the call \
+is a browser-only one (it fails outside a page, e.g. CORS or a bot-protection 403), use \
+`transport: page` with `page_url` set to a store page: the request is then made with fetch() \
+from inside that page. Use `transport: request` only when a plain HTTP call works.
+
 Search spec (YAML) schema:
   kind: http
+  transport: request | page    # default request
+  page_url: https://store.com/  # required when transport is page
   method: GET | POST
   url: https://...            # {query} is URL-encoded in; {limit} is the page size
   headers: {}                  # only non-secret headers the API needs (e.g. content-type)
@@ -90,12 +98,16 @@ async def discover_search(
     role: ChatRole,
     browser: BrowserProvider,
     log: Callable[[str], None] = print,
+    api_domains: list[str] | None = None,
+    headed: bool = False,
 ) -> DiscoveryResult:
     model = chat_model(role)
 
     async with browser.session() as context:
         page = await context.new_page()
-        session = DiscoverySession(context, page, registrable_domain(base_url), queries)
+        session = DiscoverySession(
+            context, page, registrable_domain(base_url), queries, api_domains or []
+        )
         page.on("response", session.record)
         agent = create_agent(model, tools=build_tools(session), system_prompt=SYSTEM_PROMPT)
 
@@ -113,6 +125,8 @@ async def discover_search(
                 for call in getattr(message, "tool_calls", None) or []:
                     args = json.dumps(call["args"], ensure_ascii=False)
                     log(f"→ {call['name']}({args[:160]})")
+                if message.type == "tool":
+                    log(f"  ← {_text(message.content)[:300]!r}")
                 if message.type == "ai" and not getattr(message, "tool_calls", None):
                     report = _text(message.content)
 
@@ -120,7 +134,12 @@ async def discover_search(
         return DiscoveryResult(None, report or "no search spec was accepted", None, [])
 
     profile = SiteProfile(
-        store=store, version=1, base_url=base_url, search=session.accepted, notes=report
+        store=store,
+        version=1,
+        base_url=base_url,
+        headed=headed,
+        search=session.accepted,
+        notes=report,
     )
     path = save_profile(profile)
     fixtures = _save_fixtures(store, session.accepted, session.payloads)

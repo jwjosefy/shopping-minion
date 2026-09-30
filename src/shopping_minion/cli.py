@@ -29,7 +29,7 @@ async def _search(store: str, query: str) -> int:
     if profile.search is None:
         print(f"profile {store!r} has no search section; run discover first")
         return 1
-    async with browser_provider().session() as context:
+    async with browser_provider(headless=not profile.headed).session() as context:
         payload = await fetch(context, profile.search, query)
     candidates = rank(query, parse_results(profile.search, payload))
     for c in candidates:
@@ -45,13 +45,23 @@ async def _search(store: str, query: str) -> int:
     return 0 if candidates else 1
 
 
-async def _discover(store: str, url: str, queries: list[str], headed: bool) -> int:
+async def _discover(
+    store: str, url: str, queries: list[str], headed: bool, api_domains: list[str]
+) -> int:
     from shopping_minion.config import load_models_config
     from shopping_minion.discovery.agent import discover_search
 
     role = load_models_config().discovery
     print(f"discovery with {role.provider}:{role.model} on {url}")
-    result = await discover_search(store, url, queries, role, browser_provider(headless=not headed))
+    result = await discover_search(
+        store,
+        url,
+        queries,
+        role,
+        browser_provider(headless=not headed),
+        api_domains=api_domains,
+        headed=headed,
+    )
     print("\n" + result.report)
     if result.profile_path is None:
         return 1
@@ -85,7 +95,18 @@ def main(argv: list[str] | None = None) -> int:
         dest="queries",
         help="test query (repeatable); defaults to the v0 items",
     )
-    discover.add_argument("--headed", action="store_true")
+    discover.add_argument(
+        "--headed",
+        action="store_true",
+        help="visible browser window (needed when the store blocks headless Chromium)",
+    )
+    discover.add_argument(
+        "--allow-domain",
+        action="append",
+        dest="api_domains",
+        default=[],
+        help="extra host the store's search API lives on (a human decision; read-only searches)",
+    )
 
     search = commands.add_parser("search", help="search a store using its site profile")
     search.add_argument("store")
@@ -96,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_browser_check(args.url, headless=not args.headed))
     if args.command == "discover":
         queries = args.queries or V0_ITEMS
-        return asyncio.run(_discover(args.store, args.url, queries, args.headed))
+        return asyncio.run(_discover(args.store, args.url, queries, args.headed, args.api_domains))
     if args.command == "search":
         return asyncio.run(_search(args.store, args.query))
     if args.command == "serve":

@@ -22,7 +22,7 @@ from playwright.async_api import BrowserContext, Page, Request, Response
 from playwright.async_api import Error as PlaywrightError
 
 from shopping_minion.catalog.adapter import ProfileError, fetch, parse_results, rank
-from shopping_minion.catalog.profile import HttpSearch
+from shopping_minion.catalog.profile import FORBIDDEN_HEADERS, HttpSearch
 
 BLOCKED_ACTION = re.compile(
     r"carrinho|comprar|adicionar|finalizar|checkout|pagamento|pagar|cart|buy|add to|"
@@ -39,6 +39,7 @@ class NetworkEntry:
     status: int
     request_body: str
     response_body: str
+    request_headers: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -47,13 +48,18 @@ class DiscoverySession:
     page: Page
     allowed_domain: str
     test_queries: list[str]
+    api_domains: list[str] = field(default_factory=list)  # store-owned API hosts, set by a human
     network: list[NetworkEntry] = field(default_factory=list)
     accepted: HttpSearch | None = None
     payloads: dict[str, Any] = field(default_factory=dict)
 
     def allowed(self, url: str) -> bool:
-        host = urlparse(url).hostname or ""
-        return host == self.allowed_domain or host.endswith("." + self.allowed_domain)
+        """Browsing is limited to the store's domain."""
+        return _on_domain(url, self.allowed_domain)
+
+    def allowed_for_search(self, url: str) -> bool:
+        """Search specs may also call API hosts a human explicitly allowed (read-only GET/POST)."""
+        return any(_on_domain(url, d) for d in [self.allowed_domain, *self.api_domains])
 
     async def record(self, response: Response) -> None:
         request: Request = response.request
@@ -72,8 +78,37 @@ class DiscoverySession:
                 status=response.status,
                 request_body=request.post_data or "",
                 response_body=body,
+                request_headers=_safe_headers(await request.all_headers()),
             )
         )
+
+
+# Headers the browser adds by itself or that carry credentials/session state: not shown to the model.
+_HIDDEN_HEADERS = FORBIDDEN_HEADERS | {
+    "user-agent",
+    "referer",
+    "origin",
+    "accept-encoding",
+    "accept-language",
+    "connection",
+    "host",
+    "content-length",
+    "sec-ch-ua",
+    "sec-ch-ua-mobile",
+    "sec-ch-ua-platform",
+    "sec-fetch-dest",
+    "sec-fetch-mode",
+    "sec-fetch-site",
+}
+
+
+def _on_domain(url: str, domain: str) -> bool:
+    host = urlparse(url).hostname or ""
+    return host == domain or host.endswith("." + domain)
+
+
+def _safe_headers(headers: dict[str, str]) -> dict[str, str]:
+    return {k: v for k, v in headers.items() if k.lower() not in _HIDDEN_HEADERS}
 
 
 def registrable_domain(url: str) -> str:
@@ -190,12 +225,14 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
     @tool
     @_errors_to_model
     def network_entry(index: int, max_chars: int = 6000) -> str:
-        """Show one recorded request in full: headers are not recorded, only URL, body, response."""
+        """Show one recorded request in full: URL, non-secret request headers, body and response."""
         if not 0 <= index < len(session.network):
             return "no such entry"
         e = session.network[index]
         return (
-            f"{e.method} {e.url}\nstatus: {e.status}\nrequest body:\n{e.request_body[:4000]}\n"
+            f"{e.method} {e.url}\nstatus: {e.status}\n"
+            f"request headers (cookies/authorization hidden): {json.dumps(e.request_headers)}\n"
+            f"request body:\n{e.request_body[:4000]}\n"
             f"response (first {max_chars} chars):\n{e.response_body[:max_chars]}"
         )
 
@@ -215,8 +252,11 @@ def build_tools(session: DiscoverySession) -> list[BaseTool]:
 
     def parse_spec(spec_yaml: str) -> HttpSearch:
         spec = HttpSearch.model_validate(yaml.safe_load(spec_yaml))
-        if not session.allowed(spec.url):
-            raise ValueError(f"search URL must be on {session.allowed_domain}")
+        if not session.allowed_for_search(spec.url):
+            allowed = ", ".join([session.allowed_domain, *session.api_domains])
+            raise ValueError(f"search URL must be on one of: {allowed}")
+        if spec.page_url and not session.allowed(spec.page_url):
+            raise ValueError(f"page_url must be on {session.allowed_domain}")
         return spec
 
     @tool

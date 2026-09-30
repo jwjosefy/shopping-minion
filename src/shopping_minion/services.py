@@ -66,7 +66,7 @@ async def default_services(store: str = DEFAULT_STORE) -> AsyncIterator[Services
     role = config.resolver
     if role.backend != "haiku":
         raise NotImplementedError(f"resolver backend {role.backend!r} arrives in M6")
-    async with browser_provider().session() as context:
+    async with browser_provider(headless=not profile.headed).session() as context:
         yield Services(
             catalog=ProfileCatalog(profile, context),
             backend=build_backend(role.chat_role(), f"{role.backend}:{role.model}"),

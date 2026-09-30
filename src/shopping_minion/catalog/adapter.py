@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 from urllib.parse import quote
 
-from playwright.async_api import BrowserContext
+from playwright.async_api import BrowserContext, Page
 
 from shopping_minion.catalog.profile import Condition, HttpSearch, UnitRule, ValueSpec
 from shopping_minion.contracts import Candidate, UnitOfSale
@@ -55,17 +55,45 @@ def _fill(value: Any, query: str, limit: int) -> Any:
     return value
 
 
+_PAGE_FETCH_JS = """async ({url, method, headers, body}) => {
+  const r = await fetch(url, {method, headers, body});
+  return {status: r.status, ok: r.ok, text: await r.text()};
+}"""
+_pages: dict[int, Page] = {}  # one store page per browser context, kept for the whole run
+
+
+async def _store_page(context: BrowserContext, page_url: str) -> Page:
+    page = _pages.get(id(context))
+    if page is None or page.is_closed():
+        page = await context.new_page()
+        await page.goto(page_url, wait_until="domcontentloaded")
+        _pages[id(context)] = page
+    return page
+
+
 async def fetch(context: BrowserContext, spec: HttpSearch, query: str, limit: int = 40) -> Any:
     url = spec.url.replace("{query}", quote(query)).replace("{limit}", str(limit))
     headers = {"accept": "application/json", **spec.headers}
-    kwargs: dict[str, Any] = {"method": spec.method, "headers": headers, "timeout": 20_000}
-    if spec.body is not None:
-        kwargs["data"] = json.dumps(_fill(spec.body, query, limit))
+    body = json.dumps(_fill(spec.body, query, limit)) if spec.body is not None else None
+    if body is not None:
         headers.setdefault("content-type", "application/json")
-    response = await context.request.fetch(url, **kwargs)
-    text = await response.text()
-    if not response.ok:
-        raise ProfileError(f"search returned HTTP {response.status}: {text[:300]}")
+
+    if spec.transport == "page":
+        assert spec.page_url is not None
+        page = await _store_page(context, spec.page_url)
+        result = await page.evaluate(
+            _PAGE_FETCH_JS, {"url": url, "method": spec.method, "headers": headers, "body": body}
+        )
+        status, ok, text = result["status"], result["ok"], result["text"]
+    else:
+        kwargs: dict[str, Any] = {"method": spec.method, "headers": headers, "timeout": 20_000}
+        if body is not None:
+            kwargs["data"] = body
+        response = await context.request.fetch(url, **kwargs)
+        status, ok, text = response.status, response.ok, await response.text()
+
+    if not ok:
+        raise ProfileError(f"search returned HTTP {status}: {text[:300]}")
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
@@ -167,7 +195,7 @@ def _price(value: Any) -> Decimal | None:
 def _template(template: str, item: Any) -> str:
     def replace(match: re.Match[str]) -> str:
         value = get_path(item, match[1])
-        return "" if value is _MISSING else str(value)
+        return "" if value is _MISSING else quote(str(value), safe="")
 
     return re.sub(r"\{([^}]+)\}", replace, template)
 
