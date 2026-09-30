@@ -1,0 +1,4 @@
+# Browser settings (ADR-0012). `auto` takes the browser's own user agent and replaces
+# "HeadlessChrome" with "Chrome"; any other string is used as given.
+headless: true
+user_agent: auto
