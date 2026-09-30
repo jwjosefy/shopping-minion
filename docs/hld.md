@@ -214,7 +214,7 @@ Every model call belongs to a role, and each role is configured in one file:
 intake:    { provider: anthropic, model: claude-sonnet-5-5 }
 resolver:  { backend: haiku,      model: claude-haiku-4-5 }   # haiku | julia1 | jev
 discovery: { provider: anthropic, model: claude-opus-5-5 }
-# fallback: not configured in v0 (field reserved)
+# fallback: per role, one level; intake falls back to GLM 5.3 Flash (ADR-0011)
 # TODO(glm): add GLM 5.3 as an intake candidate (provider integration + GLM_API_KEY in .env)
 ```
 
@@ -349,6 +349,7 @@ Everything in [ADR-0001](adr/0001-secrets-with-dotenvx.md) and `CLAUDE.md` still
 | 0008 | Low-confidence decisions are added and flagged; below the skip threshold, items are skipped as NOT_SURE | Supersedes 0005's low-confidence clause |
 | 0009 | Workflow on LangGraph as a deterministic graph; one configurable model per role, no fallback in v0 | New |
 | 0010 | Resolver makes one call per item with two typed multiple-choice questions (product, product-independent target quantity) behind a `DecisionBackend`; the executor converts quantity to unit of sale; rationale optional; backend chosen by evals | Amends 0005's rationale requirement |
+| 0011 | Intake falls back to a second model when the first fails (added after approval, 2026-09-30) | Supersedes 0009's no-fallback clause |
 
 ## 13. Build plan
 

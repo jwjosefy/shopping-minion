@@ -1,6 +1,6 @@
 # ADR-0009: Workflow on LangGraph as a deterministic graph; one configurable model per role
 
-- **Status:** Accepted
+- **Status:** Accepted. "No fallback in v0" superseded for intake by [ADR-0011](0011-intake-fallback-model.md).
 - **Date:** 2026-09-29
 
 ## Context
