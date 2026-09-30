@@ -1,6 +1,6 @@
 # 2026-09-30 — The search was behind a wall the agent couldn't see
 
-_Draft written by Claude during an unattended run on 2026-09-30._
+_Drafted by Claude, reviewed and approved by Johann on 2026-09-30._
 
 > **Correction, 2026-09-30 (after review):** the approach this entry describes, calling the store's search endpoint directly, was a departure from the project's thesis (drive the browser as a user). The code, the profile and the ADR-0012 cited below were removed. The entry is kept as written, as a record of what the run believed. See [entry 0007](2026-09-30-0007-goal-run-and-review.md).
 

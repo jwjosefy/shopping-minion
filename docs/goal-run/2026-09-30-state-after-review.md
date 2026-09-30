@@ -25,7 +25,6 @@ This replaces the summary in [the goal-run log](2026-09-30-goal-run-log.md). Tha
 ## Waiting for Johann
 
 1. **Decide whether the quantity question comes back.** The resolver derives the target quantity from the list, then the preferences, then 1 unit flagged as assumed (a deviation from HLD §4.5).
-2. **Read journal drafts 0005, 0006 and 0007.** They are written by Claude in your voice.
 3. **Whole-project review**, before any work is split into smaller tasks.
 
 ## Blockers for later work

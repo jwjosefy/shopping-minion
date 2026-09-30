@@ -1,6 +1,6 @@
 # 2026-09-30 — First numbers for the resolver
 
-_Draft written by Claude during an unattended run on 2026-09-30._
+_Drafted by Claude, reviewed and approved by Johann on 2026-09-30._
 
 > **Note, 2026-09-30 (after review):** the numbers below stand. The recorded store responses they were measured on are now normalized candidate lists in `evals/fixtures/candidates/`; the store profile mentioned here was removed. See [entry 0007](2026-09-30-0007-goal-run-and-review.md).
 

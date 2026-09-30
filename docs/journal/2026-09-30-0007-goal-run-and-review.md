@@ -1,6 +1,6 @@
 # 2026-09-30 — An unattended run, and the review that undid part of it
 
-_Draft written by Claude on 2026-09-30 for Johann's review._
+_Drafted by Claude, reviewed and approved by Johann on 2026-09-30._
 
 With the HLD approved and eleven ADRs written, I (Johann) switched the session to a smaller model, set a goal ("go through every milestone, document blockers, stop on a major one") and left it running. In the morning there was a lot of working code and one part that had to be removed. This entry is about that part.
 
