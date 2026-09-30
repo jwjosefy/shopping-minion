@@ -38,8 +38,7 @@ search box, then use network_log/network_entry to find the call that returns the
 - Never put cookies, Authorization headers or tokens in the spec. If the API only works with \
 them, stop and explain.
 
-Where the search API lives: the site's own pages may call an API on another host (a platform \
-vendor's domain). Look at the network log for the call that returns the product list. If the call \
+Where the search API lives: the site's own pages may call an API on another host. Look at the network log for the call that returns the product list. If the call \
 is a browser-only one (it fails outside a page, e.g. CORS or a bot-protection 403), use \
 `transport: page` with `page_url` set to a store page: the request is then made with fetch() \
 from inside that page. Use `transport: request` only when a plain HTTP call works.

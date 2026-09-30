@@ -33,4 +33,4 @@ search:
 notes: >-
   Written by hand from a network probe on 2026-09-30, not produced by the discovery agent: its
   first runs could not find the search call because the API lives on another host (osuper.com.br)
-  and only answers a real page. See docs/goal-run/. Cart and login are not covered yet (M4).
+  and only answers a real page (the host is one Andorinha's own page calls; how the two relate isn't documented). See docs/goal-run/. Cart and login are not covered yet (M4).

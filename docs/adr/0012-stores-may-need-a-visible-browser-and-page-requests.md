@@ -6,13 +6,13 @@
 
 ## Context
 
-Andorinha's product search is a `GET` to `sense.osuper.com.br`, a platform vendor's API behind Cloudflare bot protection:
+Andorinha's product search is a `GET` to `sense.osuper.com.br`, a host that Andorinha's own pages call (the relationship between the two isn't documented anywhere we found; the store and tenant ids in the URL, 269 and 1327, match the ids in Andorinha's own GraphQL responses). It sits behind Cloudflare bot protection:
 
 - a plain HTTP client, including Playwright's request context, gets `403`;
 - `fetch()` from a store page in **headless** Chromium fails with a CORS error (the `403` carries no CORS headers);
 - `fetch()` from a store page in a **visible** Chromium returns `200` with the full catalog JSON.
 
-So the runtime needs to be able to (a) show a browser window and (b) send the request from inside a page of the store. ADR-0006 also limited discovery to the store's own domain, which excludes the vendor host that serves the search.
+So the runtime needs to be able to (a) show a browser window and (b) send the request from inside a page of the store. ADR-0006 also limited discovery to the store's own domain, which excludes the host that serves the search.
 
 ## Options considered
 
