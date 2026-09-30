@@ -96,7 +96,6 @@ docs/adr/        Architecture Decision Records
 docs/journal/    Build log: what I tried, what I rejected, and why
 src/             Source code (added as components land)
 evals/           Ground-truth fixtures and the intake / resolver eval harness
-profiles/        Site profiles (what discovery learned about a store) and recorded public responses
 data/            Local personal data: history, preferences. Never committed.
 ```
 

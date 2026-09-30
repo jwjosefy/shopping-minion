@@ -119,7 +119,7 @@ The graph runs once per confirmed item. Items are processed one at a time in v0,
 
 ### 4.4 Catalog adapter (generic, profile-driven)
 
-This implements the `CatalogAdapter` protocol from [ADR-0004](adr/0004-store-catalog-adapters.md) **once, for every store**, by executing the store's site profile: which URL or API call to use for search, which selectors or JSON fields map to `Candidate` fields, and how the unit of sale is expressed.
+This implements the `CatalogAdapter` protocol from [ADR-0004](adr/0004-store-catalog-adapters.md) **once, for every store**, by executing the store's site profile: the user steps to search (the search page or box), how to read each result into `Candidate` fields, and how the unit of sale is expressed. The adapter drives the site in the browser; it never calls the site's endpoints directly ([ADR-0012](adr/0012-the-store-is-used-through-its-site-in-a-browser.md), Draft).
 
 - **Search** works without login on Andorinha.
 - **Pre-ranking:** the adapter returns at most 20 normalized candidates per item, ranked by text similarity plus preferences ([ADR-0003](adr/0003-preferences-as-static-yaml.md)). This is where brand and variant preferences cut the list down, and it keeps the resolver within Julia-1's 2–20 option limit (§4.5).
@@ -175,7 +175,7 @@ This is an LLM agent (a LangGraph agent with browser tools) that explores a stor
 
 **What it has to discover**, in order:
 
-1. **Search:** how a query is made, whether an internal JSON API exists, and how results map to `Candidate`.
+1. **Search:** how a user searches on the site, and how the results shown map to `Candidate`.
 2. **Product and unit of sale:** unit, pack, or weight step, and the step size.
 3. **Login:** the flow, and whether there's a captcha, a code sent by email or SMS, or a CEP/store selection.
 4. **Cart:** how to add and remove an item, and how to read the cart.
@@ -203,7 +203,7 @@ Behind a `BrowserProvider` interface:
 - **v0:** Playwright with its own pinned Chromium (`uv run playwright install chromium`). The system Chrome is never used, which removes most "works on my machine" problems without Docker.
 - **Later:** a remote browser over CDP (`connect_over_cdp`). This could be browserless in Docker, browserless SaaS, or the hosting platform's browser. Switching is configuration only.
 
-A raw HTTP client (`curl_cffi`) stays an option **if** discovery finds internal JSON APIs for search and cart. The site profile can describe either browser steps or HTTP calls.
+The site profile describes browser steps only. Calling the site's internal endpoints with an HTTP client was left open in the first version of this document; it was tried on 2026-09-30, caused every problem of that run, and was removed ([ADR-0012](adr/0012-the-store-is-used-through-its-site-in-a-browser.md), Draft).
 
 ### 4.9 Model configuration
 
@@ -350,7 +350,7 @@ Everything in [ADR-0001](adr/0001-secrets-with-dotenvx.md) and `CLAUDE.md` still
 | 0009 | Workflow on LangGraph as a deterministic graph; one configurable model per role, no fallback in v0 | New |
 | 0010 | Resolver makes one call per item with two typed multiple-choice questions (product, product-independent target quantity) behind a `DecisionBackend`; the executor converts quantity to unit of sale; rationale optional; backend chosen by evals | Amends 0005's rationale requirement |
 | 0011 | Intake falls back to a second model when the first fails (added after approval, 2026-09-30) | Supersedes 0009's no-fallback clause |
-| 0012 | A store profile may require a visible browser and requests made from a page (proposed, added after approval, 2026-09-30) | Extends 0007 and 0006 |
+| 0012 | The store is used through its site, in a browser, the way a user would; endpoints are never called directly (**Draft**, 2026-09-30) | Would close 0007's raw-HTTP opening |
 
 ## 13. Build plan
 
