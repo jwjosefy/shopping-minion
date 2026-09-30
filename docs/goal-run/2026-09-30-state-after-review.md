@@ -5,7 +5,7 @@ This replaces the summary in [the goal-run log](2026-09-30-goal-run-log.md). Tha
 ## What the review changed
 
 - **Removed:** the catalog adapter, the discovery agent, the Andorinha site profile and its recorded responses, the `discover` and `search` commands, and the ADR-0012 the run had proposed. They called the store's endpoints directly, which is not how this project reaches a store.
-- **Added:** [ADR-0012](../adr/0012-the-store-is-used-through-its-site-in-a-browser.md) as a **Draft** (the store is used through its site, in a browser, as a user would), new working rules in `CLAUDE.md`, and [journal entry 0007](../journal/2026-09-30-0007-goal-run-and-review.md).
+- **Added:** [ADR-0012](../adr/0012-the-store-is-used-through-its-site-in-a-browser.md), accepted by Johann on 2026-09-30 (the store is used through its site, in a browser, as a user would), new working rules in `CLAUDE.md`, and [journal entry 0007](../journal/2026-09-30-0007-goal-run-and-review.md).
 - **Converted:** the recorded store responses became normalized candidate lists in `evals/fixtures/candidates/`, so the resolver eval no longer depends on a profile. The eval gives the same numbers as before.
 
 ## State by milestone
@@ -24,10 +24,9 @@ This replaces the summary in [the goal-run log](2026-09-30-goal-run-log.md). Tha
 
 ## Waiting for Johann
 
-1. **Accept or change ADR-0012 (Draft).** Its two open questions were answered by Johann on 2026-09-30 and are now part of the text, with the browser test that followed.
-2. **Decide whether the quantity question comes back.** The resolver derives the target quantity from the list, then the preferences, then 1 unit flagged as assumed (a deviation from HLD §4.5).
-3. **Read journal drafts 0005, 0006 and 0007.** They are written by Claude in your voice.
-4. **Whole-project review**, before any work is split into smaller tasks.
+1. **Decide whether the quantity question comes back.** The resolver derives the target quantity from the list, then the preferences, then 1 unit flagged as assumed (a deviation from HLD §4.5).
+2. **Read journal drafts 0005, 0006 and 0007.** They are written by Claude in your voice.
+3. **Whole-project review**, before any work is split into smaller tasks.
 
 ## Blockers for later work
 

@@ -1,8 +1,8 @@
 # ADR-0012: The store is used through its site, in a browser, the way a user would
 
-- **Status:** Draft. Written by Claude on 2026-09-30 for Johann's review. Not a decision until he accepts it.
+- **Status:** Accepted (drafted by Claude, accepted by Johann on 2026-09-30)
 - **Date:** 2026-09-30
-- **Would close:** the "raw HTTP stays open" clause of [ADR-0007](0007-browser-runtime-playwright-local-cdp-later.md) and the same opening in the HLD (§4.4, §4.7, §4.8).
+- **Closes:** the "raw HTTP stays open" clause of [ADR-0007](0007-browser-runtime-playwright-local-cdp-later.md) and the same opening in the HLD (§4.4, §4.7, §4.8).
 
 ## Context
 
@@ -32,7 +32,7 @@ That code and its profile were removed. The account of what happened is in the [
 1. **Keep (3) available as an optimization** when a site's internal API is convenient. Rejected: it is where all the fragility came from, and "when convenient" is exactly the judgment that went wrong.
 2. **Drive the browser only.** The adapter and the discovery agent do what a user does: open pages, type in the search box, click, and read what the page shows.
 
-## Decision (proposed)
+## Decision
 
 Option 2.
 

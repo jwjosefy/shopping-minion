@@ -9,7 +9,7 @@ Read before working: `docs/hld.md` (design), `docs/adr/` (decisions), `docs/goal
 Photo → Intake (vision model) → human review (web app) → Workflow (LangGraph, fixed steps) → per item: Catalog search → Resolver (decision model picks a product) → Executor (deterministic: converts quantity, validates, adds to cart, verifies) → Report → human checkout.
 
 Non-negotiables:
-- **The store is used only through its site, in a browser, the way a user would.** Never call the site's endpoints directly: no HTTP client, no `fetch()` with hand-built requests, no copied hosts, ids or request parameters (ADR-0012, Draft; ADR-0007). If something seems to need it, stop and ask.
+- **The store is used only through its site, in a browser, the way a user would.** Never call the site's endpoints directly: no HTTP client, no `fetch()` with hand-built requests, no copied hosts, ids or request parameters (ADR-0012). If something seems to need it, stop and ask.
 - At shopping time no model drives the browser, and the model never writes to the cart (ADR-0005). The discovery agent is the only model that browses, before shopping and supervised (ADR-0006).
 - Store-specific knowledge lives in a site profile, never in the core (ADR-0004, ADR-0006).
 - Checkout is always manual. No tool or code path may place an order.

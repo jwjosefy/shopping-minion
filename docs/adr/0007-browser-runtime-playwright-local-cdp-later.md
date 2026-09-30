@@ -1,6 +1,6 @@
 # ADR-0007: Browser runtime is a Playwright-managed Chromium locally, a remote CDP browser later
 
-- **Status:** Accepted. The "raw HTTP stays open" clause is under review: [ADR-0012](0012-the-store-is-used-through-its-site-in-a-browser.md) (Draft) would close it. Don't build on that clause.
+- **Status:** Accepted. The "raw HTTP stays open" clause was closed by [ADR-0012](0012-the-store-is-used-through-its-site-in-a-browser.md): the store's endpoints are never called directly.
 - **Date:** 2026-09-29
 
 ## Context
