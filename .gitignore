@@ -35,3 +35,6 @@ build/
 .vscode/
 .idea/
 .DS_Store
+
+# --- Claude Code worktrees for task agents ---
+.claude/
