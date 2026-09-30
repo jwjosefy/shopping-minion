@@ -29,7 +29,7 @@ def test_decision_backend_without_model_is_fine():
     config = ModelsConfig.model_validate(
         {
             "intake": {"provider": "anthropic", "model": "m"},
-            "resolver": {"backend": "julia1"},
+            "resolver": {"backend": "julia1", "path": "data/models/Julia-1"},
             "discovery": {"provider": "anthropic", "model": "m"},
         }
     )
@@ -42,7 +42,7 @@ def test_fallback_cannot_have_its_own_fallback():
         ModelsConfig.model_validate(
             {
                 "intake": role | {"fallback": role | {"fallback": role}},
-                "resolver": {"backend": "julia1"},
+                "resolver": {"backend": "julia1", "path": "p"},
                 "discovery": role,
             }
         )

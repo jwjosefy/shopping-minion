@@ -1,0 +1,1571 @@
+{
+ "query": "feijão",
+ "payload": {
+  "hits": [
+   {
+    "id": "6137385",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/h5TJJANzRQfKTuTdm3so50S3FG8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/536634cf-salgadinhos-2.png",
+    "name": "Feijão Carioca Tipo 1 Camil Pacote 1KG",
+    "pricing": {
+     "price": 8.69,
+     "promotion": false,
+     "promotionalPrice": 8.69,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 14748,
+     "max": 40,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-tipo-1-camil-pacote-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 8409,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> Tipo 1 Camil Pacote 1KG"
+     ]
+    },
+    "_id": "p6137385s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6152480",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca",
+     "store1327:Ofertas Andorinha:"
+    ],
+    "brandName": "Kicaldo",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/Y3bWvhi3evbluvUVykKsDuB9Gss=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/7f25fe05-tamanho-512x512-10.png",
+    "name": "Feijão Carioca Tipo 1 Kicaldo Pacote 1kg",
+    "pricing": {
+     "price": 8.49,
+     "promotion": false,
+     "promotionalPrice": 8.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 4643,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-tipo-1-kicaldo-pacote-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 3938,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> Tipo 1 Kicaldo Pacote 1kg"
+     ]
+    },
+    "_id": "p6152480s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6148629",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca",
+     "store1327:Ofertas show",
+     "store1327:Ofertas Andorinha"
+    ],
+    "brandName": "Andorinha",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/MxVCIPnewssy7yuGWXG9ob1ZlhI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/87cca6fe-capia-de-capia-de-presutos-queijos.png",
+    "name": "Feijão Carioca Andorinha 1kg",
+    "pricing": {
+     "price": 7.99,
+     "promotion": true,
+     "promotionalPrice": 6.99,
+     "discount": 12,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 9645,
+     "max": 30,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-andorinha-1kg",
+    "tags": [
+     "marca própria",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2623,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> Andorinha 1kg"
+     ]
+    },
+    "_id": "p6148629s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6153934",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca"
+    ],
+    "brandName": "Broto Legal",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/93BabCBNMdsugWOVV02a5AOAHNo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108b58dc19e45a31ff03/146947-6b94a661.jpg",
+    "name": "Feijao Carioca Broto Legal 1KG",
+    "pricing": {
+     "price": 9.85,
+     "promotion": false,
+     "promotionalPrice": 9.85,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 8780,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-broto-legal-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2037,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijao <b>Carioca</b> Broto Legal 1KG"
+     ]
+    },
+    "_id": "p6153934s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6137393",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/dX407NqbsR_rdLOS1yZDSM7GcVw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/28418f57-salgadinhos-3.png",
+    "name": "Feijão Preto Tipo 1 Camil Pacote 1KG",
+    "pricing": {
+     "price": 8.99,
+     "promotion": false,
+     "promotionalPrice": 8.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 5149,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-tipo-1-camil-pacote-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2431,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Tipo 1 Camil Pacote 1KG"
+     ]
+    },
+    "_id": "p6137393s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6137392",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/1J9YxBJjcuozNhgWgaYDBelnBvk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/799b9f4a-salgadinhos.png",
+    "name": "Feijão Preto Camil 500g",
+    "pricing": {
+     "price": 4.99,
+     "promotion": false,
+     "promotionalPrice": 4.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 773,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-camil-500g",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 734,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Camil 500g"
+     ]
+    },
+    "_id": "p6137392s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6155614",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca"
+    ],
+    "brandName": "Kicaldo",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/niucY349Ms836muJWaMkgRBhCYQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/70f6aca5-capia-de-capia-de-presutos-queijos.png",
+    "name": "Feijão Orgânico Carioca Kicaldo 500g",
+    "pricing": {
+     "price": 8.49,
+     "promotion": false,
+     "promotionalPrice": 8.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 95,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-organico-carioca-kicaldo-500g",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 119,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Orgânico</b> <b>Carioca</b> Kicaldo 500g"
+     ]
+    },
+    "_id": "p6155614s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6156132",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    ],
+    "brandName": "Kicaldo",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/WOuhyQwMKIh6i0SLyh6_Y7W3OJE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108859da11e55f34ff02/157948-b84f16bb.jpg",
+    "name": "Feijão Preto Tipo 1 Kicaldo Pacote 1kg",
+    "pricing": {
+     "price": 8.99,
+     "promotion": false,
+     "promotionalPrice": 8.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 3210,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-tipo-1-kicaldo-pacote-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 525,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Tipo 1 Kicaldo Pacote 1kg"
+     ]
+    },
+    "_id": "p6156132s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6143939",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    ],
+    "brandName": "Broto Legal",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/JCnO6xA03UIL59ku2-f8R458sgY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/53b1ab20-design-sem-nome.png",
+    "name": "Feijao Preto Broto Legal 1KG",
+    "pricing": {
+     "price": 8.99,
+     "promotion": false,
+     "promotionalPrice": 8.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 743,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-broto-legal-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 390,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijao <b>Preto</b> Broto Legal 1KG"
+     ]
+    },
+    "_id": "p6143939s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6135072",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca"
+    ],
+    "brandName": "Korin",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/YFhxpml9EMn-8jYMk8PiDcYR1_Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284158e5ddf1ee55d3aff07/128219-0c55a5f0.jpg",
+    "name": "Feijão Carioca Orgânico Korin Embalagem 500G",
+    "pricing": {
+     "price": 13.49,
+     "promotion": false,
+     "promotionalPrice": 13.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 59,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-organico-korin-embalagem-500g",
+    "tags": [
+     "orgânico",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 24,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> <b>Orgânico</b> Korin Embalagem 500G"
+     ]
+    },
+    "_id": "p6135072s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6135071",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    ],
+    "brandName": "Korin",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/1ja7ZpGxP38HnrkfjaskZ42SYkE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284158e5ddf1ee55d3af800/135753-0ad85e2b.jpg",
+    "name": "Feijão Preto Orgânico Korin 500G",
+    "pricing": {
+     "price": 12.99,
+     "promotion": false,
+     "promotionalPrice": 12.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 21,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-organico-korin-500g",
+    "tags": [
+     "orgânico",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 35,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> <b>Orgânico</b> Korin 500G"
+     ]
+    },
+    "_id": "p6135071s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6137411",
+    "categories": [
+     "store1327:Mercearia"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/pL2mzWINU45TwTN9rIs613u_vWs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/249608-a53f0720.webp",
+    "name": "Feijão Carioca Pronto Camil 380g",
+    "pricing": {
+     "price": 9.49,
+     "promotion": false,
+     "promotionalPrice": 9.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 377,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-pronto-camil-380g",
+    "tags": [
+     "mercearia"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 107,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/SgrmdI5DonBPwDSSXRujgc37E1s=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496086b876a09-0.webp",
+     "https://edge.osuper.com.br/OeCBUmS1jTFhYd0oHLdYJ8Kf3AE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608e1b359a1-1.webp",
+     "https://edge.osuper.com.br/XP4sjwwEkzYk5W5MPugEyKtRkKg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608513d7a02-2.webp",
+     "https://edge.osuper.com.br/6Y44JfW-z326qviMuYdYZjaV-AU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960876437696-3.webp",
+     "https://edge.osuper.com.br/OUA2PdKInQwhbT7t4XId65lq_Zw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496081132655d-4.webp",
+     "https://edge.osuper.com.br/Ck_XQW6exXG6vDE8El73gFLdFOs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496087c5920a3-5.webp",
+     "https://edge.osuper.com.br/knzURnVwRepwz_pRCTVMnCLBU7E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608ed94f1f8-6.webp",
+     "https://edge.osuper.com.br/50YK37DyMf63fmwmFbNsfJrHf0Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608ca6e47d8-7.webp",
+     "https://edge.osuper.com.br/J06lz02UD1SAp1BxjNU_iFeHg5M=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608d339ee56-8.webp",
+     "https://edge.osuper.com.br/5WyCATFACu2sTGVnYUMXOPq7_KE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960833087e7f-9.webp",
+     "https://edge.osuper.com.br/S7XelizyvvivSFpdnh35cDNKMAw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608225e3f76-10.webp",
+     "https://edge.osuper.com.br/4tIiwGWrhfCVplI9kmIBG8nUSes=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960842a04459-11.webp",
+     "https://edge.osuper.com.br/ZrecRw6Vn8xyiTZDa4qitVxh9Uc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608319c049b-12.webp",
+     "https://edge.osuper.com.br/5rBVARuNS2EyZn_tt_KN2mYCXrQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496089a9bcf63-13.webp",
+     "https://edge.osuper.com.br/f8MVgyyboBCJWZrFJjtoXs1E8co=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496083f253bbd-14.webp",
+     "https://edge.osuper.com.br/LdTXrIMbMaCDkumi9x83hg9IOuA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608a2abd6ad-15.webp",
+     "https://edge.osuper.com.br/DQwSfeVtv6CDqexAVIur-UhsplE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496088467334e-16.webp",
+     "https://edge.osuper.com.br/scntDVK0f6WcU5DATmqyzOn-W2M=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608e5f0ebd7-17.webp",
+     "https://edge.osuper.com.br/bm5-ngwykaXeGeFF_cuj9RQKWOE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496082ac094d6-18.webp",
+     "https://edge.osuper.com.br/yGEzZLM3TKxhGLS22g5dUPevbjs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608bef49fa8-19.webp",
+     "https://edge.osuper.com.br/yrDmYSNd8FvzryR-T3fu5YPYulM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960884029408-20.webp",
+     "https://edge.osuper.com.br/rgogxkQdaFZTehBP18dnGV2RE5k=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960833f8d399-21.webp",
+     "https://edge.osuper.com.br/R29-9zaAP9-shqy9SjTd7qjU0P8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608f5a00497-22.webp",
+     "https://edge.osuper.com.br/YkfiktKuhzTTVlpYKopEuM1v7VI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496089ec41cc6-23.webp",
+     "https://edge.osuper.com.br/fArJDRZ7LCB4k_ObJcQ24KU9FUU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496080e0188a0-24.webp",
+     "https://edge.osuper.com.br/W7K2EYdDQq-28hxZ-JD8bzkcgXs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496087f200c50-25.webp",
+     "https://edge.osuper.com.br/hzNmZhy41qnAP6Zgt8IW_G06SkI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496086b1b32b4-26.webp",
+     "https://edge.osuper.com.br/BvOv1iXDk8vYyoDlPsQFf5Xp3RM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608e801405b-27.webp",
+     "https://edge.osuper.com.br/Smdsp-p0Bt1LsJ9HIP4tDpmllQg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960813592e46-28.webp",
+     "https://edge.osuper.com.br/nie8Oiie3_uiU_05jY1D00BosNA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496085fdee715-29.webp",
+     "https://edge.osuper.com.br/7otVth_CmjIeRGldj7axXGpsPYU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960851d5a691-30.webp",
+     "https://edge.osuper.com.br/C1t36Fo8bJ3Com0TPrEL45d2EgA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960806fed8e2-31.webp",
+     "https://edge.osuper.com.br/sU36BX6LwqawSJdMYhMKKOsCmek=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960844b8359c-32.webp",
+     "https://edge.osuper.com.br/j-Ph2jy2MYuU3qIdo-33rUUQ5Wk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/249608cf26bda4-33.webp",
+     "https://edge.osuper.com.br/P_fSiuJI-Ae38GppmxPQ_athj-4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/24960808c8b2d3-34.webp",
+     "https://edge.osuper.com.br/dcrODLcxcXWjVP2LtePVyb_Wx8A=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bf905/360/2496089006101f-35.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> Pronto Camil 380g"
+     ]
+    },
+    "_id": "p6137411s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6152401",
+    "categories": [
+     "store1327:Empório",
+     "store1327:Empório > Leguminosas"
+    ],
+    "brandName": "Barcelona",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/E5xCdCpafqh7nIVdeFqhUxHoCjw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/ca64b735-18.png",
+    "name": "Feijão Carioca T1 Granel Kg",
+    "pricing": {
+     "price": 6.99,
+     "promotion": false,
+     "promotionalPrice": 6.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 306.002,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "feijao-carioca-t1-granel-kg",
+    "tags": [
+     "marca propria",
+     "mercearia basica"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 40,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> T1 Granel Kg"
+     ]
+    },
+    "_id": "p6152401s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "8184333",
+    "categories": [],
+    "brandName": "Vapza",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/VJkN1q-LLgH-mw8daYEcs08_COI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/eb8f6c16-captura-de-tela-20260901-170847.png",
+    "name": "Feijão Carioca Vapza 200g",
+    "pricing": {
+     "price": 9.49,
+     "promotion": false,
+     "promotionalPrice": 9.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 12,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-carioca-vapza-200g",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 0,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Carioca</b> Vapza 200g"
+     ]
+    },
+    "_id": "p8184333s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6152539",
+    "categories": [
+     "store1327:Empório",
+     "store1327:Empório > Leguminosas"
+    ],
+    "brandName": "Barcelona",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/tZzhSeUNeWeFSAtrWlhykcaOw-M=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/8faae2aa-8.png",
+    "name": "Feijão Preto Granel Kg",
+    "pricing": {
+     "price": 9.5,
+     "promotion": false,
+     "promotionalPrice": 9.5,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 125.388,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "feijao-preto-granel-kg",
+    "tags": [
+     "marca propria",
+     "mercearia basica"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 43,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Granel Kg"
+     ]
+    },
+    "_id": "p6152539s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6145035",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Branco"
+    ],
+    "brandName": "Kicaldo",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/xOxD5lTy2JmKnBzzxJi8aFn4PSI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/a990c84b-tamanho-512x512-2.png",
+    "name": "Feijão Branco Kicaldo 1kg",
+    "pricing": {
+     "price": 14.99,
+     "promotion": false,
+     "promotionalPrice": 14.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 131,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-branco-kicaldo-1kg",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 156,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Branco</b> Kicaldo 1kg"
+     ]
+    },
+    "_id": "p6145035s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "8205227",
+    "categories": [],
+    "brandName": "Vapza",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/57J5xyWzQQgaSl5KGep9GIptYzg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/55b4d152-captura-de-tela-20260929-173821.png",
+    "name": "Feijão Preto Vapza 200g",
+    "pricing": {
+     "price": 8.49,
+     "promotion": false,
+     "promotionalPrice": 8.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 10,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-vapza-200g",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 0,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Vapza 200g"
+     ]
+    },
+    "_id": "p8205227s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6137412",
+    "categories": [
+     "store1327:Mercearia"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/jClw7F-w6DmzNNNOa4tJF5lPH8Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/249153-5290e5ea.webp",
+    "name": "Feijão Preto Pronto Camil 380g",
+    "pricing": {
+     "price": 9.49,
+     "promotion": false,
+     "promotionalPrice": 9.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 147,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-preto-pronto-camil-380g",
+    "tags": [
+     "mercearia"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 49,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/bX6nsQuBFguzST2fxVazgzMlvYs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-05ae1e28.webp",
+     "https://edge.osuper.com.br/vbfhiY9eQEd6WjFIF9ndL4Ci7Gg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-78d04bd1.webp",
+     "https://edge.osuper.com.br/-243FXhnpxCiuUiQawQ325Ft2gg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-567dcae0.webp",
+     "https://edge.osuper.com.br/jHbAUAkXlfWaS2f4Hj9b06z7bKc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-9d5caa45.webp",
+     "https://edge.osuper.com.br/Wvaa6ImDSdfmzE2k04w8pP5ecsM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-1bde8284.webp",
+     "https://edge.osuper.com.br/SysoY8SiVZy1pXnioodbaqek1EY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-a2645533.webp",
+     "https://edge.osuper.com.br/Owg3pC1QJ68wBhSPrajhH9SOjvM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-11f916f5.webp",
+     "https://edge.osuper.com.br/qEhODB3-0znMfYbtuHHxp2Jwyds=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-410ad6bd.webp",
+     "https://edge.osuper.com.br/y2R32zmXpgYnk2tXkPDdnkhRKwk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-6cf8ef87.webp",
+     "https://edge.osuper.com.br/JZSoKsTqEZpnziOAGN-7_Iq6XYg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-15fc4520.webp",
+     "https://edge.osuper.com.br/buUx15mLxMVlmHZgmqce8m3IYCw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-16d0eb56.webp",
+     "https://edge.osuper.com.br/wizaJwKoXCoHnH6NGiDYHhmzvls=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-955558eb.webp",
+     "https://edge.osuper.com.br/3fOBpcCFj5HSHDnwsuTHlg6_HIM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-537e881e.webp",
+     "https://edge.osuper.com.br/J5KDNwFxlUc4lO2-rVM0ItwTGG4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-62de6530.webp",
+     "https://edge.osuper.com.br/_E_uFHtB_wUdOfKB0q83jVuZFpw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-40cbd9f1.webp",
+     "https://edge.osuper.com.br/bL6O-kqF9XdccmejsYFfeAzZdbk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-a53bfc94.webp",
+     "https://edge.osuper.com.br/t6ZRmBjlWoH5Tjvn3DTlirRNT3U=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-cd42cd0a.webp",
+     "https://edge.osuper.com.br/y3GNh7sx1DXjoin06qXjWCr4ZRA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-07590479.webp",
+     "https://edge.osuper.com.br/UbBf3rc9BT38N3eoHVPdnrSIH2s=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-5cd62c52.webp",
+     "https://edge.osuper.com.br/SfUURk2QxKY52fKLhefTYvzRtBA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-b032a001.webp",
+     "https://edge.osuper.com.br/ICfPQ9TRQPLboNNJ-S9STGLyyDU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-52e2f9a1.webp",
+     "https://edge.osuper.com.br/yDu_3oil7-VOe0Qd8bu2dvg1bdo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-8cd8ff97.webp",
+     "https://edge.osuper.com.br/YVkohkZ-w8sE_dxsTrh7kWZvN60=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-53fc4994.webp",
+     "https://edge.osuper.com.br/NBK8f5oJo_CyVKDpRKSeQriW5aA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-dc6fc139.webp",
+     "https://edge.osuper.com.br/9zUm4PsjeMyn3rtM6ZE0pjjKJuk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-2648d84e.webp",
+     "https://edge.osuper.com.br/SKxSxZOZUpleBkVN4K_7FDejK-U=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-4412556a.webp",
+     "https://edge.osuper.com.br/G8hrfINYtJ32KXIHHEjqZDq7vzg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-2471ff9b.webp",
+     "https://edge.osuper.com.br/KiLJ2jp9RpbO7itmcuiJbEpauWQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-21c1a9e3.webp",
+     "https://edge.osuper.com.br/cjTL67axxWADxG2GEC4RXnMZ6QE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-59e8a5b4.webp",
+     "https://edge.osuper.com.br/vHEfPsmcbgKBuOmvdfUHFEENsig=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-3468e320.webp",
+     "https://edge.osuper.com.br/qqVLc5zUHuWs8cKgPr25NUQ_Agk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-2aaf0018.webp",
+     "https://edge.osuper.com.br/e0o-nG3rKKYNyeUgEoCGwIqoIts=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-eb395351.webp",
+     "https://edge.osuper.com.br/cMIHSDQ9z1OBQSw1UPT9K7UQ-d4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-9d2b6791.webp",
+     "https://edge.osuper.com.br/HNvR3UEuLZC0ID8OKFU2yVz5cZg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-e049830a.webp",
+     "https://edge.osuper.com.br/VPE3s2Rtn8I6_zOnqF4Obz4eSnk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-850cf57f.webp",
+     "https://edge.osuper.com.br/C9HIPmsofi2d0e8FlUcVYga51X4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fec583bff01/360/249153-8879efbf.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Preto</b> Pronto Camil 380g"
+     ]
+    },
+    "_id": "p6137412s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6137388",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Branco"
+    ],
+    "brandName": "Camil",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/ALnXUpCazegDDVbEDxv3zGkzLQE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108958da1fe1573af300/45627-33b6b98b.jpg",
+    "name": "Feijão Branco Tipo 1 Camil Pacote 500G",
+    "pricing": {
+     "price": 11.99,
+     "promotion": false,
+     "promotionalPrice": 11.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 104,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-branco-tipo-1-camil-pacote-500g",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 199,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Branco</b> Tipo 1 Camil Pacote 500G"
+     ]
+    },
+    "_id": "p6137388s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6188573",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Grãos, Arroz e Feijões",
+     "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Branco"
+    ],
+    "brandName": "da Terrinha",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/v_5xWnR9YvBexAlkfTGgcw95d1E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/85da0e97-salgadinhos-3.png",
+    "name": "Feijão Branco Da Terrinha 500g",
+    "pricing": {
+     "price": 9.79,
+     "promotion": false,
+     "promotionalPrice": 9.79,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 47,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "feijao-branco-da-terrinha-500g",
+    "tags": [
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 118,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Feijão <b>Branco</b> Da Terrinha 500g"
+     ]
+    },
+    "_id": "p6188573s1327",
+    "installmentGroup": null
+   }
+  ],
+  "total": 48,
+  "nextFrom": 20,
+  "extraData": {
+   "categories": [
+    {
+     "doc_count": 33,
+     "key": "store1327:Mercearia"
+    },
+    {
+     "doc_count": 31,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões"
+    },
+    {
+     "doc_count": 8,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Outros Feijões"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Empório"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Empório > Leguminosas"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Carioca"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Branco"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Preto"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Fradinho"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Hortifruti"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Feijão Vermelho"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Ofertas Andorinha"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Ofertas Andorinha:"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Ofertas show"
+    }
+   ],
+   "brands": [
+    {
+     "key": "broto legal",
+     "doc_count": 9
+    },
+    {
+     "key": "camil",
+     "doc_count": 9
+    },
+    {
+     "key": "barcelona",
+     "doc_count": 7
+    },
+    {
+     "key": "kicaldo",
+     "doc_count": 7
+    },
+    {
+     "key": "bom tempo",
+     "doc_count": 6
+    },
+    {
+     "key": "korin",
+     "doc_count": 2
+    },
+    {
+     "key": "vapza",
+     "doc_count": 2
+    },
+    {
+     "key": "andorinha",
+     "doc_count": 1
+    },
+    {
+     "key": "da terrinha",
+     "doc_count": 1
+    },
+    {
+     "key": "hort frut",
+     "doc_count": 1
+    },
+    {
+     "key": "papapa",
+     "doc_count": 1
+    },
+    {
+     "key": "salsaretti",
+     "doc_count": 1
+    },
+    {
+     "key": "seara",
+     "doc_count": 1
+    }
+   ],
+   "tags": [
+    {
+     "key": "mercearia basica",
+     "doc_count": 38
+    },
+    {
+     "key": "mercearia",
+     "doc_count": 33
+    },
+    {
+     "key": "marca propria",
+     "doc_count": 7
+    },
+    {
+     "key": "orgânico",
+     "doc_count": 2
+    },
+    {
+     "key": "marca própria",
+     "doc_count": 1
+    },
+    {
+     "key": "tudo fresquinho todos os dias",
+     "doc_count": 1
+    }
+   ],
+   "max_price": 24.989999771118164,
+   "min_price": 4.389999866485596
+  },
+  "hasNext": true,
+  "hasPrevious": false
+ }
+}

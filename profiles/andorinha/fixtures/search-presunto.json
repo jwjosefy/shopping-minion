@@ -1,0 +1,1602 @@
+{
+ "query": "presunto",
+ "payload": {
+  "hits": [
+   {
+    "id": "6133012",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Perdigao",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/mYUz_DatmOJD9CFxRjpxJWENcvA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178c59d91ced5b32ff05/24194-96c8cabb.jpg",
+    "name": "Presunto Perdigão Cozido Fatiado 200G",
+    "pricing": {
+     "price": 11.99,
+     "promotion": false,
+     "promotionalPrice": 11.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 236,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-perdigao-cozido-fatiado-200g",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 378,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Perdigão <b>Cozido</b> Fatiado 200G"
+     ]
+    },
+    "_id": "p6133012s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6151071",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Perdigao",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/5mkN0A5bhN1i3wIm9e8J_zXLWQ0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/65ff738d-design-sem-nome-11.png",
+    "name": "Presunto Perdigão Fatiado Kg",
+    "pricing": {
+     "price": 29.99,
+     "promotion": false,
+     "promotionalPrice": 29.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 1311.13,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-perdigao-fatiado-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1731,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Perdigão Fatiado Kg"
+     ]
+    },
+    "_id": "p6151071s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6148210",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Aurora",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/zQDz-w54uTDriHeTYX2cTe_pplQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/d3ace406-design-sem-nome-12.png",
+    "name": "Presunto Aurora Fatiado Kg",
+    "pricing": {
+     "price": 32.99,
+     "promotion": false,
+     "promotionalPrice": 32.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 1153.04,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-aurora-fatiado-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1428,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Aurora Fatiado Kg"
+     ]
+    },
+    "_id": "p6148210s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6145618",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/tdsq5fjGMWoEBfpsh3O_mlGWOs8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/842fc417-design-sem-nome-13.png",
+    "name": "Presunto Sadia Fatiado/Pedaço Kg",
+    "pricing": {
+     "price": 37.99,
+     "promotion": true,
+     "promotionalPrice": 29.99,
+     "discount": 21,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 1163.63,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-sadia-fatiadopedaco-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1065,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Sadia Fatiado/Pedaço Kg"
+     ]
+    },
+    "_id": "p6145618s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6152762",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/NeGJzo-QAiwZg0xWcFXpSBqDat4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/7aea5113-design-sem-nome-14.png",
+    "name": "Presunto Seara Fatiado/Pedaço Kg",
+    "pricing": {
+     "price": 29.99,
+     "promotion": false,
+     "promotionalPrice": 29.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 3248.88,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-seara-fatiadopedaco-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 558,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Seara Fatiado/Pedaço Kg"
+     ]
+    },
+    "_id": "p6152762s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6131724",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Outros Presuntos",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Aurora",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/DydBgSeo8Gg4xdPP9TmdWuNGlMY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e28417885ed818e55833fd01/226604-74a6487f.jpg",
+    "name": "Presunto Fat Aurora 180g",
+    "pricing": {
+     "price": 9.99,
+     "promotion": false,
+     "promotionalPrice": 9.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 311,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-fat-aurora-180g",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 536,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Fat Aurora 180g"
+     ]
+    },
+    "_id": "p6131724s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134342",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Snacks",
+     "store1327:Mercearia > Salgadinhos de Milho"
+    ],
+    "brandName": "Eqlibri",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/UZprBRJbUKJEKQo53SRrMXa3Gxk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e28414815cdc1ae3583aff04/16786-2f2b0c89.jpg",
+    "name": "Snack Panetini Eqlibri Presunto Defumado 40G",
+    "pricing": {
+     "price": 5.49,
+     "promotion": false,
+     "promotionalPrice": 5.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 45,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "snack-panetini-eqlibri-presunto-defumado-40g",
+    "tags": [
+     "mercearia",
+     "petiscos"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 160,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Snack Panetini Eqlibri <b>Presunto</b> <b>Defumado</b> 40G"
+     ]
+    },
+    "_id": "p6134342s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6133203",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/N2ep3pfJRQZ1dq0yEnUw9MF40-c=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178c59d91dec5730fd03/227744-8db9e0f5.jpg",
+    "name": "Presunto Sadia S/Capa Fatiado 180g",
+    "pricing": {
+     "price": 11.99,
+     "promotion": false,
+     "promotionalPrice": 11.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 431,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-sadia-scapa-fatiado-180g",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 350,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Sadia S/Capa Fatiado 180g"
+     ]
+    },
+    "_id": "p6133203s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6141825",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Veggie",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/vGGp3LASyu2noks2TSuTBiGWIHA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e805cd918e55634f904/3782-514438eb.jpg",
+    "name": "Presunto de Soja Goshen Fatiado Embalagem 200G",
+    "pricing": {
+     "price": 21.99,
+     "promotion": false,
+     "promotionalPrice": 21.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 33,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-de-soja-goshen-fatiado-embalagem-200g",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 14,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> de <b>Soja</b> Goshen Fatiado Embalagem 200G"
+     ]
+    },
+    "_id": "p6141825s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6133232",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/ajUw4ddZhRsv7vKFI45rojIVsr8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/555a2adc-capia-de-capia-de-presutos-queijos-1.png",
+    "name": "Presunto Filé Mignon Sadia Fatiado 180g",
+    "pricing": {
+     "price": 11.49,
+     "promotion": false,
+     "promotionalPrice": 11.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 68,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-file-mignon-sadia-fatiado-180g",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 192,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Filé Mignon Sadia Fatiado 180g"
+     ]
+    },
+    "_id": "p6133232s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6145015",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Aurora",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/0NmAdaCEnFA_EXrlS7KRfbW6e8I=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/ab5cbc43-tamanho-512x512-1.png",
+    "name": "Presunto Aurora Peça Kg",
+    "pricing": {
+     "price": 25.99,
+     "promotion": false,
+     "promotionalPrice": 25.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 1153.636,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-aurora-peca-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 106,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Aurora Peça Kg"
+     ]
+    },
+    "_id": "p6145015s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6147012",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/Jy2Lq1LkZdrGDqsuzOSzdgE0o_Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/57e29a4b-capia-de-capia-de-presutos-queijos-8.png",
+    "name": "Presunto Sadia Peça Kg",
+    "pricing": {
+     "price": 28.98,
+     "promotion": false,
+     "promotionalPrice": 28.98,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 3088.459,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-sadia-peca-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 30,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Sadia Peça Kg"
+     ]
+    },
+    "_id": "p6147012s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6147451",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/ZdFjoh7IYmonHmu_Puol2cQYxqc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/94096d68-capia-de-presutos-queijos-1.png",
+    "name": "Presunto Seara Royal Fatiado Kg",
+    "pricing": {
+     "price": 79.98,
+     "promotion": false,
+     "promotionalPrice": 79.98,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 1.87,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-seara-royal-fatiado-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 28,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Seara Royal Fatiado Kg"
+     ]
+    },
+    "_id": "p6147451s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6140704",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/Hp5-PNQ21PRE_6yrLnJ-ZVrATWE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/78484bed-capia-de-capia-de-presutos-queijos-11.png",
+    "name": "Presunto Sadia Royale Fatiado Kg",
+    "pricing": {
+     "price": 98.9,
+     "promotion": false,
+     "promotionalPrice": 98.9,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 3.5,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-sadia-royale-fatiado-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 18,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Sadia Royale Fatiado Kg"
+     ]
+    },
+    "_id": "p6140704s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6144475",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru",
+     "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    ],
+    "brandName": "Sadia",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/Ic-SadE7UVSvIqkT7aiKidqcurk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/8135e4d0-capia-de-capia-de-presutos-queijos-11.png",
+    "name": "Presunto Sadia Royale Peça Kg",
+    "pricing": {
+     "price": 79.9,
+     "promotion": false,
+     "promotionalPrice": 79.9,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 0.3,
+     "inStock": 3.499,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 0.3,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "KG",
+    "slug": "presunto-sadia-royale-peca-kg",
+    "tags": [
+     "resfriado",
+     "hora do cafe"
+    ],
+    "type": "VARIABLE",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 0,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Sadia Royale Peça Kg"
+     ]
+    },
+    "_id": "p6144475s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6698825",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Queijos",
+     "store1327:Laticínios e Frios > Queijos > Queijo Mussarela",
+     "store1327:Laticínios e Frios > Queijos > Queijo Tipo Parmesão"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/SYr19cWCmfQzY_IHkLIsKjFPvE4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/0d612f44-7894904603756imagem1.png",
+    "name": "Presunto Alemão Seara Gourmet Fatiado 100g",
+    "pricing": {
+     "price": 17.99,
+     "promotion": false,
+     "promotionalPrice": 17.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 17,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-alemao-seara-gourmet-fatiado-100g",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 29,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Alemão Seara Gourmet Fatiado 100g"
+     ]
+    },
+    "_id": "p6698825s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6698556",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Queijos",
+     "store1327:Laticínios e Frios > Queijos > Queijo Mussarela",
+     "store1327:Laticínios e Frios > Queijos > Queijo Tipo Parmesão"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/F0eVmr1WMhV6kUiUlES4jMtyYzw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284128058d81aec583bfb05/586188-a837034f.png",
+    "name": "Presunto Seara Fatiado150g",
+    "pricing": {
+     "price": 12.99,
+     "promotion": true,
+     "promotionalPrice": 4.99,
+     "discount": 61,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 26,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-seara-fatiado150g",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 3,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Seara Fatiado150g"
+     ]
+    },
+    "_id": "p6698556s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6698823",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Queijos",
+     "store1327:Laticínios e Frios > Queijos > Queijo Mussarela",
+     "store1327:Laticínios e Frios > Queijos > Queijo Tipo Parmesão"
+    ],
+    "brandName": "Seara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/8QJhWcI95RNBNFJDOrmpCxUrLUE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284128058d81aec583bff0d/586170-a9447157.png",
+    "name": "Presunto Royal Seara Gourmet Fatiado 100g",
+    "pricing": {
+     "price": 17.99,
+     "promotion": false,
+     "promotionalPrice": 17.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 42,
+     "max": 10,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "presunto-royal-seara-gourmet-fatiado-100g",
+    "tags": [],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 15,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Presunto</b> Royal Seara Gourmet Fatiado 100g"
+     ]
+    },
+    "_id": "p6698823s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134614",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Snacks",
+     "store1327:Mercearia > Salgadinhos de Milho",
+     "store1327:Mercearia > Salgadinhos de Milho > Fandangos"
+    ],
+    "brandName": "Fandangos",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/36rOnQl4ta4oKXH3r3LP1vameNc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/3f6b67fe-salgadinhos-2.png",
+    "name": "Salgadinhos Fandangos Presunto 35g",
+    "pricing": {
+     "price": 4.39,
+     "promotion": false,
+     "promotionalPrice": 4.39,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 703,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "salgadinhos-fandangos-presunto-35g",
+    "tags": [
+     "mercearia",
+     "petiscos"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 498,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Salgadinhos Fandangos <b>Presunto</b> 35g"
+     ]
+    },
+    "_id": "p6134614s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6134616",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Snacks",
+     "store1327:Mercearia > Salgadinhos de Milho",
+     "store1327:Mercearia > Salgadinhos de Milho > Fandangos"
+    ],
+    "brandName": "Fandangos",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/lTz2d3xgmbY-43iYLX3UaKxdul4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/135e01cc-salgadinhos.png",
+    "name": "Salgadinhos Fandangos Presunto 160g",
+    "pricing": {
+     "price": 13.99,
+     "promotion": false,
+     "promotionalPrice": 13.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 573,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "salgadinhos-fandangos-presunto-160g",
+    "tags": [
+     "mercearia",
+     "petiscos"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 383,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "Salgadinhos Fandangos <b>Presunto</b> 160g"
+     ]
+    },
+    "_id": "p6134616s1327",
+    "installmentGroup": null
+   }
+  ],
+  "total": 40,
+  "nextFrom": 20,
+  "extraData": {
+   "categories": [
+    {
+     "doc_count": 20,
+     "key": "store1327:Laticínios e Frios"
+    },
+    {
+     "doc_count": 14,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru"
+    },
+    {
+     "doc_count": 14,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru > Presunto Cozido"
+    },
+    {
+     "doc_count": 11,
+     "key": "store1327:Mercearia"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Mercearia > Snacks"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Congelados"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Mercearia > Salgadinhos de Milho"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Lasanhas Congeladas"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Congelados > Petiscos e Salgados Congelados"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Congelados > Pratos Prontos Congelados"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Laticínios e Frios > Queijos"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Laticínios e Frios > Queijos > Queijo Mussarela"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Laticínios e Frios > Queijos > Queijo Tipo Parmesão"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Congelados > Petiscos e Salgados Congelados > Empanados"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Laticínios e Frios > Mortadela e Patê"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Laticínios e Frios > Mortadela e Patê > Patês"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Biscoitos Salgados"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Biscoitos Salgados > Outros Biscoitos Salgados"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Salgadinhos de Milho > Fandangos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Carnes e Peixes Congelados"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Massas e Pizzas Congeladas > Massas Congeladas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Pratos Prontos Congelados > Refeições Congeladas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Massas resfriadas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Presunto e Peito de Peru > Outros Presuntos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Biscoitos Doces"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Conservas de Legumes e Vegetais"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Conservas de Legumes e Vegetais > Conserva de Azeitonas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Grãos, Arroz e Feijões > Milhos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Massas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Salgadinhos de Batata"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Salgadinhos de Milho > Outros Salgadinhos de Milho"
+    }
+   ],
+   "brands": [
+    {
+     "key": "sadia",
+     "doc_count": 9
+    },
+    {
+     "key": "seara",
+     "doc_count": 8
+    },
+    {
+     "key": "aurora",
+     "doc_count": 4
+    },
+    {
+     "key": "fandangos",
+     "doc_count": 3
+    },
+    {
+     "key": "perdigao",
+     "doc_count": 3
+    },
+    {
+     "key": "club social",
+     "doc_count": 2
+    },
+    {
+     "key": "yoki",
+     "doc_count": 2
+    },
+    {
+     "key": "amavita",
+     "doc_count": 1
+    },
+    {
+     "key": "eqlibri",
+     "doc_count": 1
+    },
+    {
+     "key": "fina massa",
+     "doc_count": 1
+    },
+    {
+     "key": "fofura",
+     "doc_count": 1
+    },
+    {
+     "key": "forno de minas",
+     "doc_count": 1
+    },
+    {
+     "key": "kodilar",
+     "doc_count": 1
+    },
+    {
+     "key": "topway",
+     "doc_count": 1
+    },
+    {
+     "key": "vale fertil",
+     "doc_count": 1
+    },
+    {
+     "key": "veggie",
+     "doc_count": 1
+    }
+   ],
+   "tags": [
+    {
+     "key": "hora do cafe",
+     "doc_count": 16
+    },
+    {
+     "key": "resfriado",
+     "doc_count": 16
+    },
+    {
+     "key": "mercearia",
+     "doc_count": 7
+    },
+    {
+     "key": "petiscos",
+     "doc_count": 7
+    },
+    {
+     "key": "congelado",
+     "doc_count": 6
+    },
+    {
+     "key": "estou pronta so me colocar no forno",
+     "doc_count": 4
+    },
+    {
+     "key": "receita pronta so precisa me aquecer",
+     "doc_count": 2
+    }
+   ],
+   "max_price": 98.9000015258789,
+   "min_price": 3.490000009536743
+  },
+  "hasNext": true,
+  "hasPrevious": false
+ }
+}

@@ -1,0 +1,57 @@
+# Ground truth for the resolver eval (ADR-0010). Each case pairs a confirmed item with a recorded
+# search response of the store (profiles/<store>/fixtures/). Labels say which KIND of product is
+# correct, not which brand: brands and sizes are the user's preferences, not ground truth.
+#
+#   accept: regexes (accent- and case-insensitive); the chosen name must match at least one
+#   reject: regexes; the chosen name must match none
+#   expect_none: no candidate is right; choosing nothing (or being unsure) is the correct answer
+store: andorinha
+cases:
+  - id: atum
+    tags: [unit]
+    item: { name: atum }
+    fixture: search-atum.json
+    accept: ["^atum"]
+
+  - id: papel-higienico
+    tags: [pack]
+    item: { name: papel higiênico }
+    fixture: search-papel-higienico.json
+    accept: ["papel higienico"]
+    reject: ["toalha"]
+
+  - id: file-de-peito-de-frango
+    tags: [weight]
+    item: { name: filé de peito de frango }
+    fixture: search-file-de-peito-de-frango.json
+    # word order varies in the store's names: "Filé de Peito Frango", "Frango Filé Peito"
+    accept: ["file.*peito.*frango", "peito.*frango.*file", "frango.*file.*peito", "file.*frango"]
+
+  - id: feijao-normal-nao-preto
+    tags: [negation, list-001]
+    item:
+      name: feijão
+      constraints: [normal, não preto]
+      source_line: Feijão normal / preto não
+    fixture: search-feijao.json
+    accept: ["feij"]
+    reject: ["preto"]
+
+  - id: presunto-600g
+    tags: [inline_quantity, weight, list-001]
+    item: { name: presunto, quantity: 600, unit: g, source_line: presunto 600 g }
+    fixture: search-presunto.json
+    accept: ["presunto"]
+
+  - id: leite
+    tags: [ambiguous]
+    item: { name: leite }
+    fixture: search-leite.json
+    accept: ["^leite "]
+    reject: ["condensado", "coco", "fermentado", "achocolatado", " em po", "creme"]
+
+  - id: atum-among-milk
+    tags: [no_match]
+    item: { name: atum }
+    fixture: search-leite.json # deliberately the wrong catalog page: nothing here is tuna
+    expect_none: true

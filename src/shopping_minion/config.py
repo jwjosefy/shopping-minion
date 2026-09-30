@@ -42,6 +42,9 @@ class ResolverRole(_Config):
     base_url: str | None = None
     api_key_env: str | None = None
     max_tokens: int | None = None
+    path: str | None = None  # julia1: where the weights are
+    device: str = "cpu"  # julia1
+    none_option: bool = True  # julia1: offer an explicit "none of these" answer
 
     def chat_role(self) -> ChatRole:
         assert self.model is not None
@@ -57,6 +60,8 @@ class ResolverRole(_Config):
     def _llm_backend_needs_model(self) -> ResolverRole:
         if self.backend == "haiku" and not self.model:
             raise ValueError("resolver backend 'haiku' requires a model")
+        if self.backend == "julia1" and not self.path:
+            raise ValueError("resolver backend 'julia1' requires a path to the weights")
         return self
 
 

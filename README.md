@@ -75,6 +75,19 @@ dotenvx run -- uv run shopping-minion serve        # http://127.0.0.1:8000
 dotenvx run -- uv run shopping-minion serve --lan  # reachable from a phone on the same network
 ```
 
+### Julia-1 backend (optional)
+
+The resolver can run on [Julia-1](https://huggingface.co/SupersonicLabs/Julia-1), a small local decision model (Apache 2.0, runs on CPU), instead of an LLM ([ADR-0010](docs/adr/0010-single-pass-typed-resolver.md)). It isn't a project dependency because it needs PyTorch:
+
+```bash
+uv pip install huggingface_hub
+uv run python -c "from huggingface_hub import snapshot_download; snapshot_download('SupersonicLabs/Julia-1', local_dir='data/models/Julia-1')"
+uv pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch>=2.6"
+uv pip install "transformers>=5.0,<5.1" safetensors numpy -e data/models/Julia-1
+```
+
+Run with `uv run --no-sync ...` afterwards: a plain `uv sync` removes packages that aren't in the lockfile. Compare backends on the recorded cases with `uv run --no-sync python evals/harness/resolver_eval.py --backend julia1`.
+
 ## Repository layout
 
 ```
@@ -82,7 +95,8 @@ docs/hld.md      High-level design (v0)
 docs/adr/        Architecture Decision Records
 docs/journal/    Build log: what I tried, what I rejected, and why
 src/             Source code (added as components land)
-evals/           Evaluation fixtures (first real list in evals/fixtures/) and harness (planned)
+evals/           Ground-truth fixtures and the intake / resolver eval harness
+profiles/        Site profiles (what discovery learned about a store) and recorded public responses
 data/            Local personal data: history, preferences. Never committed.
 ```
 

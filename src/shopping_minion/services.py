@@ -20,7 +20,7 @@ from shopping_minion.catalog.profile import SiteProfile, load_profile
 from shopping_minion.config import load_models_config
 from shopping_minion.contracts import Candidate, CartLine, SaleQuantity
 from shopping_minion.preferences import Preferences
-from shopping_minion.resolver import DecisionBackend, build_backend
+from shopping_minion.resolver import DecisionBackend, build_resolver_backend
 from shopping_minion.workflow import CartExecutor, Catalog
 
 DEFAULT_STORE = "andorinha"
@@ -63,13 +63,10 @@ class ServicesFactory(Protocol):
 async def default_services(store: str = DEFAULT_STORE) -> AsyncIterator[Services]:
     config = load_models_config()
     profile = load_profile(store)
-    role = config.resolver
-    if role.backend != "haiku":
-        raise NotImplementedError(f"resolver backend {role.backend!r} arrives in M6")
     async with browser_provider(headless=not profile.headed).session() as context:
         yield Services(
             catalog=ProfileCatalog(profile, context),
-            backend=build_backend(role.chat_role(), f"{role.backend}:{role.model}"),
+            backend=build_resolver_backend(config.resolver),
             executor=DryRunExecutor(),
             preferences=Preferences.load(),
             dry_run=True,

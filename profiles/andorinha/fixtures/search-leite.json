@@ -1,0 +1,2027 @@
+{
+ "query": "leite",
+ "payload": {
+  "hits": [
+   {
+    "id": "6150353",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Lider",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "O Leite Longa Vida Integral Lider 1L, tem sua textura cremosa, sendo uma boa fonte de cálcio  e vitaminas essenciais e importantes para o bom funcionamento do nosso corpo  e só possui 3% de gordura em sua composição.Ele é produzido&nbsp; com &nbsp;rigorosos padrões de qualidade,sua embalagem prática garante\n    a durabilidade do produto, além disso ele é versátil na cozinha, podendo ser\n    usado em diversas receitas.\n\nLembrando que esse produto não poder ser usado como alimento\n    para criança &nbsp;menores de 2 anos de idade.*Valores diários com base em\n                uma dieta de 2000 kcal ou 8400 kJ.&nbsp;Seus valores diários podem ser\n                maiores ou menores dependendo de suas necessidades energéticas.&nbsp;\n\n\n\n\n\n-Ingredientes: Leite integral e\n                estabilizantes: trifosfato pentassódico, citrato trissódico, difosfato\n                dissódico e di-hidrogenofosfato de sódio \n        \n        -Leite UHT (Ultra High Temperature)\n                é um tipo de leite que passa por um processo de pasteurização em alta\n                temperatura, permitindo que ele seja armazenado por longos períodos sem a\n                necessidade de refrigeração.Dica de Receita -&nbsp;Leite Condensado&nbsp; Caseiro\n    \n\n\nIngredientes da Receita:1-&nbsp;litro de leite líder&nbsp; &nbsp;1- meia xícara de chá de áçucarModo de Preparo:Leve o açúcar e o leite líder ao fogo médio e misture até o açúcar derreter.&nbsp;Mantenha no fogo, mexendo de vez em quando, ate encorpar e ficar com cor de caramelo claro.Para saber o ponto correto do leite condensado, deixe um pires no freezer por 1 hora.&nbsp;Coloque uma gota de leite condensado no pires gelado e incline-o. Se escorrer lentamente, está pronto.Transfira para tigela de batedeira e bata bem até esfriar.\n\n\n\n\n    \n\n\n\n\n\n    \n    \n    \n    \n    \n",
+    "image": "https://edge.osuper.com.br/DSWnRcj46Q_xJjyoOO072CCi3os=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108c5ed51ce55a32fb06/140849-b539bc02.jpg",
+    "name": "Leite Longa Vida Integral Lider 1L",
+    "pricing": {
+     "price": 5.29,
+     "promotion": false,
+     "promotionalPrice": 5.29,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 72047,
+     "max": 48,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-integral-lider-1lt",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 6546,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Integral</b> Lider 1L"
+     ]
+    },
+    "_id": "p6150353s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6139343",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Parmalat",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/Vf4I9o4k1mtPYw64QxLyWNqFNeY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e28410895bd81ee45f32fa02/15700-a7107bea.jpg",
+    "name": "Leite Longa Vida Integral Parmalat 1LT",
+    "pricing": {
+     "price": 6.29,
+     "promotion": false,
+     "promotionalPrice": 6.29,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 12429,
+     "max": 120,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-integral-parmalat-1lt",
+    "tags": [
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2926,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Integral</b> Parmalat 1LT"
+     ]
+    },
+    "_id": "p6139343s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6148377",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Jussara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/5LHX3d_vy-464yZV3hy5Gv-6A80=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108b50df10e55f33f301/154087-1c0aa80d.jpg",
+    "name": "Leite Longa Vida Integral Jussara Max Garrafa 1LT",
+    "pricing": {
+     "price": 5.49,
+     "promotion": false,
+     "promotionalPrice": 5.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 8460,
+     "max": 360,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-integral-jussara-max-garrafa-1lt",
+    "tags": [
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 2632,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Integral</b> Jussara Max Garrafa 1LT"
+     ]
+    },
+    "_id": "p6148377s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6156617",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Leite em Pó e Fórmulas Infantis",
+     "store1327:Ofertas Andorinha:"
+    ],
+    "brandName": "Itambe",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/9SUzr78lS8WxL8k5iVtLKpmumi0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e28410895ddd19e65f33fa03/139747-224fa109.jpg",
+    "name": "Leite em Pó Integral Itambé 400G",
+    "pricing": {
+     "price": 16.99,
+     "promotion": false,
+     "promotionalPrice": 16.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 6290,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-em-po-integral-itambe-400g",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1674,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> em Pó <b>Integral</b> Itambé 400G"
+     ]
+    },
+    "_id": "p6156617s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6151771",
+    "categories": [
+     "store1327:Bebês e Crianças",
+     "store1327:Bebês e Crianças > Alimentação do Bebê",
+     "store1327:Bebês e Crianças > Alimentação do Bebê > Leites Integrais para Bebês",
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Ninho",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/mCmxlc3evdwaIE10SzlotB2ZTek=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/123231-769c0e24.webp",
+    "name": "Leite Longa Vida Ninho Integral Cx 1l",
+    "pricing": {
+     "price": 7.49,
+     "promotion": false,
+     "promotionalPrice": 7.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 12966,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-ninho-integral-cx-1l",
+    "tags": [
+     "integral",
+     "integral",
+     "childhood",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1713,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/-7fj5Ep-0xBWGMFRvL836vQKjfU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232311507cf36-0.webp",
+     "https://edge.osuper.com.br/d3Jl6rW_9swx39waQw1hgSa8er4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323197816c8a-1.webp",
+     "https://edge.osuper.com.br/ryAfCrxLilp4iKX7tNBOr2EGAsw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323167ad8303-2.webp",
+     "https://edge.osuper.com.br/SacP9PFY6lKA-ZYYSOctloPA7yQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232310dda4284-3.webp",
+     "https://edge.osuper.com.br/ssdLKaS9jys7a7YEMHZcGmQk37A=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232319aa007b1-4.webp",
+     "https://edge.osuper.com.br/1FmgL2jVPYjUuxwpqmCxfdN4_jo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323160bc5f79-5.webp",
+     "https://edge.osuper.com.br/Ww4rFiBZyPeVU9fPerprvvV25Ho=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323100ecf001-6.webp",
+     "https://edge.osuper.com.br/sib--EClpjhfcFO5MIT_6Gi98rM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323188c42639-7.webp",
+     "https://edge.osuper.com.br/osk5f08oZIIl0pSnZu0AwhkwDPY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232314ac0c91d-8.webp",
+     "https://edge.osuper.com.br/fls3SX3kzYBAZoH5Y0M2oSGJXTg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232314b1b854c-9.webp",
+     "https://edge.osuper.com.br/90UOKOAUcDNYIDSYlod0Hai934Y=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231b62d37ea-10.webp",
+     "https://edge.osuper.com.br/H5otVmRToCJtHfT21LObA_PVMnY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231dc1d2aeb-11.webp",
+     "https://edge.osuper.com.br/v4iaozo9fLSH1QinjAoBdt1tUFY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232318e669f13-12.webp",
+     "https://edge.osuper.com.br/k2Yg98wdj8bu1u5kJ-0XJYtQqKc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232313a19fb77-13.webp",
+     "https://edge.osuper.com.br/AkQ5EcBeJH_KT2yAcQNApY-ICRE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231dd42d0df-14.webp",
+     "https://edge.osuper.com.br/48ZSm2tSrzk1LQ1Rf3agmXqnlws=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231d2693075-15.webp",
+     "https://edge.osuper.com.br/jyTjG-27vRizApWoSCR93S5lOZE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231fd9527bc-16.webp",
+     "https://edge.osuper.com.br/dMWLgSExmUdmxSLoShRgZw25asY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231ffa12d25-17.webp",
+     "https://edge.osuper.com.br/Cn7FS1D_OAR3RpLR9Tmk2707X3Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231afaf4387-18.webp",
+     "https://edge.osuper.com.br/NRajQAykmU-o0gKRPAGYwM46yEQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231047c7b50-19.webp",
+     "https://edge.osuper.com.br/ZqUkTviAljMbUTRGCTZ_qpWjNUM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232314590f35f-20.webp",
+     "https://edge.osuper.com.br/UEfSibrqCcV8vXs9aLkALb6kaKw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231861be0f1-21.webp",
+     "https://edge.osuper.com.br/rQioez85QymDgvKAfavythUdSEM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231a490b718-22.webp",
+     "https://edge.osuper.com.br/VHezv07r6aHVNd4gBrr0OIn1OeU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323179fdf437-23.webp",
+     "https://edge.osuper.com.br/RqLFwbuGdvL0LyabmCZu7aPVWjQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232312939e38d-24.webp",
+     "https://edge.osuper.com.br/maJNLwCStsTTCs23W_TTBoKoEc8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231b5d45602-25.webp",
+     "https://edge.osuper.com.br/L7vGYPuaJpMloM6ZHUBF9oW9n9w=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323129f6bb53-26.webp",
+     "https://edge.osuper.com.br/kXy7eyJbih-zZrSzyku1Yz3a6Tk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232319b2dc301-27.webp",
+     "https://edge.osuper.com.br/-FsSBPdjGp4eFFpAFewiZfs-5Qc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231cdd8ca39-28.webp",
+     "https://edge.osuper.com.br/-dOAhEyFWnig6w_tHDY2-CWYvEk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/1232314d4ff519-29.webp",
+     "https://edge.osuper.com.br/kBg32RztiPLRPwdxZGwjR_r2gzc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231ba70c224-30.webp",
+     "https://edge.osuper.com.br/kkcs3Cie51yDDH3_rh7kHUyvYus=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/12323132f28732-31.webp",
+     "https://edge.osuper.com.br/jgfaD-rXa9bkpFdZX7XIwV5rx88=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231ac0a152e-32.webp",
+     "https://edge.osuper.com.br/5KWfY1WB8JhBQ8Y1gzHXiCKLMlw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231a2ccb779-33.webp",
+     "https://edge.osuper.com.br/SIdQhfHN4LohKxVdVZh0uA6HQos=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231fa41e239-34.webp",
+     "https://edge.osuper.com.br/eKl4P-7QPOXkFwl1mCABjumPVug=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836fb06/360/123231e799f850-35.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Ninho <b>Integral</b> Cx 1l"
+     ]
+    },
+    "_id": "p6151771s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6149421",
+    "categories": [
+     "store1327:Bebês e Crianças",
+     "store1327:Bebês e Crianças > Alimentação do Bebê",
+     "store1327:Bebês e Crianças > Alimentação do Bebê > Leites Integrais para Bebês",
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Italac",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/hHy09ndjpH-RE-LJh-_v3vTy1No=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/11301-eaed0367.webp",
+    "name": "Leite Longa Vida Italac Integral Cx 1l",
+    "pricing": {
+     "price": 6.09,
+     "promotion": false,
+     "promotionalPrice": 6.09,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 7848,
+     "max": 350,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-italac-integral-cx-1l",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1606,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/Gl-Y3E-Jn2XDJCS1yWI2ZE9Kg8E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-7eedd6b5.webp",
+     "https://edge.osuper.com.br/tOuoCR1x0QZDxp7FYahwWyv0pNI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-c0747edf.webp",
+     "https://edge.osuper.com.br/Zve3mkeCW4c1JHTF4_Wlbgt1kQM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-04acdd7d.webp",
+     "https://edge.osuper.com.br/VQ3y_msHlQtPRUsf0g8mtrxXIhw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-f95487bd.webp",
+     "https://edge.osuper.com.br/fJra34CxH2Ut92NBC2U80ag42sw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-3fa48268.webp",
+     "https://edge.osuper.com.br/dsIJuzyw_i6u2K7GSyJjqyFw-ds=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-d82a772f.webp",
+     "https://edge.osuper.com.br/W_jnccaKIdTZ_OTzJ8jj6kRj9mo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-80906311.webp",
+     "https://edge.osuper.com.br/UINH16v_zuqiCHMUGG0Fi1pycu0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-0807f673.webp",
+     "https://edge.osuper.com.br/SoO-MzBsfzLxAuhvEnHKBE37KwA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-ec5aaea8.webp",
+     "https://edge.osuper.com.br/6EhnO-Fk1bNcANKUz82NJ3xh5eY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-bf7f4acf.webp",
+     "https://edge.osuper.com.br/MUW39BdV9eAXPpGyoJLNfSqWN6Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-f302219e.webp",
+     "https://edge.osuper.com.br/0IodTr-BI3g72L9pK1RaSa06kwc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-5d40b7fb.webp",
+     "https://edge.osuper.com.br/P1MJP3er-SBxU_npXqN-JA6kcRs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-30ebf80b.webp",
+     "https://edge.osuper.com.br/eHIy4AQzcgDqu9FS6jo4NoeTCvo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-27ff8c9c.webp",
+     "https://edge.osuper.com.br/w9uuEARrbz8R2xPHbU7hNDTWHL4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-f53793c7.webp",
+     "https://edge.osuper.com.br/PWr1zbL0L3GIAneWiSgAVFuWURM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-eac09b4f.webp",
+     "https://edge.osuper.com.br/4WPqB0bjOm4UiqLsWdCFHW5Kj6k=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-5e05984c.webp",
+     "https://edge.osuper.com.br/obXODYD8Zq8Rw5xplyHvqRy0EZ0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-9ccc6bf1.webp",
+     "https://edge.osuper.com.br/CgzVhnZ4wP3HoQh-jyTpxS4xc20=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-5b73745b.webp",
+     "https://edge.osuper.com.br/7vG0BDtugd1_u8z2jbG_ZSJw3fE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-b720211f.webp",
+     "https://edge.osuper.com.br/npIO2Klm9yE1teIathTW8FrnYhI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-0bbde21c.webp",
+     "https://edge.osuper.com.br/YguUY8NYOmTotsHgrf97P4ESGes=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-debeb02b.webp",
+     "https://edge.osuper.com.br/PFwfRQv8kQY5NOLc0TuNu4Kl6LA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-89321f57.webp",
+     "https://edge.osuper.com.br/mSRs1hvxcHju_sfDvcJC9H3_sXk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-88826983.webp",
+     "https://edge.osuper.com.br/6gzwIymvVvQFyMrNM0syTrUtCSk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-45b9c409.webp",
+     "https://edge.osuper.com.br/rQOA7R6DLBF8mGg2FhvqY9J_lkg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-917cd00a.webp",
+     "https://edge.osuper.com.br/sLl78tHXXWXt9kfUW3XwsXlESNg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-b264026a.webp",
+     "https://edge.osuper.com.br/WddYJi4wj9M3Ma8FbyYNitB-Xbc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-0161f8f0.webp",
+     "https://edge.osuper.com.br/f5vny8SH2u9TzPP0B8NZP9r7kBw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-e0caa992.webp",
+     "https://edge.osuper.com.br/Z35IPWt-dO4SUb5SOKEgKntmfhs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-7ca379af.webp",
+     "https://edge.osuper.com.br/CVzMwgfo0Q8EhSIbteyQVBBc68w=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-fe051cb7.webp",
+     "https://edge.osuper.com.br/KNxEnHZO84DWL4WpTP7BhpNU48k=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-e72d8df6.webp",
+     "https://edge.osuper.com.br/UlJXUfDP7yVGfDYIiYm6E5a2hQY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-e4462cbc.webp",
+     "https://edge.osuper.com.br/-P-Ge44LSzZPHcv3s5mfk6gDqKI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-570549e3.webp",
+     "https://edge.osuper.com.br/6lS5NAA5uYaumYvMIouVci9x4Fc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-97b7db2b.webp",
+     "https://edge.osuper.com.br/0t3xnN_ij5WA2UaTmqd6TOcM-yk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34fa04/360/11301-e31df84d.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Italac <b>Integral</b> Cx 1l"
+     ]
+    },
+    "_id": "p6149421s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6156634",
+    "categories": [
+     "store1327:Pão Nosso De Cada Dia"
+    ],
+    "brandName": "Jussara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/YarpPor-Pbr7LICySxQ_7K4qD8c=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108b50df10e55f37fe0c/158583-11a69e8c.jpg",
+    "name": "Leite Longa Vida Semi Desnatado Jussara Zero Lactose Garrafa 1LT",
+    "pricing": {
+     "price": 6.99,
+     "promotion": true,
+     "promotionalPrice": 5.99,
+     "discount": 14,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2876,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-semi-desnatado-jussara-zero-lactose-garrafa-1lt",
+    "tags": [
+     "zero lactose",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 720,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": true
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Semi</b> <b>Desnatado</b> Jussara Zero <b>Lactose</b> Garrafa 1LT"
+     ]
+    },
+    "_id": "p6156634s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6150206",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Leite em Pó e Fórmulas Infantis"
+    ],
+    "brandName": "Piracanjuba",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/gqzDtfbbOvd7Df-vr7ReUkObIF8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/1d9875b2-salgadinhos-49.png",
+    "name": "Leite em Pó Integral Piracanjuba 400G",
+    "pricing": {
+     "price": 15.8,
+     "promotion": false,
+     "promotionalPrice": 15.8,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 8140,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-em-po-integral-piracanjuba-400g",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1374,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> em Pó <b>Integral</b> Piracanjuba 400G"
+     ]
+    },
+    "_id": "p6150206s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6153467",
+    "categories": [],
+    "brandName": "Jussara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/VCqDBpuxEIBST3Ih2p6AL-BHX6E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/74d19868-capia-de-capia-de-presutos-queijos.png",
+    "name": "Leite Longa Vida Jussara Semi Desnatado Cx 1l",
+    "pricing": {
+     "price": 5.49,
+     "promotion": false,
+     "promotionalPrice": 5.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 4536,
+     "max": 36,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-jussara-semi-desnatado-cx-1l",
+    "tags": [
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1088,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Jussara <b>Semi</b> <b>Desnatado</b> Cx 1l"
+     ]
+    },
+    "_id": "p6153467s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6146129",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Desnatados"
+    ],
+    "brandName": "Lider",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/StUm7M9HWZ0dww7uUzfSQNvPZrY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108c5ed51ce55a32f902/140850-d4cc9d05.jpg",
+    "name": "Leite Longa Vida Desnatado Lider 1LT",
+    "pricing": {
+     "price": 5.29,
+     "promotion": false,
+     "promotionalPrice": 5.29,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-desnatado-lider-1lt",
+    "tags": [
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1364,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Desnatado</b> Lider 1LT"
+     ]
+    },
+    "_id": "p6146129s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6154317",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Jussara",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "O Leite Longa Vida Jussara Integral 1L é a escolha perfeita\n    para quem busca sabor, qualidade e nutrição em um só produto. Produzido com\n    leite 100% de origem controlada, o Leite Jussara passa por rigorosos processos\n    de seleção e pasteurização, garantindo um alimento seguro, saudável e com alto\n    padrão de qualidade. é enriquecido naturalmente com cálcio, proteínas e\n    vitaminas essenciais, como A e D, que contribuem para o fortalecimento dos\n    ossos, o desenvolvimento muscular e o bom funcionamento do organismo. Além\n    disso, o leite integral possui uma textura cremosa e sabor suave, perfeito para\n    ser consumido puro ou como ingrediente em receitas doces e salgadas.Dicas de Receitas: Doce de leite caseiroIngrediente:1- 2 litros de leite2- 4 xícaras de açúcarModo de Preparo:Coloque o leite e o açúcar em uma panela grande de fundo largo.Leve ao fogo médio, mexendo sempre com uma colher de pau, até obter fervura (cerca de 15 minutos).Diminua o fogo e continue mexendo até obter um doce marrom claro de consistência cremosa (cerca de 45 minutos).Passe o doce para um refratário, deixe esfriar bem e sirva colheradas em pratos de sobremesa.",
+    "image": "https://edge.osuper.com.br/szCIL9zWaiNqZc3jsO9pKY-PnCc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/8c420b0b-7896283800801.png",
+    "name": "Leite Longa Vida Jussara Integral Cx 1l",
+    "pricing": {
+     "price": 5.49,
+     "promotion": false,
+     "promotionalPrice": 5.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 22437,
+     "max": 412,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-jussara-integral-cx-1l",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1213,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Jussara <b>Integral</b> Cx 1l"
+     ]
+    },
+    "_id": "p6154317s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6146414",
+    "categories": [
+     "store1327:Laticínios e Frios",
+     "store1327:Laticínios e Frios > Leites",
+     "store1327:Laticínios e Frios > Leites > Leites Integrais",
+     "store1327:Laticínios e Frios > Leites > Especiais"
+    ],
+    "brandName": "Italac",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/5nVzy52gBqexH5xPhooMdl5uTZw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15d31fc05/166840-7b693fb1.jpg",
+    "name": "Leite Integral Italac Zero Lactose 1LT",
+    "pricing": {
+     "price": 8.49,
+     "promotion": false,
+     "promotionalPrice": 8.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 175,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-integral-italac-zero-lactose-1lt",
+    "tags": [
+     "zero lactose",
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 242,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> <b>Integral</b> Italac Zero <b>Lactose</b> 1LT"
+     ]
+    },
+    "_id": "p6146414s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6151515",
+    "categories": [],
+    "brandName": "Shefa",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/dH02cp3bq325cL6kPAjq9_hNbn0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108850d91be45d34fb05/153269-fa178809.jpg",
+    "name": "Leite Semidesnatado Shefa Zero Lactose Garrafa 1LT",
+    "pricing": {
+     "price": 6.49,
+     "promotion": false,
+     "promotionalPrice": 6.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2697,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-semidesnatado-shefa-zero-lactose-garrafa-1lt",
+    "tags": [
+     "zero lactose",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 561,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> <b>Semidesnatado</b> Shefa Zero <b>Lactose</b> Garrafa 1LT"
+     ]
+    },
+    "_id": "p6151515s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6146988",
+    "categories": [],
+    "brandName": "Italac",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/V3Li6CgMMzZdrzPQG5rJ2Dvn-Bg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/12781-de5cbf20.webp",
+    "name": "Leite Longa Vida Italac Semi Desnatado Cx 1l",
+    "pricing": {
+     "price": 6.09,
+     "promotion": false,
+     "promotionalPrice": 6.09,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 1139,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-italac-semi-desnatado-cx-1l",
+    "tags": [
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 570,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/qDlU-2FjpuBGMMVLgGxUnStxiVk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-8c13f41a.webp",
+     "https://edge.osuper.com.br/GkIVGC6FEKyMcj89gmRJRYsa54A=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-b93da380.webp",
+     "https://edge.osuper.com.br/-cNlvNHAqa6DNnVzgF11nBocdAc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-8889c406.webp",
+     "https://edge.osuper.com.br/gvXOB6cYc9QnZn0idWysUsawhrc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-d9e95b71.webp",
+     "https://edge.osuper.com.br/-PE1ylKzAkRQb749Ae8nxg0gQsk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-bbaa2c08.webp",
+     "https://edge.osuper.com.br/AgYkqvXO7h1sGzlfDiDeK75z4SY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-da12ac39.webp",
+     "https://edge.osuper.com.br/xwTlmcgyXqLdJ1bJV_Q-Ywko-kc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-1efbef5d.webp",
+     "https://edge.osuper.com.br/OMKS9rVYn_TgzKEwlBLOj_XZezk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-91dd37a9.webp",
+     "https://edge.osuper.com.br/7wQDcTfYfIiqXvo9RVmRibsaZDY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-e52e718a.webp",
+     "https://edge.osuper.com.br/US1lOvHuXJXJaBqozdpJoqPT_DA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-44366be1.webp",
+     "https://edge.osuper.com.br/I9rBgSlEXx4T0r7UVXQfxbUHbjw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-e8729814.webp",
+     "https://edge.osuper.com.br/OoydAy7BI2B6Xbgf4pyn6quCCbw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-1ad9c14a.webp",
+     "https://edge.osuper.com.br/W3Rxs1GblYYjv2WSafW_oCMDhsw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-4cb1c967.webp",
+     "https://edge.osuper.com.br/opxLwNj9MhKv3JVF4dGv8JVGjIU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-3b77bb5b.webp",
+     "https://edge.osuper.com.br/3imukjuPQw1xvWCOB4RXs_piFGM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-503b3487.webp",
+     "https://edge.osuper.com.br/gEgHWhP2tqeEtsqkSon2jFJwiYo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-b9e69014.webp",
+     "https://edge.osuper.com.br/1YwVEla9y25AQq_VoNPem57duos=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-c6bf0606.webp",
+     "https://edge.osuper.com.br/eDlDrlfLr_A0bOZPE6lXrp-Yk9g=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-8506bf68.webp",
+     "https://edge.osuper.com.br/qb2HHOJeXz8UNbIP4KVAFF1yCpQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-f1ffae26.webp",
+     "https://edge.osuper.com.br/HEzUhmJPMOlJ9BXpxxhSLHPnP08=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-a2fd5219.webp",
+     "https://edge.osuper.com.br/CZSpJ1gjS9PyjVbkaf9ZJWM1FlM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-9fa6fd48.webp",
+     "https://edge.osuper.com.br/gFMAM98b_pe4ydjtAJj057Gnr7o=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-837b0736.webp",
+     "https://edge.osuper.com.br/t9HG1AcpF-6XM5YhfNSR07Vw33s=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-f4f5a82f.webp",
+     "https://edge.osuper.com.br/nx0AvyFuuC_0oyWju_Y6ejb4qLA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-7c5b462a.webp",
+     "https://edge.osuper.com.br/_gaA0he-FMHrJDpx4caNoovpSlI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-3c9815aa.webp",
+     "https://edge.osuper.com.br/ANfwW8kQiqiGaVGS1cVXnzZCSwI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-3b747c6b.webp",
+     "https://edge.osuper.com.br/yTxwsGGmqNtulxwWtfKWBraR2b4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-fac5cd47.webp",
+     "https://edge.osuper.com.br/sl_F81kOEJmKsq5v5-doAMRMB2c=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-c0321bbe.webp",
+     "https://edge.osuper.com.br/5bZwZAiofd35s9Rc4x__XMgk0XA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-f0cf465c.webp",
+     "https://edge.osuper.com.br/QFJgLsT8c1RCGVxmRGVBMKPY9ZY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-6d64cc23.webp",
+     "https://edge.osuper.com.br/9bkg9upUbfHg6bD1a6gHbAftm4U=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-4bc7d25c.webp",
+     "https://edge.osuper.com.br/RgRgsxufjwTQCbQJE1r4kOUmyCQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-ec3aecb0.webp",
+     "https://edge.osuper.com.br/IeHEGjcFM5kspfQ0FSjJ3D3iRGE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-ede653f7.webp",
+     "https://edge.osuper.com.br/eCBWUVDXeMapCVh5IlOiPQMGUww=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-b8ee8884.webp",
+     "https://edge.osuper.com.br/kcAPy_6ueyv_aMcBcfDGR6KzmZ4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-8d137ca9.webp",
+     "https://edge.osuper.com.br/xPekkUzJmc7LfkcG5tfbCRdgx60=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8950dc1ee15f34f90d/360/12781-198ab4ba.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Italac <b>Semi</b> <b>Desnatado</b> Cx 1l"
+     ]
+    },
+    "_id": "p6146988s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6141914",
+    "categories": [],
+    "brandName": "Paulista",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/9KTYOHON61D2Y_xzhyGOaND-89A=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/9f050c15-leitelongavidaintegralpaulista1litro.webp",
+    "name": "Leite Longa Vida Paulista Integral Cx 1l",
+    "pricing": {
+     "price": 5.99,
+     "promotion": false,
+     "promotionalPrice": 5.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 12346,
+     "max": 48,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-paulista-integral-cx-1l",
+    "tags": [
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 827,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Paulista <b>Integral</b> Cx 1l"
+     ]
+    },
+    "_id": "p6141914s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6143814",
+    "categories": [],
+    "brandName": "Paulista",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/r7aSioKcSLx3LtF-8zdWSw_RjNs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-ecommerce-andorinha.s3.sa-east-1.amazonaws.com/fad0fdba-capia-de-capia-de-presutos-queijos-2.png",
+    "name": "Leite Longa Vida Paulista Semi Desnatado Cx 1l",
+    "pricing": {
+     "price": 5.99,
+     "promotion": false,
+     "promotionalPrice": 5.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 4836,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-paulista-semi-desnatado-cx-1l",
+    "tags": [
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 552,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Paulista <b>Semi</b> <b>Desnatado</b> Cx 1l"
+     ]
+    },
+    "_id": "p6143814s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6158892",
+    "categories": [
+     "store1327:Bebês e Crianças",
+     "store1327:Bebês e Crianças > Alimentação do Bebê",
+     "store1327:Bebês e Crianças > Alimentação do Bebê > Leites Integrais para Bebês",
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Desnatados"
+    ],
+    "brandName": "Ninho",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/TZzQnfmkK6qasNS3jyEYKYNoKgg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/123889-d294f2b2.webp",
+    "name": "Leite Longa Vida Ninho Levinho Semi Desnatado Cx 1l",
+    "pricing": {
+     "price": 7.49,
+     "promotion": false,
+     "promotionalPrice": 7.49,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2550,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-ninho-levinho-semi-desnatado-cx-1l",
+    "tags": [
+     "childhood",
+     "childhood",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 600,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/UjX5eF6_sr1Wg8b52A_iKIG_yZs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388969a2d6f4-0.webp",
+     "https://edge.osuper.com.br/0-XtQmcx79vdhvDeTeErT4_uT1g=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388997a41ee8-1.webp",
+     "https://edge.osuper.com.br/VpHqHdgqnIgjx7hguAD6b3x8feE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889bcf49e8e-2.webp",
+     "https://edge.osuper.com.br/tq6T3CkLALRfqXQyn3TYZ_PMd5c=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889972b403a-3.webp",
+     "https://edge.osuper.com.br/RcrWsyvtRLGeWwck9pXgOJ825Ns=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889236b15ae-4.webp",
+     "https://edge.osuper.com.br/k_kusBbuXSd3Ug1xIzOXlIE32f0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889de09262e-5.webp",
+     "https://edge.osuper.com.br/Q_1q8CAQS0UMl8vU3yegd0kKe0U=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889364aabf5-6.webp",
+     "https://edge.osuper.com.br/1Pax0XVX39rmZ_iywMZB8wEc1hw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238896cc6f73a-7.webp",
+     "https://edge.osuper.com.br/Zv0aUSIwEmzY0aPLIYShd80w688=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889d53e5270-8.webp",
+     "https://edge.osuper.com.br/klieWapLFXyN6e4Hoi2_URMVhrs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388902e86344-9.webp",
+     "https://edge.osuper.com.br/LsClYE39rMKj2WX3O2Zgj6N6an8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889417ad226-10.webp",
+     "https://edge.osuper.com.br/LM0dLkOjkzCovIVLnC6r4aXbkeQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889e7e3d00e-11.webp",
+     "https://edge.osuper.com.br/wMwwX5W5JzCOQoKxZP-rPafYwsw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889537d8226-12.webp",
+     "https://edge.osuper.com.br/bjGAp1Wxqih74fcqNZWJLc5QkvQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388950780533-13.webp",
+     "https://edge.osuper.com.br/BUtRKFlZ2b2F4_4cd4jxPaMrnAw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889572e55c3-14.webp",
+     "https://edge.osuper.com.br/hZ8ybh9nQHVpq_k7p5qoM9aP1wI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388950ac6bf8-15.webp",
+     "https://edge.osuper.com.br/zLhXQCYQbVaIjpQI9jk7FEDrefc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238898b15adab-16.webp",
+     "https://edge.osuper.com.br/2A98FQP9xamaZ_IhT1mvoi-OoL8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388951d13c3a-17.webp",
+     "https://edge.osuper.com.br/yEBJ0OoLsYb-rHqce9Wc7InL-lI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889425ca478-18.webp",
+     "https://edge.osuper.com.br/wUo8sQ9s34mNtbqVaUpjy9dyU_k=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889d3bfd517-19.webp",
+     "https://edge.osuper.com.br/IPVVhSiiOga8COvWRD60xtY_iAg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238899fd7e269-20.webp",
+     "https://edge.osuper.com.br/VBYscDH_teZtERCs4qILB5zzG28=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889b571dd86-21.webp",
+     "https://edge.osuper.com.br/cwgMunstmi5kqzID7wSq8fq8vOo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238890c53a647-22.webp",
+     "https://edge.osuper.com.br/L1k4WQIqYVFpE9Pq3Z27Q3bGOzU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889be903240-23.webp",
+     "https://edge.osuper.com.br/wHnHvrpiRSzGc-hfZngm4wa_RE0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889fc8a41ab-24.webp",
+     "https://edge.osuper.com.br/Kfz1aG5zDUNmfQO1YRYy18qlJQQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889d77f66ee-25.webp",
+     "https://edge.osuper.com.br/kFSAtzdE6GOftqLvX-GtYySSS8Q=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889250d185c-26.webp",
+     "https://edge.osuper.com.br/hdT6DRIn1JgnlfZisSaat1ESDxs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388961dcc2af-27.webp",
+     "https://edge.osuper.com.br/n3B_sbKRGcxi7r6mNHn5WggjSX0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889f6fbf888-28.webp",
+     "https://edge.osuper.com.br/t9hlf1itvN7GkWf5MrkAhDirkrw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238894e8e22bf-29.webp",
+     "https://edge.osuper.com.br/7-FTt3_dr5JEuUoQRGj6nZKrB-o=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238897d259f04-30.webp",
+     "https://edge.osuper.com.br/FSUjYiXfvsbaxJ3OyEEIcHk4W3E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/123889496ba55a-31.webp",
+     "https://edge.osuper.com.br/CdUluE84y0amOg-XthpXA8vHElw=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/1238892ddd63dc-32.webp",
+     "https://edge.osuper.com.br/w7IMdamv-e26qNJrqc-bsgfzbGQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388920813b1c-33.webp",
+     "https://edge.osuper.com.br/QRP2DNAXOBbeRpLPZnRoOUxDqrU=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388900645808-34.webp",
+     "https://edge.osuper.com.br/E4xtXDpuOIheJthp2J0q2rNN9D0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e2841e8b59d919e05836f902/360/12388973f64b8d-35.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida Ninho Levinho <b>Semi</b> <b>Desnatado</b> Cx 1l"
+     ]
+    },
+    "_id": "p6158892s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6156544",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Integral"
+    ],
+    "brandName": "Shefa",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/0rJ7DukKbNwf5F6hx3RMbaUkiNk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108850d91be45d31f203/153261-32f9be8f.jpg",
+    "name": "Leite Longa Vida Integral Shefa Garrafa 1LT",
+    "pricing": {
+     "price": 5.99,
+     "promotion": false,
+     "promotionalPrice": 5.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 2703,
+     "max": 48,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-integral-shefa-garrafa-1lt",
+    "tags": [
+     "integral",
+     "integral",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 730,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Integral</b> Shefa Garrafa 1LT"
+     ]
+    },
+    "_id": "p6156544s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6125885",
+    "categories": [
+     "store1327:Bebês e Crianças",
+     "store1327:Bebês e Crianças > Alimentação do Bebê",
+     "store1327:Bebês e Crianças > Alimentação do Bebê > Leites Integrais para Bebês",
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Leite em Pó e Fórmulas Infantis"
+    ],
+    "brandName": "Ninho",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/mX1DK2wuTyfR5VA712OERjKNTlI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/135173-b2a22464.webp",
+    "name": "Leite Pó Ninho Integral Lt 380g",
+    "pricing": {
+     "price": 22.99,
+     "promotion": false,
+     "promotionalPrice": 22.99,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 1084,
+     "max": 24,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-po-ninho-integral-lt-380g",
+    "tags": [
+     "integral",
+     "childhood",
+     "mercearia",
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 610,
+    "threeDimensionalImage": [
+     "https://edge.osuper.com.br/l8TWifolwOjLJRyWMrru2tTWHJs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173b25c2e59-0.webp",
+     "https://edge.osuper.com.br/0QfkkOMY3sDunbYtAeCVNtamNJs=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351731198640d-1.webp",
+     "https://edge.osuper.com.br/K20bLjD-TjJ_OBGP-uLFaJ0edKg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173e656d511-2.webp",
+     "https://edge.osuper.com.br/SoIgh3NUCb7Bg748WZ3goIVnrBA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351736cbc2b00-3.webp",
+     "https://edge.osuper.com.br/cPGHpZ76uOW-CqQ-AJjuIHHxMZ4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351735a66b729-4.webp",
+     "https://edge.osuper.com.br/T9YeZ1AuH7A05MXCG4q_NTQbTWM=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f214be7a-5.webp",
+     "https://edge.osuper.com.br/Ps2uxo3Z2hZpNn2RltJqltAUII8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173bbd1d4d0-6.webp",
+     "https://edge.osuper.com.br/GQnSFaZXEpIl5DErTwlMOOgaqqQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351736afac3ef-7.webp",
+     "https://edge.osuper.com.br/kj7wyfguzqgdObgkrGcf8DXacwc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351730e1d1711-8.webp",
+     "https://edge.osuper.com.br/l3clQiU3UAOYCxl9b0msv1Kkv2w=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173ae1b61f1-9.webp",
+     "https://edge.osuper.com.br/12IrBrEtszXXwZJggRzKfs6Ohj4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351736d7163ea-10.webp",
+     "https://edge.osuper.com.br/X3LeCr1xmlOInjVpVMDfcIETQtE=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173dd796e62-11.webp",
+     "https://edge.osuper.com.br/3H9XY0Cwo0c4-tZL7ZnD-KzbcDk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173e932c69e-12.webp",
+     "https://edge.osuper.com.br/gi1OmpZKlWWOy8GyOAQcKHRNfh4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351730c89afff-13.webp",
+     "https://edge.osuper.com.br/yCE97Ho6MycGZEaheUqziDBBkuc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173bf130387-14.webp",
+     "https://edge.osuper.com.br/WVUOVQrLHj3R8xA7m80ostwezus=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173c81910c2-15.webp",
+     "https://edge.osuper.com.br/OPqDadaFQX2R6LbInzNNsSqVqRQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173ed41436b-16.webp",
+     "https://edge.osuper.com.br/qoWoHqWYlsNBXc3cI5us9IF1N8Y=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/13517356774f15-17.webp",
+     "https://edge.osuper.com.br/kBGXSPoSTCphDkZhERGstwWyOmI=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173a883778d-18.webp",
+     "https://edge.osuper.com.br/XpIZaNGYTOghpUux9QRE3JVizm4=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f9ff37de-19.webp",
+     "https://edge.osuper.com.br/R7uTALW7aLWBStNmO2mAAUCAMEg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173a858f7e3-20.webp",
+     "https://edge.osuper.com.br/F3XJzgO1183oWg8PxGpCyZweqvc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f9ce0eb7-21.webp",
+     "https://edge.osuper.com.br/EazvWCLhvJrB0Z3YjiJSaZOP2vQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f985cf8c-22.webp",
+     "https://edge.osuper.com.br/Vp-8Cjo_r7Y--RIlgwzDQAOhyDQ=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351736192fa2d-23.webp",
+     "https://edge.osuper.com.br/Mf__8SHV89l4dIY_pa-gD1CDI8E=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351731a3d2d6d-24.webp",
+     "https://edge.osuper.com.br/O6Lbqf8M_TTqImNVS88043nR2Kk=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173b7d5f98e-25.webp",
+     "https://edge.osuper.com.br/Azz9Iksp1Q2A6fDBTu8e9Bk5_NA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/13517302c2beb4-26.webp",
+     "https://edge.osuper.com.br/T2uLfQznHvz7nLLaLfKAOD-0fMo=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173768e1d64-27.webp",
+     "https://edge.osuper.com.br/CdEGJm6l3Ji29LWalZHnLcXr97M=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351737823bd83-28.webp",
+     "https://edge.osuper.com.br/E1PDgQiPxMrHVvWTmTLDcGayEK0=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f2dbb345-29.webp",
+     "https://edge.osuper.com.br/8TFCfz3pQMOYjQVmV3ZMwXnQlUg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/13517326709fd7-30.webp",
+     "https://edge.osuper.com.br/sTcfpAftOErSU_CXE-VRmHOwuqA=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173c3b0a057-31.webp",
+     "https://edge.osuper.com.br/TxHdt9PafXK_VmIj_nBQWk97vE8=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173f0be8803-32.webp",
+     "https://edge.osuper.com.br/1_uwYDgfv9Fu89nnPTDKHzLiF4g=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173a3ad2187-33.webp",
+     "https://edge.osuper.com.br/PUYAbmI2L5-2-8RkHDSpl3vtBrY=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/1351733e028ac5-34.webp",
+     "https://edge.osuper.com.br/BtD2-Fb0qrbVWootBJWGyEJfZAg=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://produtos-osuper.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284178958dc1be75a3afe0d/360/135173355e589f-35.webp"
+    ],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Pó Ninho <b>Integral</b> Lt 380g"
+     ]
+    },
+    "_id": "p6125885s1327",
+    "installmentGroup": null
+   },
+   {
+    "id": "6139953",
+    "categories": [
+     "store1327:Mercearia",
+     "store1327:Mercearia > Leites",
+     "store1327:Mercearia > Leites > Semidesnatado"
+    ],
+    "brandName": "Lider",
+    "categoriesSlugs": [],
+    "flags": [],
+    "content": null,
+    "contentUnit": null,
+    "description": "",
+    "image": "https://edge.osuper.com.br/GP55HDAgG6gnC0RobG8Jt8EsFPc=/fit-in/400x400/filters:fill(FFFFFF):background_color(white)/https://osuper-product-vault.s3.sa-east-1.amazonaws.com/934f78e66b9c78d0e284108c5ed51ce55a32fa05/140851-68e89694.jpg",
+    "name": "Leite Longa Vida Semidesnatado Lider 1LT",
+    "pricing": {
+     "price": 5.29,
+     "promotion": false,
+     "promotionalPrice": 5.29,
+     "discount": 0,
+     "store": 1327
+    },
+    "quantity": {
+     "fraction": 1,
+     "inStock": 9782,
+     "max": 36,
+     "maxCompany": null,
+     "maxPromotion": null,
+     "maxPersona": null,
+     "min": 1,
+     "sellByWeightAndUnit": false
+    },
+    "personas": [],
+    "saleUnit": "UN",
+    "slug": "leite-longa-vida-semidesnatado-lider-1lt",
+    "tags": [
+     "mercearia basica"
+    ],
+    "type": "PRODUCT",
+    "promotions": null,
+    "customerPromotion": null,
+    "personaPromotions": null,
+    "cashbacks": null,
+    "paymentPromotions": null,
+    "salesCount": 1268,
+    "threeDimensionalImage": [],
+    "salesPerStore": null,
+    "configurations": {
+     "enableMaturitySelection": false,
+     "displayExpirationDate": false,
+     "store": 1327,
+     "nextToExpirationDate": false,
+     "promotedOnStore": false
+    },
+    "hasMore": true,
+    "sponsored": false,
+    "nextToExpirationDate": false,
+    "highlighted": false,
+    "showThreeDimensionalMiniature": false,
+    "highlight": {
+     "name.term": [
+      "<b>Leite</b> Longa Vida <b>Semidesnatado</b> Lider 1LT"
+     ]
+    },
+    "_id": "p6139953s1327",
+    "installmentGroup": null
+   }
+  ],
+  "total": 140,
+  "nextFrom": 20,
+  "extraData": {
+   "categories": [
+    {
+     "doc_count": 87,
+     "key": "store1327:Mercearia"
+    },
+    {
+     "doc_count": 58,
+     "key": "store1327:Mercearia > Leites"
+    },
+    {
+     "doc_count": 29,
+     "key": "store1327:Mercearia > Leites > Leite em Pó e Fórmulas Infantis"
+    },
+    {
+     "doc_count": 16,
+     "key": "store1327:Laticínios e Frios"
+    },
+    {
+     "doc_count": 14,
+     "key": "store1327:Laticínios e Frios > Leites"
+    },
+    {
+     "doc_count": 13,
+     "key": "store1327:Bebês e Crianças"
+    },
+    {
+     "doc_count": 13,
+     "key": "store1327:Bebês e Crianças > Alimentação do Bebê"
+    },
+    {
+     "doc_count": 13,
+     "key": "store1327:Bebês e Crianças > Alimentação do Bebê > Leites Integrais para Bebês"
+    },
+    {
+     "doc_count": 12,
+     "key": "store1327:Mercearia > Leites > Integral"
+    },
+    {
+     "doc_count": 9,
+     "key": "store1327:Laticínios e Frios > Leites > Especiais"
+    },
+    {
+     "doc_count": 9,
+     "key": "store1327:Mercearia > Leites > Desnatados"
+    },
+    {
+     "doc_count": 8,
+     "key": "store1327:Petshop"
+    },
+    {
+     "doc_count": 8,
+     "key": "store1327:Petshop > Alimentos para Cães"
+    },
+    {
+     "doc_count": 7,
+     "key": "store1327:Laticínios e Frios > Leites > Leites Integrais"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Mercearia > Cafés"
+    },
+    {
+     "doc_count": 6,
+     "key": "store1327:Mercearia > Leites > Semidesnatado"
+    },
+    {
+     "doc_count": 5,
+     "key": "store1327:Mercearia > Cafés > Café com Leite"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Laticínios e Frios > Leites > Leites Semidesnatado"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Mercearia > Biscoitos Doces"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Mercearia > Bomboniere"
+    },
+    {
+     "doc_count": 4,
+     "key": "store1327:Padaria e Confeitaria"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Laticínios e Frios > Leites > Leites Desnatados"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Biscoitos Doces > Rosquinhas"
+    },
+    {
+     "doc_count": 3,
+     "key": "store1327:Mercearia > Pães Industrializados"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Bebidas não Alcoólicas"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Bebidas não Alcoólicas > Vegetais e Mistas"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Higiene e Beleza"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Higiene e Beleza > Desodorantes"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Laticínios e Frios > Leites > Leites sem Lactose"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Bomboniere > Bombons"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Bomboniere > Outros"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Cafés > Café em Cápsula"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Cereais, Sucrilhos, Granolas e Cia"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Cereais, Sucrilhos, Granolas e Cia > Sucrilhos"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Leites > Leites Vegetais"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Mercearia > Pães Industrializados > Pão de Leite"
+    },
+    {
+     "doc_count": 2,
+     "key": "store1327:Petshop > Alimentos para Cães > Ração Úmida"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Doces e Sobremesas Geladas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Frutas, Legumes e Vegetais"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Frutas, Legumes e Vegetais > Frutas Congeladas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Congelados > Pratos Prontos Congelados"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Higiene e Beleza > Cuidados com as Mãos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Higiene e Beleza > Cuidados com as Mãos > Hidratante para as Mãos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Higiene e Beleza > Desodorantes > Desodorantes Aerosol"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Iogurte e Bebidas Lácteas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Iogurte e Bebidas Lácteas > Leites Fermentados"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Queijos"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Laticínios e Frios > Queijos > Queijo Minas"
+    },
+    {
+     "doc_count": 1,
+     "key": "store1327:Mercearia > Biscoitos Doces > Biscoito Doces e Recheados"
+    }
+   ],
+   "brands": [
+    {
+     "key": "ninho",
+     "doc_count": 14
+    },
+    {
+     "key": "piracanjuba",
+     "doc_count": 11
+    },
+    {
+     "key": "italac",
+     "doc_count": 6
+    },
+    {
+     "key": "itambe",
+     "doc_count": 6
+    },
+    {
+     "key": "jussara",
+     "doc_count": 6
+    },
+    {
+     "key": "3 coracoes",
+     "doc_count": 5
+    },
+    {
+     "key": "fazenda bela vista",
+     "doc_count": 5
+    },
+    {
+     "key": "la serenissima",
+     "doc_count": 5
+    },
+    {
+     "key": "molico",
+     "doc_count": 5
+    },
+    {
+     "key": "parmalat",
+     "doc_count": 5
+    },
+    {
+     "key": "paulista",
+     "doc_count": 5
+    },
+    {
+     "key": "xando",
+     "doc_count": 5
+    },
+    {
+     "key": "lider",
+     "doc_count": 4
+    },
+    {
+     "key": "shefa",
+     "doc_count": 4
+    },
+    {
+     "key": "pedigree",
+     "doc_count": 3
+    },
+    {
+     "key": "tirol",
+     "doc_count": 3
+    },
+    {
+     "key": "alpo",
+     "doc_count": 2
+    },
+    {
+     "key": "aptamil",
+     "doc_count": 2
+    },
+    {
+     "key": "dog chow",
+     "doc_count": 2
+    },
+    {
+     "key": "jazam",
+     "doc_count": 2
+    },
+    {
+     "key": "leite de rosas",
+     "doc_count": 2
+    },
+    {
+     "key": "leitesol",
+     "doc_count": 2
+    },
+    {
+     "key": "liane",
+     "doc_count": 2
+    },
+    {
+     "key": "mucilon",
+     "doc_count": 2
+    },
+    {
+     "key": "panco",
+     "doc_count": 2
+    },
+    {
+     "key": "serramar",
+     "doc_count": 2
+    },
+    {
+     "key": "suprasoy",
+     "doc_count": 2
+    },
+    {
+     "key": "andorinha",
+     "doc_count": 1
+    },
+    {
+     "key": "aptanutri",
+     "doc_count": 1
+    },
+    {
+     "key": "arcor",
+     "doc_count": 1
+    },
+    {
+     "key": "atdc",
+     "doc_count": 1
+    },
+    {
+     "key": "bom destino",
+     "doc_count": 1
+    },
+    {
+     "key": "caprilat",
+     "doc_count": 1
+    },
+    {
+     "key": "crisp",
+     "doc_count": 1
+    },
+    {
+     "key": "dr peanut",
+     "doc_count": 1
+    },
+    {
+     "key": "elege",
+     "doc_count": 1
+    },
+    {
+     "key": "franui",
+     "doc_count": 1
+    },
+    {
+     "key": "m&ms",
+     "doc_count": 1
+    },
+    {
+     "key": "mabel",
+     "doc_count": 1
+    },
+    {
+     "key": "melitta",
+     "doc_count": 1
+    },
+    {
+     "key": "milnutri",
+     "doc_count": 1
+    },
+    {
+     "key": "mococa",
+     "doc_count": 1
+    },
+    {
+     "key": "montevergine",
+     "doc_count": 1
+    },
+    {
+     "key": "neslac",
+     "doc_count": 1
+    },
+    {
+     "key": "paderri",
+     "doc_count": 1
+    },
+    {
+     "key": "possible",
+     "doc_count": 1
+    },
+    {
+     "key": "puro leite",
+     "doc_count": 1
+    },
+    {
+     "key": "seven boys",
+     "doc_count": 1
+    },
+    {
+     "key": "soy",
+     "doc_count": 1
+    },
+    {
+     "key": "vapza",
+     "doc_count": 1
+    }
+   ],
+   "tags": [
+    {
+     "key": "mercearia basica",
+     "doc_count": 81
+    },
+    {
+     "key": "mercearia",
+     "doc_count": 35
+    },
+    {
+     "key": "integral",
+     "doc_count": 30
+    },
+    {
+     "key": "zero lactose",
+     "doc_count": 22
+    },
+    {
+     "key": "childhood",
+     "doc_count": 11
+    },
+    {
+     "key": "hora do cafe",
+     "doc_count": 5
+    },
+    {
+     "key": "petshop",
+     "doc_count": 5
+    },
+    {
+     "key": "caes",
+     "doc_count": 4
+    },
+    {
+     "key": "congelado",
+     "doc_count": 1
+    },
+    {
+     "key": "gatos",
+     "doc_count": 1
+    },
+    {
+     "key": "light",
+     "doc_count": 1
+    },
+    {
+     "key": "producao propria",
+     "doc_count": 1
+    },
+    {
+     "key": "resfriado",
+     "doc_count": 1
+    },
+    {
+     "key": "tudo fresquinho todos os dias",
+     "doc_count": 1
+    },
+    {
+     "key": "vegetal",
+     "doc_count": 1
+    }
+   ],
+   "max_price": 139.89999389648438,
+   "min_price": 2.2899999618530273
+  },
+  "hasNext": true,
+  "hasPrevious": false
+ }
+}

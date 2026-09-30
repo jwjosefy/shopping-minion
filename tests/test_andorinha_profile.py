@@ -38,7 +38,7 @@ def test_profile_requires_a_visible_browser_and_a_page_transport():
 
 def test_atum_is_sold_by_unit_with_price_and_stock(spec):
     found = candidates(spec, "search-atum.json")
-    assert len(found) == 12
+    assert len(found) == 20
     tuna = next(c for c in found if c.name == "Atum Sólido Coqueiro Natural 170g")
     assert tuna.unit_of_sale.kind == "unit" and tuna.brand == "Coqueiro"
     assert str(tuna.price) == "13.98" and tuna.in_stock

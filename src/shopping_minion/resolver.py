@@ -16,7 +16,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
-from shopping_minion.config import ChatRole
+from shopping_minion.config import ChatRole, ResolverRole
 from shopping_minion.contracts import (
     Alternative,
     Candidate,
@@ -251,3 +251,15 @@ def _clamp(p: float) -> float:
 
 def build_backend(role: ChatRole, name: str) -> LLMBackend:
     return LLMBackend(chat_model(role), name)
+
+
+def build_resolver_backend(role: ResolverRole) -> DecisionBackend:
+    """The configured decision backend (ADR-0010): haiku (LLM), julia1 (local) or jev (later)."""
+    if role.backend == "haiku":
+        return build_backend(role.chat_role(), f"haiku:{role.model}")
+    if role.backend == "julia1":
+        from shopping_minion.resolver_julia import Julia1Backend
+
+        assert role.path is not None
+        return Julia1Backend(role.path, role.device, none_option=role.none_option)
+    raise NotImplementedError("the Jev backend needs early access, which we don't have yet")
