@@ -4,7 +4,8 @@
     dotenvx run -- uv run python evals/harness/resolver_eval.py --model z-ai/glm-5.3-flash
 
 Uses the resolver role from config/models.yaml, with the same command-line overrides as
-intake_eval.py. Candidates come from recorded store responses, so the store isn't touched.
+intake_eval.py. Candidates are recorded lists in evals/fixtures/candidates/, so the store isn't
+touched.
 Reports accuracy, calibration (confidence when right vs. wrong), latency and the final status.
 """
 
@@ -20,14 +21,14 @@ from pathlib import Path
 
 import yaml
 
-from shopping_minion.catalog.adapter import parse_results, rank
-from shopping_minion.catalog.profile import load_profile
+from shopping_minion.catalog.ranking import rank
 from shopping_minion.config import ResolverRole, load_models_config
-from shopping_minion.contracts import ConfirmedItem, DecisionStatus
+from shopping_minion.contracts import Candidate, ConfirmedItem, DecisionStatus
 from shopping_minion.preferences import Preferences
 from shopping_minion.resolver import build_resolver_backend, resolve
 
 CASES = Path("evals/fixtures/resolver-cases.yaml")
+CANDIDATES = Path("evals/fixtures/candidates")
 OUT_DIR = Path("data/evals")
 
 
@@ -83,19 +84,13 @@ def main() -> None:
     )
 
     spec = yaml.safe_load(CASES.read_text(encoding="utf-8"))
-    profile = load_profile(spec["store"])
-    assert profile.search is not None
     preferences = Preferences({})  # repeatable: no personal preferences in evals
 
     rows = []
     for case in spec["cases"]:
-        fixture = json.loads(
-            (Path("profiles") / spec["store"] / "fixtures" / case["fixture"]).read_text(
-                encoding="utf-8"
-            )
-        )
+        recorded = json.loads((CANDIDATES / case["candidates"]).read_text(encoding="utf-8"))
         item = ConfirmedItem.model_validate(case["item"])
-        candidates = rank(item.name, parse_results(profile.search, fixture["payload"]))
+        candidates = rank(item.name, [Candidate.model_validate(c) for c in recorded["candidates"]])
         started = time.perf_counter()
         resolution = resolve(item, candidates, preferences, backend)
         seconds = time.perf_counter() - started

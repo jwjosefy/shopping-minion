@@ -195,6 +195,3 @@ class RunReport(Contract):
         for item in self.items:
             counts[item.decision.status] += 1
         return counts
-
-
-# Store knowledge (SiteProfile) lives in shopping_minion.catalog.profile (ADR-0006).

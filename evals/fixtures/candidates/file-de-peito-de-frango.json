@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "filé de peito de frango",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6157177",
+   "name": "Filé De Peito Frango Resf Kg",
+   "brand": "Frigo Medeiros",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 100.0,
+    "pack_size": null
+   },
+   "price": "27.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Fil%C3%A9%20De%20Peito%20Frango%20Resf%20Kg"
+  },
+  {
+   "id": "6134669",
+   "name": "Frango Filé Peito Sadia Pacote 1KG",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "22.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Frango%20Fil%C3%A9%20Peito%20Sadia%20Pacote%201KG"
+  },
+  {
+   "id": "6134756",
+   "name": "Filezinho Sassami Sadia Congelado 1KG",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "18.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20Sassami%20Sadia%20Congelado%201KG"
+  },
+  {
+   "id": "6136009",
+   "name": "Filezinho Seara Peito Frango Sassami 1KG",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "22.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20Seara%20Peito%20Frango%20Sassami%201KG"
+  },
+  {
+   "id": "6134745",
+   "name": "Filé de Peito Frango Sadia 1KG",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "24.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Fil%C3%A9%20de%20Peito%20Frango%20Sadia%201KG"
+  },
+  {
+   "id": "6132978",
+   "name": "Filezinho de Frango Perdigão Pacote 800G",
+   "brand": "Perdigao",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "19.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20de%20Frango%20Perdig%C3%A3o%20Pacote%20800G"
+  },
+  {
+   "id": "6140902",
+   "name": "Peito De Frango S/Osso Resf Kg",
+   "brand": "Andorinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 900.0,
+    "pack_size": null
+   },
+   "price": "23.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Peito%20De%20Frango%20S%2FOsso%20Resf%20Kg"
+  },
+  {
+   "id": "6132977",
+   "name": "Frango Congelado Perdigão Filé de Peito Embalagem 800G",
+   "brand": "Perdigao",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "18.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Frango%20Congelado%20Perdig%C3%A3o%20Fil%C3%A9%20de%20Peito%20Embalagem%20800G"
+  },
+  {
+   "id": "6120795",
+   "name": "Filezinho Sassami Lar Empanado 700G",
+   "brand": "Lar",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "19.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20Sassami%20Lar%20Empanado%20700G"
+  },
+  {
+   "id": "6133161",
+   "name": "Filé Peito De Frango Bifes Cong Sadia 800g",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "25.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Fil%C3%A9%20Peito%20De%20Frango%20Bifes%20Cong%20Sadia%20800g"
+  },
+  {
+   "id": "6879049",
+   "name": "Filezinho De Frango Cong Seara Bdj 1kg",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "23.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20De%20Frango%20Cong%20Seara%20Bdj%201kg"
+  },
+  {
+   "id": "6135989",
+   "name": "Frango Congelado Seara Filé de Peito 1KG",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "19.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Frango%20Congelado%20Seara%20Fil%C3%A9%20de%20Peito%201KG"
+  },
+  {
+   "id": "6136188",
+   "name": "Filezinho De Frango Temperado Cong Seara Pct 1kg",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "28.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20De%20Frango%20Temperado%20Cong%20Seara%20Pct%201kg"
+  },
+  {
+   "id": "6135041",
+   "name": "Filezinho Sassami De Frango Cong Korin Pct 700g",
+   "brand": "Korin",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "45.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20Sassami%20De%20Frango%20Cong%20Korin%20Pct%20700g"
+  },
+  {
+   "id": "6135042",
+   "name": "Filé Peito De Frango Korin Pct Cortes Cong 700g",
+   "brand": "Korin",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "43.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Fil%C3%A9%20Peito%20De%20Frango%20Korin%20Pct%20Cortes%20Cong%20700g"
+  },
+  {
+   "id": "6133060",
+   "name": "Filezinho de Frango Sadia Marinado Congelado 1KG",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "27.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Filezinho%20de%20Frango%20Sadia%20Marinado%20Congelado%201KG"
+  },
+  {
+   "id": "6149974",
+   "name": "Peito De Frango C/Osso Resf Kg",
+   "brand": "Andorinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 900.0,
+    "pack_size": null
+   },
+   "price": "21.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Peito%20De%20Frango%20C%2FOsso%20Resf%20Kg"
+  },
+  {
+   "id": "6136174",
+   "name": "Frango Seara Dagranja Filé de Peito 1KG",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "29.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Frango%20Seara%20Dagranja%20Fil%C3%A9%20de%20Peito%201KG"
+  },
+  {
+   "id": "6149175",
+   "name": "Sobrecoxa De Frango Resf Kg",
+   "brand": "Andorinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Sobrecoxa%20De%20Frango%20Resf%20Kg"
+  },
+  {
+   "id": "6154989",
+   "name": "Coxa C/Sobrecoxa De Frango Resf Kg",
+   "brand": "Andorinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "15.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Coxa%20C%2FSobrecoxa%20De%20Frango%20Resf%20Kg"
+  }
+ ]
+}
