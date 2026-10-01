@@ -282,7 +282,7 @@ Every brief repeats these rules:
 | #   | Question       | Answer (Johann, 2026-10-01)                                             |
 | --- | -------------- | ----------------------------------------------------------------------- |
 | 1   | M1 review step | An edited `lista.yaml`. No review screen until M2.                      |
-| 2   | Jev model      | Pinned to `jev-1.13`, moved up on purpose.                              |
+| 2   | Jev model      | Pinned to `jev-1.13`, moved up on purpose. Superseded by §8.1: the API only accepts `jev-latest`. |
 | 3   | M1 items       | atum, papel higiênico, filé de peito de frango (with a quantity in kg). |
 | 4   | Account        | Johann's real account, logged in. He clears the cart afterwards.        |
 
