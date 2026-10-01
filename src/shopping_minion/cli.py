@@ -26,6 +26,23 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
     return 0
 
 
+def _login() -> int:
+    """Open the store, let Johann log in by hand, and save the session in .auth/."""
+    from shopping_minion.browser import BASE_URL, is_logged_in, open_browser, save_session
+
+    with open_browser() as (_browser, context):
+        page = context.new_page()
+        page.goto(BASE_URL)
+        print("A browser window opened on the store.")
+        print("Log in by hand in that window, then come back here and press Enter.")
+        input()
+        if is_logged_in(page) is not True:
+            print("The page still shows the logged-out header; nothing was saved.")
+            return 1
+        print(f"Session saved to {save_session(context)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="shopping-minion",
@@ -38,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     ocr.add_argument("-o", "--output", type=Path, help="write here instead of stdout")
     ocr.set_defaults(func=_cmd_ocr)
 
+    login = sub.add_parser("login", help="log in to the store by hand and save the session")
+    login.set_defaults(func=lambda _args: _login())
     return parser
 
 
