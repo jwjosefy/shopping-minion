@@ -1,0 +1,26 @@
+# The three M1 items, in the format `shopping-minion ocr` writes.
+# Run: shopping-minion run examples/lista-m1.yaml
+items:
+  - source_line: atum
+    name: atum
+    search_term: atum
+    constraints: []
+    brand: null
+    quantity: null
+    needs_review: false
+  - source_line: papel higiênico
+    name: papel higiênico
+    search_term: papel higiênico
+    constraints: []
+    brand: null
+    quantity: null
+    needs_review: false
+  - source_line: filé de peito de frango 1 kg
+    name: filé de peito de frango
+    search_term: file de peito de frango
+    constraints: []
+    brand: null
+    quantity:
+      value: 1
+      unit: kg
+    needs_review: false
