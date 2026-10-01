@@ -15,6 +15,7 @@ def make_item(name: str) -> Item:
 def make_decision(item: Item) -> Decision:
     candidate = Candidate(
         product_id="p1",
+        slug="atum",
         name="Atum",
         brand=None,
         price=Decimal("9.90"),

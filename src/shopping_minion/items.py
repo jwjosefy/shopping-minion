@@ -31,6 +31,7 @@ class Candidate(Contract):
     """One search result."""
 
     product_id: str
+    slug: str  # for /produtos/<id>/<slug> (LLD §7.2)
     name: str
     brand: str | None
     price: Decimal | None
