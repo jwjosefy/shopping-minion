@@ -81,6 +81,7 @@ Seen so far, as a starting list, not a commitment:
 - when Jev finds nothing that fits, no card is pre-selected, so Enter does nothing;
 - items with no results ("lanche infantil") could offer a new search term right there, instead of being skipped;
 - the CLI's empty Enter doesn't accept Jev's pick.
+- show M3's time and corrections report on the web app's done screen, not only in the terminal (LLD-M3 Q1).
 
 ## M6 — Julia-1 as a local decide backend ⬜
 
@@ -108,8 +109,8 @@ Constraints already known, for the design to answer:
 
 ## Questions resolved in review
 
-| # | Question | Answer (Johann, 2026-10-01) |
-|---|---|---|
-| 1 | M3's baseline | His estimate: over 1 h by hand online for 30–50+ items, 2–3 h for larger lists. In person: 2 h or more, plus checkout and loading and unloading the car. |
-| 2 | M4 order of sources | Johann has an idea and will write it up in a separate doc after M3. |
-| 3 | M5 timing | After M3. Johann will draft a doc with ideas. |
+| #   | Question            | Answer (Johann, 2026-10-01)                                                                                                                              |
+| --- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | M3's baseline       | His estimate: over 1 h by hand online for 30–50+ items, 2–3 h for larger lists. In person: 2 h or more, plus checkout and loading and unloading the car. |
+| 2   | M4 order of sources | Johann has an idea and will write it up in a separate doc after M3.                                                                                      |
+| 3   | M5 timing           | After M3. Johann will draft a doc with ideas.                                                                                                            |
