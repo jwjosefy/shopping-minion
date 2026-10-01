@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "atum",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6137677",
+   "name": "Atum Sólido Coqueiro Natural 170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20S%C3%B3lido%20Coqueiro%20Natural%20170g"
+  },
+  {
+   "id": "6137678",
+   "name": "Atum Sólido Coqueiro Óleo 170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20S%C3%B3lido%20Coqueiro%20%C3%93leo%20170g"
+  },
+  {
+   "id": "6131827",
+   "name": "Atum Sólido Gomes Da Costa Óleo 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20S%C3%B3lido%20Gomes%20Da%20Costa%20%C3%93leo%20170g"
+  },
+  {
+   "id": "6131829",
+   "name": "Atum Sólido Gomes Da Costa Natural 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20S%C3%B3lido%20Gomes%20Da%20Costa%20Natural%20170g"
+  },
+  {
+   "id": "6137675",
+   "name": "Atum Ralado Coqueiro Natural 170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.48",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Ralado%20Coqueiro%20Natural%20170g"
+  },
+  {
+   "id": "6131828",
+   "name": "Atum Ralado Gomes Da Costa Óleo 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Ralado%20Gomes%20Da%20Costa%20%C3%93leo%20170g"
+  },
+  {
+   "id": "6131830",
+   "name": "Atum Ralado Gomes Da Costa Natural 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Ralado%20Gomes%20Da%20Costa%20Natural%20170g"
+  },
+  {
+   "id": "6137676",
+   "name": "Atum Ralado Coqueiro Óleo170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.48",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Ralado%20Coqueiro%20%C3%93leo170g"
+  },
+  {
+   "id": "6131836",
+   "name": "Atum Gomes Da Costa em Óleo Defumado Lata 170G",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Gomes%20Da%20Costa%20em%20%C3%93leo%20Defumado%20Lata%20170G"
+  },
+  {
+   "id": "6131835",
+   "name": "Atum Gomes Da Costa Ralado Molho de Tomate Pìcante Lata 170G",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Gomes%20Da%20Costa%20Ralado%20Molho%20de%20Tomate%20P%C3%ACcante%20Lata%20170G"
+  },
+  {
+   "id": "6131834",
+   "name": "Atum Ralado Gomes Da Costa Tomate 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Ralado%20Gomes%20Da%20Costa%20Tomate%20170g"
+  },
+  {
+   "id": "6131825",
+   "name": "Atum Pedaço Óleo Gomes da Costa 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Peda%C3%A7o%20%C3%93leo%20Gomes%20da%20Costa%20170g"
+  },
+  {
+   "id": "8103017",
+   "name": "Atum Sólido Gomes Da Costa Tuna Pro 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "16.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20S%C3%B3lido%20Gomes%20Da%20Costa%20Tuna%20Pro%20170g"
+  },
+  {
+   "id": "6137674",
+   "name": "Atum Pedaço Coqueiro Óleo 170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Peda%C3%A7o%20Coqueiro%20%C3%93leo%20170g"
+  },
+  {
+   "id": "6137673",
+   "name": "Atum Pedaço Coqueiro Natural 170g",
+   "brand": "Coqueiro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Peda%C3%A7o%20Coqueiro%20Natural%20170g"
+  },
+  {
+   "id": "6131826",
+   "name": "Atum Pedaço Natural Gomes da Costa 170g",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Peda%C3%A7o%20Natural%20Gomes%20da%20Costa%20170g"
+  },
+  {
+   "id": "6153307",
+   "name": "Atum Vegetal Futuro 150g",
+   "brand": "Fazenda Futuro",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "26.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Vegetal%20Futuro%20150g"
+  },
+  {
+   "id": "6131838",
+   "name": "Salada de Atum Gomes Da Costa Lata 170G",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Salada%20de%20Atum%20Gomes%20Da%20Costa%20Lata%20170G"
+  },
+  {
+   "id": "6138700",
+   "name": "Atum Vegetal Plantas Superbom 140g",
+   "brand": "Superbom",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "17.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Atum%20Vegetal%20Plantas%20Superbom%20140g"
+  },
+  {
+   "id": "6131856",
+   "name": "Filé de Atum Gomes Da Costa Azeite E Alho Lata 125G",
+   "brand": "Gomes da Costa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "19.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Fil%C3%A9%20de%20Atum%20Gomes%20Da%20Costa%20Azeite%20E%20Alho%20Lata%20125G"
+  }
+ ]
+}

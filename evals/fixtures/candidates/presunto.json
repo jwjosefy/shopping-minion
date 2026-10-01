@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "presunto",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6133012",
+   "name": "Presunto Perdigão Cozido Fatiado 200G",
+   "brand": "Perdigao",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "11.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Perdig%C3%A3o%20Cozido%20Fatiado%20200G"
+  },
+  {
+   "id": "6151071",
+   "name": "Presunto Perdigão Fatiado Kg",
+   "brand": "Perdigao",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "29.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Perdig%C3%A3o%20Fatiado%20Kg"
+  },
+  {
+   "id": "6148210",
+   "name": "Presunto Aurora Fatiado Kg",
+   "brand": "Aurora",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "32.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Aurora%20Fatiado%20Kg"
+  },
+  {
+   "id": "6145618",
+   "name": "Presunto Sadia Fatiado/Pedaço Kg",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "29.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Sadia%20Fatiado%2FPeda%C3%A7o%20Kg"
+  },
+  {
+   "id": "6152762",
+   "name": "Presunto Seara Fatiado/Pedaço Kg",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "29.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Seara%20Fatiado%2FPeda%C3%A7o%20Kg"
+  },
+  {
+   "id": "6131724",
+   "name": "Presunto Fat Aurora 180g",
+   "brand": "Aurora",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Fat%20Aurora%20180g"
+  },
+  {
+   "id": "6134342",
+   "name": "Snack Panetini Eqlibri Presunto Defumado 40G",
+   "brand": "Eqlibri",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Snack%20Panetini%20Eqlibri%20Presunto%20Defumado%2040G"
+  },
+  {
+   "id": "6133203",
+   "name": "Presunto Sadia S/Capa Fatiado 180g",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "11.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Sadia%20S%2FCapa%20Fatiado%20180g"
+  },
+  {
+   "id": "6141825",
+   "name": "Presunto de Soja Goshen Fatiado Embalagem 200G",
+   "brand": "Veggie",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "21.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20de%20Soja%20Goshen%20Fatiado%20Embalagem%20200G"
+  },
+  {
+   "id": "6133232",
+   "name": "Presunto Filé Mignon Sadia Fatiado 180g",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "11.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Fil%C3%A9%20Mignon%20Sadia%20Fatiado%20180g"
+  },
+  {
+   "id": "6145015",
+   "name": "Presunto Aurora Peça Kg",
+   "brand": "Aurora",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "25.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Aurora%20Pe%C3%A7a%20Kg"
+  },
+  {
+   "id": "6147012",
+   "name": "Presunto Sadia Peça Kg",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "28.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Sadia%20Pe%C3%A7a%20Kg"
+  },
+  {
+   "id": "6147451",
+   "name": "Presunto Seara Royal Fatiado Kg",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "79.98",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Seara%20Royal%20Fatiado%20Kg"
+  },
+  {
+   "id": "6140704",
+   "name": "Presunto Sadia Royale Fatiado Kg",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "98.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Sadia%20Royale%20Fatiado%20Kg"
+  },
+  {
+   "id": "6144475",
+   "name": "Presunto Sadia Royale Peça Kg",
+   "brand": "Sadia",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "79.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Sadia%20Royale%20Pe%C3%A7a%20Kg"
+  },
+  {
+   "id": "6698825",
+   "name": "Presunto Alemão Seara Gourmet Fatiado 100g",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "17.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Alem%C3%A3o%20Seara%20Gourmet%20Fatiado%20100g"
+  },
+  {
+   "id": "6698556",
+   "name": "Presunto Seara Fatiado150g",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "4.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Seara%20Fatiado150g"
+  },
+  {
+   "id": "6698823",
+   "name": "Presunto Royal Seara Gourmet Fatiado 100g",
+   "brand": "Seara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "17.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Presunto%20Royal%20Seara%20Gourmet%20Fatiado%20100g"
+  },
+  {
+   "id": "6134614",
+   "name": "Salgadinhos Fandangos Presunto 35g",
+   "brand": "Fandangos",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "4.39",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Salgadinhos%20Fandangos%20Presunto%2035g"
+  },
+  {
+   "id": "6134616",
+   "name": "Salgadinhos Fandangos Presunto 160g",
+   "brand": "Fandangos",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Salgadinhos%20Fandangos%20Presunto%20160g"
+  }
+ ]
+}

@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "feijão",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6137385",
+   "name": "Feijão Carioca Tipo 1 Camil Pacote 1KG",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.69",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Tipo%201%20Camil%20Pacote%201KG"
+  },
+  {
+   "id": "6152480",
+   "name": "Feijão Carioca Tipo 1 Kicaldo Pacote 1kg",
+   "brand": "Kicaldo",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Tipo%201%20Kicaldo%20Pacote%201kg"
+  },
+  {
+   "id": "6148629",
+   "name": "Feijão Carioca Andorinha 1kg",
+   "brand": "Andorinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "6.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Andorinha%201kg"
+  },
+  {
+   "id": "6153934",
+   "name": "Feijao Carioca Broto Legal 1KG",
+   "brand": "Broto Legal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.85",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feijao%20Carioca%20Broto%20Legal%201KG"
+  },
+  {
+   "id": "6137393",
+   "name": "Feijão Preto Tipo 1 Camil Pacote 1KG",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Tipo%201%20Camil%20Pacote%201KG"
+  },
+  {
+   "id": "6137392",
+   "name": "Feijão Preto Camil 500g",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "4.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Camil%20500g"
+  },
+  {
+   "id": "6155614",
+   "name": "Feijão Orgânico Carioca Kicaldo 500g",
+   "brand": "Kicaldo",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Org%C3%A2nico%20Carioca%20Kicaldo%20500g"
+  },
+  {
+   "id": "6156132",
+   "name": "Feijão Preto Tipo 1 Kicaldo Pacote 1kg",
+   "brand": "Kicaldo",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Tipo%201%20Kicaldo%20Pacote%201kg"
+  },
+  {
+   "id": "6143939",
+   "name": "Feijao Preto Broto Legal 1KG",
+   "brand": "Broto Legal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feijao%20Preto%20Broto%20Legal%201KG"
+  },
+  {
+   "id": "6135072",
+   "name": "Feijão Carioca Orgânico Korin Embalagem 500G",
+   "brand": "Korin",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Org%C3%A2nico%20Korin%20Embalagem%20500G"
+  },
+  {
+   "id": "6135071",
+   "name": "Feijão Preto Orgânico Korin 500G",
+   "brand": "Korin",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "12.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Org%C3%A2nico%20Korin%20500G"
+  },
+  {
+   "id": "6137411",
+   "name": "Feijão Carioca Pronto Camil 380g",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Pronto%20Camil%20380g"
+  },
+  {
+   "id": "6152401",
+   "name": "Feijão Carioca T1 Granel Kg",
+   "brand": "Barcelona",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "6.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20T1%20Granel%20Kg"
+  },
+  {
+   "id": "8184333",
+   "name": "Feijão Carioca Vapza 200g",
+   "brand": "Vapza",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Carioca%20Vapza%20200g"
+  },
+  {
+   "id": "6152539",
+   "name": "Feijão Preto Granel Kg",
+   "brand": "Barcelona",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "weight_step",
+    "step_size_g": 300.0,
+    "pack_size": null
+   },
+   "price": "9.5",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Granel%20Kg"
+  },
+  {
+   "id": "6145035",
+   "name": "Feijão Branco Kicaldo 1kg",
+   "brand": "Kicaldo",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "14.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Branco%20Kicaldo%201kg"
+  },
+  {
+   "id": "8205227",
+   "name": "Feijão Preto Vapza 200g",
+   "brand": "Vapza",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Vapza%20200g"
+  },
+  {
+   "id": "6137412",
+   "name": "Feijão Preto Pronto Camil 380g",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Preto%20Pronto%20Camil%20380g"
+  },
+  {
+   "id": "6137388",
+   "name": "Feijão Branco Tipo 1 Camil Pacote 500G",
+   "brand": "Camil",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "11.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Branco%20Tipo%201%20Camil%20Pacote%20500G"
+  },
+  {
+   "id": "6188573",
+   "name": "Feijão Branco Da Terrinha 500g",
+   "brand": "da Terrinha",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.79",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Feij%C3%A3o%20Branco%20Da%20Terrinha%20500g"
+  }
+ ]
+}

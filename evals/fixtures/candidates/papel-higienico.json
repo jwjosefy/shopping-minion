@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "papel higiênico",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6140862",
+   "name": "Papel Higiênico Fancy Folha Dupla 30m C/16 Rolos",
+   "brand": "Fancy",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 16
+   },
+   "price": "29.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Fancy%20Folha%20Dupla%2030m%20C%2F16%20Rolos"
+  },
+  {
+   "id": "6154502",
+   "name": "Papel Higiênico Personal Vip Compacto Neutro Folha Dupla - Leve 16 Pague 15 30M",
+   "brand": "Personal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "23.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Personal%20Vip%20Compacto%20Neutro%20Folha%20Dupla%20-%20Leve%2016%20Pague%2015%2030M"
+  },
+  {
+   "id": "6157674",
+   "name": "Papel Higiênico Fancy Folha Dupla 20m Lv12 Pg11 Rolos",
+   "brand": "Fancy",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 12
+   },
+   "price": "16.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Fancy%20Folha%20Dupla%2020m%20Lv12%20Pg11%20Rolos"
+  },
+  {
+   "id": "6147069",
+   "name": "Papel Higiênico Personal Vip 30m Folha Dupla Neutro Oferta Pacote 24un",
+   "brand": "Personal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "48.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Personal%20Vip%2030m%20Folha%20Dupla%20Neutro%20Oferta%20Pacote%2024un"
+  },
+  {
+   "id": "6152780",
+   "name": "Papel Higiênico Personal Vip Folha Tripla 20m Lv16 Pg15 Rolos",
+   "brand": "Personal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 16
+   },
+   "price": "23.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Personal%20Vip%20Folha%20Tripla%2020m%20Lv16%20Pg15%20Rolos"
+  },
+  {
+   "id": "6159154",
+   "name": "Papel Higiênico Atualle Folha Dupla 20m C/12 Rolos",
+   "brand": "Atualle",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 12
+   },
+   "price": "15.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Atualle%20Folha%20Dupla%2020m%20C%2F12%20Rolos"
+  },
+  {
+   "id": "6138862",
+   "name": "Papel Higiênico Stylus Folha Dupla Neutro 6 20m 12 Unidades",
+   "brand": "Stylus",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "13.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Stylus%20Folha%20Dupla%20Neutro%206%2020m%2012%20Unidades"
+  },
+  {
+   "id": "6138185",
+   "name": "Papel Higiênico Folha Dupla Neutro Neve Toque Da Seda Pacote Leve 12 Pague 11 Unidades 30M",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "29.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Folha%20Dupla%20Neutro%20Neve%20Toque%20Da%20Seda%20Pacote%20Leve%2012%20Pague%2011%20Unidades%2030M"
+  },
+  {
+   "id": "6138186",
+   "name": "Papel Higiênico Folha Tripla Neutro Neve Supreme Pacote Leve 12 Pague 11 Unidades 20M",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "29.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Folha%20Tripla%20Neutro%20Neve%20Supreme%20Pacote%20Leve%2012%20Pague%2011%20Unidades%2020M"
+  },
+  {
+   "id": "6153755",
+   "name": "Papel Higiênico Mirafiore Folha Dupla 50m C/12 Rolos",
+   "brand": "Mirafiori",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 12
+   },
+   "price": "39.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Mirafiore%20Folha%20Dupla%2050m%20C%2F12%20Rolos"
+  },
+  {
+   "id": "6144854",
+   "name": "Papel Higiênico Personal Vip Neutro 4x1 30M",
+   "brand": "Personal",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "9.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Personal%20Vip%20Neutro%204x1%2030M"
+  },
+  {
+   "id": "6157100",
+   "name": "Papel Higiênico Mirafiore Folha Dupla 50m C/4 Rolos",
+   "brand": "Mirafiori",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "pack",
+    "step_size_g": null,
+    "pack_size": 4
+   },
+   "price": "15.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Mirafiore%20Folha%20Dupla%2050m%20C%2F4%20Rolos"
+  },
+  {
+   "id": "6131875",
+   "name": "Papel Higiênico Neve Supreme Folha Tripla Oferta 16UN",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "39.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Neve%20Supreme%20Folha%20Tripla%20Oferta%2016UN"
+  },
+  {
+   "id": "6131879",
+   "name": "Papel Higiênico Neve Folha Dupla Oferta 24UN",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "43.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Neve%20Folha%20Dupla%20Oferta%2024UN"
+  },
+  {
+   "id": "6131873",
+   "name": "Papel Higiênico Neve Folha Dupla Oferta 16UN",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "39.9",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Neve%20Folha%20Dupla%20Oferta%2016UN"
+  },
+  {
+   "id": "6131871",
+   "name": "Papel Higiênico Neve Supreme Folha Tripla 20m 4un",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "7.6",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Neve%20Supreme%20Folha%20Tripla%2020m%204un"
+  },
+  {
+   "id": "6131870",
+   "name": "Papel Higiênico Neve Folha Dupla 4UN",
+   "brand": "Neve",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "7.6",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Papel%20Higi%C3%AAnico%20Neve%20Folha%20Dupla%204UN"
+  },
+  {
+   "id": "6274074",
+   "name": "Suporte Papel Higiênico P/Chão Arthi Black",
+   "brand": "Arthi",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "39.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Suporte%20Papel%20Higi%C3%AAnico%20P%2FCh%C3%A3o%20Arthi%20Black"
+  },
+  {
+   "id": "6274071",
+   "name": "Suporte Papel Higienico Dupla Face Arthi Black",
+   "brand": "Arthi",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "34.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Suporte%20Papel%20Higienico%20Dupla%20Face%20Arthi%20Black"
+  },
+  {
+   "id": "7851988",
+   "name": "Suporte Papel Higienico Arthi P/Cx Acoplada Black",
+   "brand": "Arthi",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "39.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Suporte%20Papel%20Higienico%20Arthi%20P%2FCx%20Acoplada%20Black"
+  }
+ ]
+}

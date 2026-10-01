@@ -1,0 +1,287 @@
+{
+ "store": "andorinha",
+ "query": "leite",
+ "recorded": "2026-09-30",
+ "candidates": [
+  {
+   "id": "6150353",
+   "name": "Leite Longa Vida Integral Lider 1L",
+   "brand": "Lider",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.29",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Integral%20Lider%201L"
+  },
+  {
+   "id": "6139343",
+   "name": "Leite Longa Vida Integral Parmalat 1LT",
+   "brand": "Parmalat",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "6.29",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Integral%20Parmalat%201LT"
+  },
+  {
+   "id": "6148377",
+   "name": "Leite Longa Vida Integral Jussara Max Garrafa 1LT",
+   "brand": "Jussara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Integral%20Jussara%20Max%20Garrafa%201LT"
+  },
+  {
+   "id": "6156617",
+   "name": "Leite em Pó Integral Itambé 400G",
+   "brand": "Itambe",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "16.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20em%20P%C3%B3%20Integral%20Itamb%C3%A9%20400G"
+  },
+  {
+   "id": "6151771",
+   "name": "Leite Longa Vida Ninho Integral Cx 1l",
+   "brand": "Ninho",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "7.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Ninho%20Integral%20Cx%201l"
+  },
+  {
+   "id": "6149421",
+   "name": "Leite Longa Vida Italac Integral Cx 1l",
+   "brand": "Italac",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "6.09",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Italac%20Integral%20Cx%201l"
+  },
+  {
+   "id": "6156634",
+   "name": "Leite Longa Vida Semi Desnatado Jussara Zero Lactose Garrafa 1LT",
+   "brand": "Jussara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Semi%20Desnatado%20Jussara%20Zero%20Lactose%20Garrafa%201LT"
+  },
+  {
+   "id": "6150206",
+   "name": "Leite em Pó Integral Piracanjuba 400G",
+   "brand": "Piracanjuba",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "15.8",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20em%20P%C3%B3%20Integral%20Piracanjuba%20400G"
+  },
+  {
+   "id": "6153467",
+   "name": "Leite Longa Vida Jussara Semi Desnatado Cx 1l",
+   "brand": "Jussara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Jussara%20Semi%20Desnatado%20Cx%201l"
+  },
+  {
+   "id": "6146129",
+   "name": "Leite Longa Vida Desnatado Lider 1LT",
+   "brand": "Lider",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.29",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Desnatado%20Lider%201LT"
+  },
+  {
+   "id": "6154317",
+   "name": "Leite Longa Vida Jussara Integral Cx 1l",
+   "brand": "Jussara",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Jussara%20Integral%20Cx%201l"
+  },
+  {
+   "id": "6146414",
+   "name": "Leite Integral Italac Zero Lactose 1LT",
+   "brand": "Italac",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "8.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Integral%20Italac%20Zero%20Lactose%201LT"
+  },
+  {
+   "id": "6151515",
+   "name": "Leite Semidesnatado Shefa Zero Lactose Garrafa 1LT",
+   "brand": "Shefa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "6.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Semidesnatado%20Shefa%20Zero%20Lactose%20Garrafa%201LT"
+  },
+  {
+   "id": "6146988",
+   "name": "Leite Longa Vida Italac Semi Desnatado Cx 1l",
+   "brand": "Italac",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "6.09",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Italac%20Semi%20Desnatado%20Cx%201l"
+  },
+  {
+   "id": "6141914",
+   "name": "Leite Longa Vida Paulista Integral Cx 1l",
+   "brand": "Paulista",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Paulista%20Integral%20Cx%201l"
+  },
+  {
+   "id": "6143814",
+   "name": "Leite Longa Vida Paulista Semi Desnatado Cx 1l",
+   "brand": "Paulista",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Paulista%20Semi%20Desnatado%20Cx%201l"
+  },
+  {
+   "id": "6158892",
+   "name": "Leite Longa Vida Ninho Levinho Semi Desnatado Cx 1l",
+   "brand": "Ninho",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "7.49",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Ninho%20Levinho%20Semi%20Desnatado%20Cx%201l"
+  },
+  {
+   "id": "6156544",
+   "name": "Leite Longa Vida Integral Shefa Garrafa 1LT",
+   "brand": "Shefa",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Integral%20Shefa%20Garrafa%201LT"
+  },
+  {
+   "id": "6125885",
+   "name": "Leite Pó Ninho Integral Lt 380g",
+   "brand": "Ninho",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "22.99",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20P%C3%B3%20Ninho%20Integral%20Lt%20380g"
+  },
+  {
+   "id": "6139953",
+   "name": "Leite Longa Vida Semidesnatado Lider 1LT",
+   "brand": "Lider",
+   "size": null,
+   "unit_of_sale": {
+    "kind": "unit",
+    "step_size_g": null,
+    "pack_size": null
+   },
+   "price": "5.29",
+   "in_stock": true,
+   "url": "https://andorinhaonline.com.br/busca/Leite%20Longa%20Vida%20Semidesnatado%20Lider%201LT"
+  }
+ ]
+}

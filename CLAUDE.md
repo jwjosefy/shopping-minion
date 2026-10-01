@@ -28,6 +28,9 @@ Non-negotiables:
 - Checkout is always manual. No code path may place an order.
 - Keep it simple: one store, no generic layers until a second case exists.
 
+## How Johann reviews (follow this pattern)
+When you need Johann's input (interview, design questions, open points), don't ask in the chat. Write a `.md` in `docs/` (e.g. `docs/hld-interview-NNN.md`, or an "Open questions" section in the doc under review) with numbered questions, each with your proposal. Johann answers inline with `>` in Obsidian, then tells you in the chat. Read the answers, fold them into the documents, and report back. Keep questions direct, and don't ask what `docs/project-reset.md` already answers.
+
 ## How to work here
 - **Don't write what you didn't observe.** Label inferences as inferences. Don't state a number you didn't measure or a cause you didn't test.
 - **ADRs are always created with `Status: Draft`** and wait for Johann's review. Never mark one accepted yourself.
