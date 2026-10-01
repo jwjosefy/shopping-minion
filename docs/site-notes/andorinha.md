@@ -53,6 +53,13 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 - The footer has the total and **"Finalizar pedido"**, which is the checkout button. With R$ 8,40 in the cart it was disabled, with the notice "O valor mínimo do pedido deve ser R$ 30,00".
 - Checkout markers for the "never" test: `Finalizar pedido`, plus `/checkout` as an inference, since that URL wasn't visited.
 
+## Cart sync (logged in), seen on 2026-10-01
+
+- With a logged-in session, each "Adicionar ao carrinho" or `+` makes the page send its own GraphQL mutation `operationName: "UpdateCart"`, about 0.6 s after the click. A 200 came back about 0.1 s later.
+- **The stepper and the drawer update before that.** A run that moved on to the next product too soon reported papel higiênico as added (stepper "1"), and the real cart, reloaded, didn't have it.
+- An anonymous cart sends no cart request at all. **Inference:** it lives only in the browser.
+- So: an item counts as added only after the page's own UpdateCart gets a 200. The final report reloads the page before reading the drawer.
+
 ## Session
 
 - Anonymous: the header shows **"Entre | Cadastre-se"**. That is the logged-out marker.
