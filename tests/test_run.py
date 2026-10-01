@@ -10,6 +10,7 @@ import pytest
 import yaml
 
 from shopping_minion import run as run_module
+from shopping_minion import workflow as workflow_module
 from shopping_minion.browser import NotLoggedInError
 from shopping_minion.cli import build_parser
 from shopping_minion.items import Candidate, CartResult
@@ -163,9 +164,9 @@ class World:
             return self.drawer_reads.pop(0)
 
         monkeypatch.setattr(run_module, "ensure_logged_in", ensure_logged_in)
-        monkeypatch.setattr(run_module, "search_all", search_all)
-        monkeypatch.setattr(run_module, "add_all", add_all)
-        monkeypatch.setattr(run_module, "read_cart_drawer", read_cart_drawer)
+        monkeypatch.setattr(workflow_module, "search_all", search_all)
+        monkeypatch.setattr(workflow_module, "add_all", add_all)
+        monkeypatch.setattr(workflow_module, "read_cart_drawer", read_cart_drawer)
 
     def run(self, script, **kwargs):
         return run_module.run(
@@ -459,6 +460,38 @@ def test_inexact_kg_conversion_is_flagged(world):
     ((_, target),) = world.cart_calls[0]
     assert target.clicks == 3  # ceil(0.25 / 0.1)
     assert target.flags == ["QUANTITY_INEXACT"]
+
+
+# --- duplicates -------------------------------------------------------------------------------
+
+
+def test_duplicate_lines_are_merged_in_the_table_the_cart_and_the_check(world):
+    requeijao = {"source_line": "requeijão", "name": "requeijão", "search_term": "requeijao"}
+    world.list_path.write_text(
+        yaml.safe_dump({"items": [requeijao, requeijao]}, allow_unicode=True), encoding="utf-8"
+    )
+    world.candidates = {"requeijao": [cand("30", "Requeijão Catupiry 200g")]}
+    world.answers = {"requeijão": ("p30", 0.95)}
+    # before: empty; after: the cart has 2 (the old bug left 1 and said ok for both lines)
+    world.drawer_reads = [[], [("Requeijão Catupiry 200g", "2")]]
+
+    script = Script("s", "")
+    assert world.run(script) == 0
+
+    (targets,) = world.cart_calls
+    ((candidate, target),) = targets  # one product, one add
+    assert candidate.product_id == "30" and target.clicks == 2
+    assert target.flags == ["QUANTITY_ASSUMED"]
+    assert any(
+        line.startswith("  requeijão ×2 (2 linhas da lista) | Requeijão Catupiry 200g")
+        and line.endswith("2 un -> 2 cliques  [QUANTITY_ASSUMED]")
+        for line in script.lines
+    )
+    assert "  ok requeijão ×2 | Requeijão Catupiry 200g | esperado 2: ok" in script.lines
+    assert "  1 de 1 itens da lista conferem." in script.lines
+    # both decisions are stored as made; the merge is only in the cart
+    assert len(world.rows("decisions", "decision_json")) == 2
+    assert len(world.rows("cart", "result_json")) == 1
 
 
 # --- cli --------------------------------------------------------------------------------------

@@ -11,15 +11,14 @@ from typing import Any
 import yaml
 
 from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
-from shopping_minion.cart import add_all, read_cart_drawer
 from shopping_minion.config import DecideConfig, load_decide_config
-from shopping_minion.decide import decide, describe_candidate, nothing_fit
-from shopping_minion.items import Candidate, CartResult, CartTarget, Decision, Item
-from shopping_minion.preferences import find_preference, load_preferences
-from shopping_minion.quantity import target_quantity, to_clicks
-from shopping_minion.reconcile import reconcile, report_lines
-from shopping_minion.search import search_all
+from shopping_minion.decide import describe_candidate, nothing_fit
+from shopping_minion.items import Candidate, CartDraft, Decision, Item
+from shopping_minion.merge import line_label
+from shopping_minion.preferences import load_preferences
+from shopping_minion.reconcile import report_lines
 from shopping_minion.storage import Storage
+from shopping_minion.workflow import CartOutcome, decide_list, draft_cart, fill_cart, search_list
 
 InputFn = Callable[[str], str]
 PrintFn = Callable[..., None]
@@ -117,29 +116,7 @@ def resolve_all(
     return resolved
 
 
-# --- quantity (LLD 3.5) -------------------------------------------------------------------
-
-
-def build_targets(
-    decisions: list[Decision], prefs: dict[str, dict], print_fn: PrintFn
-) -> list[tuple[Decision, Candidate, CartTarget, str]]:
-    """For each decided item: (decision, candidate, cart target, "what we want" text)."""
-    rows = []
-    for decision in decisions:
-        if decision.status not in ("accepted", "user_chosen") or decision.choice is None:
-            continue
-        candidate = next(c for c in decision.candidates if c.product_id == decision.choice)
-        target, assumed = target_quantity(decision.item, find_preference(prefs, decision.item))
-        try:
-            clicks, inexact = to_clicks(target, candidate.unit_of_sale, candidate.step_kg)
-        except ValueError as exc:  # a kg product with no stepper increment
-            print_fn(f"aviso: {decision.item.name}: {exc}; item pulado.")
-            continue
-        flags = list(dict.fromkeys([*assumed, *inexact]))
-        cart_target = CartTarget(product_id=candidate.product_id, clicks=clicks, flags=flags)
-        value = f"{target.value:g} {target.unit}"
-        rows.append((decision, candidate, cart_target, f"{value} -> {clicks} cliques"))
-    return rows
+# --- the cart draft on the terminal (LLD 3.5) ---------------------------------------------
 
 
 def _price(candidate: Candidate) -> str:
@@ -150,16 +127,21 @@ def _price(candidate: Candidate) -> str:
     )
 
 
-def print_table(rows: list, skipped: list[Decision], print_fn: PrintFn) -> None:
+def print_table(draft: CartDraft, print_fn: PrintFn) -> None:
+    for warning in draft.warnings:
+        print_fn(f"aviso: {warning}")
     print_fn("")
     print_fn("Resumo do que será adicionado:")
-    for decision, candidate, target, quantity_text in rows:
-        flags = f"  [{', '.join(target.flags)}]" if target.flags else ""
+    for line in draft.lines:
+        label = line_label(line)
+        if len(line.items) > 1:
+            label += f" ({len(line.items)} linhas da lista)"
+        flags = f"  [{', '.join(line.flags)}]" if line.flags else ""
+        quantity = f"{line.quantity.value:g} {line.quantity.unit} -> {line.target.clicks} cliques"
         print_fn(
-            f"  {decision.item.name} | {candidate.name} | {_price(candidate)} | "
-            f"{quantity_text}{flags}"
+            f"  {label} | {line.candidate.name} | {_price(line.candidate)} | {quantity}{flags}"
         )
-    for decision in skipped:
+    for decision in draft.skipped:
         print_fn(f"  {decision.item.name} | (pulado)")
     print_fn("")
 
@@ -244,14 +226,12 @@ def _run_stages(
         def progress(i, total, item, candidates):
             print_fn(f"[{i}/{total}] {item.search_term}: {len(candidates)} resultados")
 
-        candidates_per_item = search_all(page, items, progress)
+        candidates_per_item = search_list(page, items, progress)
         storage.set_status(run_id, "searched")
 
         # 2. decide
         print_fn("decidindo com o Jev...")
-        decisions = decide(
-            list(zip(items, candidates_per_item, strict=True)), prefs, config, client_factory()
-        )
+        decisions = decide_list(items, candidates_per_item, prefs, config, client_factory())
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "decided")
 
@@ -260,12 +240,10 @@ def _run_stages(
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "resolved")
 
-        # 4. quantity and the final table
-        rows = build_targets(decisions, prefs, print_fn)
-        in_cart = {id(decision) for decision, *_ in rows}
-        skipped = [d for d in decisions if id(d) not in in_cart]
-        print_table(rows, skipped, print_fn)
-        if not rows:
+        # 4. quantity, duplicates merged, and the final table
+        draft = draft_cart(decisions, prefs)
+        print_table(draft, print_fn)
+        if not draft.lines:
             storage.set_status(run_id, "nothing_to_add")
             print_fn("nada a adicionar ao carrinho.")
             return 0
@@ -276,42 +254,33 @@ def _run_stages(
             print_fn("nada foi adicionado.")
             return 0
 
-        # 5. cart, one item at a time
+        # 5. cart, one product at a time, then the check
         def cart_progress(i, total, candidate, result):
             detail = f" ({result.message})" if result.message else ""
             print_fn(f"[{i}/{total}] {candidate.name}: {result.status}{detail}")
 
-        before = _read_cart(page, print_fn, "antes")
         storage.set_status(run_id, "adding")
-        results = add_all(page, [(c, t) for _, c, t, _ in rows], cart_progress)
-        storage.save_cart(run_id, results)
+        outcome = fill_cart(page, draft, cart_progress)
+        storage.save_cart(run_id, outcome.results)
         storage.set_status(run_id, "done")
 
-        print_report(rows, results, before, page, print_fn)
+        print_report(draft, outcome, print_fn)
         print_fn(OPEN_MESSAGE)
         input_fn("")
     return 0
 
 
-def _read_cart(page, print_fn: PrintFn, when: str) -> list[tuple[str, str]] | None:
-    try:
-        return read_cart_drawer(page)
-    except Exception as exc:  # the run must go on; the report says what couldn't be checked
-        print_fn(f"não consegui ler o carrinho {when}: {exc}")
-        return None
-
-
-def print_report(rows: list, results: list[CartResult], before, page, print_fn: PrintFn) -> None:
+def print_report(draft: CartDraft, outcome: CartOutcome, print_fn: PrintFn) -> None:
+    if outcome.before_error:
+        print_fn(f"não consegui ler o carrinho antes: {outcome.before_error}")
     print_fn("")
     print_fn("O que cada adição informou:")
-    for (decision, candidate, _target, _text), result in zip(rows, results, strict=True):
+    for line, result in zip(draft.lines, outcome.results, strict=True):
         detail = f" - {result.message}" if result.message else ""
-        print_fn(f"  {decision.item.name} | {candidate.name}: {result.status}{detail}")
-    after = _read_cart(page, print_fn, "no fim")
-    if after is None:
+        print_fn(f"  {line_label(line)} | {line.candidate.name}: {result.status}{detail}")
+    if outcome.after is None:
+        print_fn(f"não consegui ler o carrinho no fim: {outcome.after_error}")
         return
-    planned = [(d.item.name, c, t) for d, c, t, _ in rows]
-    checks, extras = reconcile(planned, before, after)
     print_fn("")
-    for line in report_lines(checks, extras, before):
-        print_fn(line)
+    for text in report_lines(outcome.checks, outcome.extras, outcome.before):
+        print_fn(text)
