@@ -1,15 +1,19 @@
-<Oct. 1st>
+# Project reset
+
+_Oct. 1st. Written by Johann in Portuguese; translated to English by Claude on 2026-10-01. The original is [project-reset.pt-BR.md](project-reset.pt-BR.md)._
 
 # Intro
 
-A construção do projeto parou ontem a tarde, por conta do limite no plano do Claude. Eu poderia ter seguido com outro model, mas resolvi parar para focar em outras coisas e reavaliar. 
+Building the project stopped yesterday afternoon because I hit the limit on my Claude plan. I could have kept going with another model, but I decided to stop, focus on other things and take a step back.
 
-Olhando em retrocesso aqui - o projeto ficou desnecessariamente complicado. N camadas, abstrações por cima de abstrações, pra no final AINDA não chegar num modelo funcionando. 
+Looking in hindsight, the project got needlessly complicated and messy. N layers, abstractions on top of abstractions, and at the end of it we STILL don't have a working model.
 
-Quero que vc gere dentro de docs/ um [[lessons-learned]] com o que de fato foi aproveitado, tanto do design, como da minha interação contigo. 
+I want you to write a [[lessons-learned]] inside docs/ with what we actually kept, both from the design and from my interaction with you.
 
-### self-reflection
-O modelo mental que eu estava seguindo para operar o core da compra era de um loop master pelos itens da lista, executando os passos para cada item, algo como:
+### Self-reflection
+
+The mental model I was following for the core of the shopping was a master loop over the list items, running the steps for each item, something like:
+
 ``` ORIGINAL MODEL
 loop (each item) {
 	search()     -- use the original item name to search
@@ -19,7 +23,7 @@ loop (each item) {
 review()
 ```
 
-olhando de volta para o prototipo que fiz com meu filho, a abordagem feita lá era diferente por fazer o loop repetir para cada operação, ao invés de tentar ter um único loop. Na prática, isso torna toda a operação muito mais rápida de se executar no end-to-end, atingindo o objetivo final de otimizar o tempo do usuário - vide [[#Reset definittion]].
+Looking back at the prototype I built with my son, the approach there was different: it repeated the loop for each operation instead of trying to have a single loop. In practice, that makes the whole operation much faster end to end, which is the final goal of saving the user's time (see [[#Reset definition]]).
 
 ``` NEW MODEL
 loop (each item) { search() } -- 100% deterministic python code, simple scraper
@@ -29,68 +33,70 @@ loop (each item) { add_cart()} -- 100% deterministic python
 review()
 ```
 
+# Reset definition
 
-# Reset definittion
+Goal: build an automation plus a web app to shop at andorinhaonline.com.br. It reads (OCR) a handwritten shopping list and ends with the cart built and ready for human review and checkout. The final goal is to cut the manual effort of building a cart for longer lists (50+ items), saving the user's time.
 
-objetivo: construir automação + webapp para efetuar compras no Andorinhaonline.com.br, lendo (OCR) de uma lista de compras manual e finalizando com o carrinho de compras montado e pronto para revisão e checkout humanos. Objetivo final é reduzir esforço manual de montar carrinho de compras para listas mais longas (50+ itens), otimizando o tempo do usuário.
+## Out of scope
 
-## out-of-scope
-- fazer o checkout automático, de qualquer forma
-- automatizar outros mercados na v0
-- cloud-hosting na v0
+- automatic checkout, in any form
+- automating other stores in v0
+- cloud hosting in v0
 - mobile app
 - docker
-## Flow esperado a ser automatizado 
 
-1. usuário envia upload da lista de compras
-2. app faz OCR da lista com LLM [[#note-1]]
-3. app pede ao usuário para revisar/editar a lista
-4. app inicia busca no site (loop search)
-	1. para cada item pesquisado: capturar os resultados (top 15~) da página para posterior matching (nome, marca, un medida, preço, desconto, possibilidade de unidades [un/kg])
-	2. barra de progresso no webapp enquanto o python está pilotando o site
-5. app faz o matching (decide())
-	1. para cada item: elabore consulta padronizada ao Jev para escolher qual o item mais provável considerando (item da lista original)<->(opções encontradas)
-	2. loop -> eval para todos os itens, 1 call por item ou batches de 5 em 5
-	3. para opções com confiança alta: assumir aquele item
-	4. confiança média-baixa: apresentar tela de escolha para desambiguar item
-		1. em loop, item por item, um de cada vez para o usuário escolher
-	5. apresentar opção para o usuário fazer um último review e ajuste
-6. app monta o carrinho (add_cart)
-	1. cada item: navega no site para o item, executa ação para adicionar no carrinho
-	2. atenção com a interação > deve clicar multiplas vezes no botão mais (+) - controlar timeout e race condiiton
-	3. barra de progresso no webapp enquanto o python está pilotando o site
-7. app informa ao usuário status concluído e oferece abrir com o site no carrinho aberto.
+## Expected flow to automate
+
+1. The user uploads the shopping list.
+2. The app does OCR of the list with an LLM ([[#note-1]]).
+3. The app asks the user to review/edit the list.
+4. The app starts searching the site (search loop).
+	1. For each item searched: capture the results (top ~15) from the page for matching later (name, brand, unit of measure, price, discount, possible units [un/kg]).
+	2. A progress bar in the web app while Python drives the site.
+5. The app does the matching (decide()).
+	1. For each item: build a standardized query to Jev to choose the most likely product, given (original list item)<->(options found).
+	2. Loop → eval for every item, 1 call per item or batches of 5.
+	3. For high-confidence options: take that product.
+	4. Medium-low confidence: show a choice screen to disambiguate the item.
+		1. In a loop, item by item, one at a time, for the user to choose.
+	5. Offer the user a last review and adjustment.
+6. The app builds the cart (add_cart).
+	1. For each item: navigate the site to the item and perform the action to add it to the cart.
+	2. Careful with the interaction: it must click the plus (+) button several times. Handle timeouts and race conditions.
+	3. A progress bar in the web app while Python drives the site.
+7. The app tells the user it's done and offers to open the site with the cart open.
 
 ### note-1
-Note que "faz OCR da lista" pode ser feito de diversas formas. Para economizar, elabore uma forma de invocar o claude com -p no parametro, modelo haiku, para passar o arquivo de input como referência e direcionar o output estruturado em JSON.
 
-## Output pós redesign - arquitetura esperada
+Note that "do OCR of the list" can be done in several ways. To save money, design a way to invoke claude with -p, model haiku, passing the input file as a reference and directing the output to structured JSON.
 
-mover TODA a implementação atual para uma subpasta alfa0/ , começar nova implementação na pasta do projeto.
+## Output after the redesign: expected architecture
 
-Webapp Python simples (FastAPI com vue.js e tema dark moderno e interessante)
-Playwright pilotando o chrome
-- modo headless=false > exibir o site navegando
-- usar um user agent adequado igual um navegador regular
-Sqlite local em data/ para manter históricos, inputs, correções
-- essa informação posteriormente irá evoluir para um mecanismo de preferências, para direcionar melhor o matching
-novo HLD
-novo LLD > somente após review e stamp no HLD
-- plano de implementação (PLAN = Opus; RUN=Sonnet)
+Move ALL of the current implementation into an alfa0/ subfolder, and start a new implementation in the project folder.
 
-continuar usando dotenvx para secrets
+- A simple Python web app (FastAPI with vue.js and a modern, interesting dark theme).
+- Playwright driving Chrome:
+	- headless=false mode, showing the site as it navigates;
+	- a proper user agent, like a regular browser.
+- Local SQLite in data/ to keep history, inputs and corrections.
+	- This information will later evolve into a preferences mechanism, to steer the matching better.
+- New HLD.
+- New LLD, only after review and a stamp on the HLD.
+	- Implementation plan (PLAN = Opus; RUN = Sonnet).
 
-# Dúvidas antes de começar
+Keep using dotenvx for secrets.
 
-1. "Jev": o que é? É um modelo ou serviço específico, ou um typo (Julia-1? LLM em geral?).
-	> modelo da typesafe.ai estilo System1 - o que inspirou o Julia-1 na verdade. vamos começar com o Jev, vou fornecer a api-key no .env, depois iremos testar com Julia-1
+# Questions before starting
 
-2. Abrir o site com o carrinho no final: o carrinho fica na sessão do Chrome do Playwright. Ou deixamos essa janela aberta no fim, ou é preciso fazer login para o carrinho aparecer no seu navegador. Isso vai para o HLD como decisão. Você tem preferência?
-	> manter o playwright aberto já resolve por hora. por enquanto vou logar manualmente no andorinha pra garantir que o carrinho permaneça na conta, mesmo que eu troque de navegador.
+1. "Jev": what is it? A specific model or service, or a typo (Julia-1? LLMs in general?).
+	> A System One-style model from typesafe.ai, which is actually what inspired Julia-1. We'll start with Jev; I'll put the API key in .env, and later we'll test with Julia-1.
 
-3. ADRs, journal e evals antigos: vão todos para alfa0/, ou docs/adr e docs/journal continuam na raiz como histórico, com ADRs novos superando os antigos? Imagino que as fixtures do eval (list-001, resolver-cases) sejam reaproveitadas.
-	> TUDO para alfa0, menos os docs/journal - inclusive altere o CLAUDE.md para que ignore a pasta e não siga os ADRs de lá.
-	> docs/journal documentam a jornada e servem de base para o blog na sequencia - devem ser tratados como append only
+2. Opening the site with the cart at the end: the cart lives in Playwright's Chrome session. Either we leave that window open at the end, or a login is needed for the cart to show in your browser. This goes into the HLD as a decision. Do you have a preference?
+	> Keeping Playwright open solves it for now. For now I'll log in to Andorinha by hand, so the cart stays on the account even if I switch browsers.
 
-4. Branch de fix não mergeado (worktree agent-abdb617314a348016, ajustes do agente de descoberta e S1 run 2): descarto, ou faço o merge antes do move para ficar registrado no alfa0?
-	> merge antes do move para manter o registro. 
+3. Old ADRs, journal and evals: do they all go to alfa0/, or do docs/adr and docs/journal stay at the root as history, with new ADRs superseding the old ones? I assume the eval fixtures (list-001, resolver-cases) get reused.
+	> EVERYTHING goes to alfa0, except docs/journal. Also change CLAUDE.md so it ignores the folder and doesn't follow the ADRs there.
+	> docs/journal records the journey and is the basis for the blog later on. It must be treated as append-only.
+
+4. The unmerged fix branch (worktree agent-abdb617314a348016, the discovery agent fixes and S1 run 2): discard it, or merge it before the move so it's on record in alfa0?
+	> Merge before the move, to keep the record.

@@ -23,6 +23,12 @@ PROFILE_BUTTON = '[data-test="profile-btn"]'
 CART_BUTTON = '[data-test="cart-btn"] button'
 LOGGED_OUT_TEXT = re.compile(r"Entre\s*\|\s*Cadastre-se")
 
+# Pause after every action on the site (navigation or click) before the next one. Johann,
+# 2026-10-01: 500 ms after a live run moved on too fast on a product page, then 300 ms once
+# add_cart waited for the page's own UpdateCart confirmation (cart.py), which is what
+# actually fixed the lost item.
+ACTION_PAUSE_MS = 300
+
 
 class NotLoggedInError(RuntimeError):
     """The session has no logged-in account."""
@@ -54,11 +60,6 @@ def save_session(context: BrowserContext, auth_file: Path = AUTH_FILE) -> Path:
     auth_file.parent.mkdir(parents=True, exist_ok=True)
     context.storage_state(path=str(auth_file))
     return auth_file
-
-
-# Johann, 2026-10-01: after any action on the site (navigation or click), wait at least this
-# long before the next one. Without it, a live run moved on too fast on a product page.
-ACTION_PAUSE_MS = 500
 
 
 def settle(page: Page) -> None:
