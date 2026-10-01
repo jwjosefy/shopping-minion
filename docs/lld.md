@@ -317,3 +317,18 @@ From [site-notes/andorinha.md](site-notes/andorinha.md). Where these differ from
 2. **OCR model:** `intake` takes a `model` argument (default `haiku` until 2026-10-01, now `sonnet` by Johann's decision), and the eval takes `--model`. Measured on list-001 on 2026-10-01: Haiku 26/32 in 160 s, Sonnet 31/32 in 22 s.
 3. **Preferences for testing:** `data/preferencias.yaml` holds the first search hit for each M1 item. Real preferences come later.
 4. **list-001:** "Saco lixo pia e banheiro" is crossed out on the paper and now expects no items.
+
+## 9. M1 accepted (2026-10-01)
+
+Johann ran `shopping-minion run examples/lista-m1.yaml` on his logged-in account:
+- the 3 items were accepted by Jev with the test preferences and added;
+- the reloaded cart matched the plan (3 of 3);
+- the final check flagged the one product he had left in the cart on purpose ("Enxaguante Bucal Colgate Plax Kids Minions 250ml") as not in the list.
+
+Found and fixed during acceptance:
+- the 500 ms pause after every action;
+- waiting for the page's own `UpdateCart` confirmation;
+- reading the cart from the reloaded site;
+- checking it against the plan.
+
+Next: the LLD for M2 (web app).
