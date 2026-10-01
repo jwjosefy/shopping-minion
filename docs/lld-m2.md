@@ -258,3 +258,16 @@ The product photos come from the store's image CDN, loaded by **your** browser w
 | R2.3 | Endpoints: one resource per waiting state, plus `/confirm` | Approved.                                                                                                       |
 | R2.4 | `--lan` default with a token                               | Approved, with the QR shown in the terminal **and** on the desktop page.                                        |
 | R2.5 | `workflow.py` + `web/statemachine.py`                      | Approved.                                                                                                       |
+
+## 11. M2 accepted (2026-10-01)
+
+Johann ran real lists through the web app on his account, from the desktop and from the phone over the LAN (runs 6 and 7 in the local history, both `done`). His verdict: "ficou MUITO BOM", no glaring bugs, room to improve.
+
+Found and fixed while integrating, before acceptance:
+- the list photo now comes from the server (`GET /api/run/photo`);
+- the pick counter uses the backend's `position`/`total`;
+- the checkout guard also scans the page's own files.
+
+The real Playwright browser on the worker thread was checked once against the real site: a search of 2 items, stopping before the cart.
+
+To reach the server from the phone, the firewall needed a rule for port 8000 from the LAN only (`ufw allow in on <wifi> from <lan>/24 to any port 8000 proto tcp`).
