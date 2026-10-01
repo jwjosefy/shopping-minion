@@ -1,50 +1,47 @@
 # Shopping Minion — working agreement for Claude Code
 
 ## What this project is
-An agent that turns a photo of a handwritten grocery list into a ready-to-review online cart. Public repo, built in the open: the reasoning is as much a deliverable as the code.
+Automation plus a web app that turns a photo of a handwritten grocery list into a cart at andorinhaonline.com.br, ready for a human to review and check out. The goal is to cut the time it takes to build a cart for long lists (50+ items). Public repo, built in the open.
 
-Read before working: `docs/hld.md` (design), `docs/lld.md` (the tasks for the rest of v0, and the brief template for task agents), `docs/adr/` (decisions), `docs/goal-run/` (state and blockers after unattended work).
+Read before working: `docs/project-reset.md` (the reset and its scope), `docs/lessons-learned.md`, and the new `docs/hld.md` / `docs/lld.md` once they exist.
 
-## Architecture
-Photo → Intake (vision model) → human review (web app) → Workflow (LangGraph, fixed steps) → per item: Catalog search → Resolver (decision model picks a product) → Executor (deterministic: converts quantity, validates, adds to cart, verifies) → Report → human checkout.
+## alfa0/ is an archive
+`alfa0/` holds the first implementation, with its HLD, LLD, ADRs, evals and goal-run logs. **Ignore it.** Its ADRs don't apply here, and its code isn't a base to build on. Read from it only when Johann asks, or to copy a specific asset he approves (e.g. an eval fixture). Never edit it.
+
+## Shape of the system
+Three passes over the list, not one loop per item:
+1. **search**: deterministic Python driving the store's site with Playwright, capturing the top ~15 results per item.
+2. **decide**: model calls (Jev first, Julia-1 later) pick the product for each item. High confidence is accepted; medium or low goes to the user, one item at a time.
+3. **add_cart**: deterministic Python adds each item, clicking the stepper as needed.
+
+## Jev (the decide step)
+Jev is TypeSafe's "System One" decision model (docs: https://docs.typesafe.ai/introduction, index at https://docs.typesafe.ai/llms.txt). It is the model that inspired Julia-1. It does not generate text: it takes a `state` plus typed questions and returns typed answers with calibrated probabilities.
+- Question types: **Choice** (pick one of up to 255 options; returns `choice`, `probabilities`, `confidence`), **Score** (rate on ordered levels) and **Noul** (probability that a statement is true). Several questions go in one call and are evaluated independently.
+- API: `POST https://api.typesafe.ai/v1/systemone`, `Authorization: Bearer $TYPESAFE_API_KEY`, model `jev-latest` (currently `jev-1.13`). Python SDK: `typesafe-sdk` (`TypeSafeClient().system_one(state=..., questions=...)`), which reads `TYPESAFE_API_KEY` from the environment.
+- Billed per input token (output is free). Context: 64k tokens per request, 32k for the state plus the longest question.
+- Known weak spots (jev-1.13): reads instructions literally, can't do math or counting, gets worse with irrelevant state. So: keep arithmetic and unit conversion in code, send only the fields the question needs, and write exact criteria for each option.
+- Choice and Noul answer different questions. A Choice says *which* option; a Noul per option says whether *any* fits. Thresholds don't carry over between them.
 
 Non-negotiables:
-- **The store is used only through its site, in a browser, the way a user would.** Never call the site's endpoints directly: no HTTP client, no `fetch()` with hand-built requests, no copied hosts, ids or request parameters (ADR-0012). If something seems to need it, stop and ask.
-- At shopping time no model drives the browser, and the model never writes to the cart (ADR-0005). The discovery agent is the only model that browses, before shopping and supervised (ADR-0006).
-- Store-specific knowledge lives in a site profile, never in the core (ADR-0004, ADR-0006).
-- Checkout is always manual. No tool or code path may place an order.
-
-## What exists and what doesn't (2026-09-30)
-- **Built and tested:** contracts, model config per role, browser provider, intake with fallback, web app (upload, review, run, report), run store, resolver (LLM and Julia-1 backends), quantity conversion, confidence policy, LangGraph workflow, intake and resolver evals.
-- **Not built:** the catalog adapter, the discovery agent, site profiles, login and the cart executor. `default_services` refuses to start a run; the cart is a dry run.
+- **The store is used only through its site, in a browser, the way a user would.** No HTTP client, no `fetch()` with hand-built requests, no copied hosts, ids or request parameters. If something seems to need it, stop and ask.
+- No model drives the browser, and no model writes to the cart.
+- Checkout is always manual. No code path may place an order.
+- Keep it simple: one store, no generic layers until a second case exists.
 
 ## How to work here
-- **ADRs are always created with `Status: Draft`** and wait for Johann's review. Never write `Accepted` or `Proposed` yourself, and never change an accepted ADR's decision. When a change contradicts an ADR, stop and ask before writing code.
-- **Don't write what you didn't observe.** Label inferences as inferences. Don't state a number you didn't measure or a cause you didn't test. If only two cases were tested, say which two.
-- **A design option left "open" in a document is not permission.** If the work starts to depend on a choice that changes how the system reaches the store, the models or the data, stop and ask.
-- **Stay inside the task.** Don't add flags, workarounds or exceptions to get past a guardrail; report the blocker instead.
-- **Journal entries are Johann's voice.** If you draft one, mark it as a draft written by Claude at the top.
-- Commit and push only what was asked. Small Conventional Commits; the history is part of the audit trail.
+- **Don't write what you didn't observe.** Label inferences as inferences. Don't state a number you didn't measure or a cause you didn't test.
+- **ADRs are always created with `Status: Draft`** and wait for Johann's review. Never mark one accepted yourself.
+- **A design option left open is not permission.** If the work depends on a choice that changes how the system reaches the store, the models or the data, stop and ask.
+- **Stay inside the task.** Report blockers; don't add flags or workarounds to get past them.
+- **The HLD needs Johann's approval before the LLD is written.** Plans are written by Opus, tasks run by Sonnet.
+- Commit and push only what was asked. Small Conventional Commits.
 
-## Secrets and personal data (ADR-0001)
+## Journal
+`docs/journal/` records the whole journey, alfa0 included, and feeds the blog. **It is append-only:** never rewrite an entry. Correct one with a dated note at its top or with a new entry. Name entries `YYYY-MM-DD-NNNN-kebab-title.md`, with `NNNN` continuing the global sequence. Entries are Johann's voice: if you draft one, mark it at the top as drafted by Claude.
+
+## Secrets and personal data
 - Secrets live in `.env`, encrypted with dotenvx. Run things with `dotenvx run -- <cmd>`. The private key is in the OS keyring, backed up by Johann.
 - NEVER read, print or commit `.env.keys`. Never echo decrypted values. To check a key, test only whether it is set.
 - Never commit anything under `data/`, `inbox/`, `.auth/`, browser storage state, screenshots or traces.
-- Before every commit, check `git status` for files that look personal (order history, photos, cookies), and run `gitleaks protect --staged`. If in doubt, stop and ask.
+- Before every commit, check `git status` for personal files and run `gitleaks protect --staged`.
 - Model calls cost money. Run one paid job at a time, and say what a run will call before starting it.
-
-## Documentation conventions
-- **ADR** (`docs/adr/NNNN-kebab-title.md`): Status, Date, Context, Options considered, Decision, Consequences. Supersede, don't rewrite.
-- **Journal** (`docs/journal/YYYY-MM-DD-NNNN-kebab-title.md`, `NNNN` a global sequence from 0001 in order of creation): what was tried, what was rejected, changes of mind. Append-only: correct an old entry with a dated note at its top or with a new entry.
-- **Goal-run log** (`docs/goal-run/`): state, blockers and decisions waiting for review after unattended work.
-
-## Code conventions
-- Python 3.12+, managed with `uv`. Source in `src/shopping_minion/`, tests in `tests/`.
-- Contracts between components are Pydantic models (`contracts.py`).
-- `uv run ruff check . && uv run pytest` must pass before committing. Tests that hit real sites are marked `live` and don't run by default.
-- One model per role in `config/models.yaml` (ADR-0009). API keys are named by env var, never written in config.
-- Julia-1 (optional resolver backend) is installed by hand, see README; use `uv run --no-sync` with it.
-
-## Evaluation
-- `evals/fixtures/list-001.yaml`: ground truth for intake (the first real list). `evals/fixtures/resolver-cases.yaml` with `evals/fixtures/candidates/`: ground truth for the resolver.
-- Any change to intake or resolver is run against the fixtures, and the result goes in the commit message. Fix a wrong label, never the result.
