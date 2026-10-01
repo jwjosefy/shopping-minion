@@ -42,7 +42,7 @@ def test_fixture_candidates_have_buildable_urls():
 # round `+` and a two-button div sits outside the buy box and must never be touched.
 PAGE = """
 <style>button {{ min-width: 20px; min-height: 20px }}</style>
-<div class="product-header-summary">
+<div class="product-renderer-info-box">
   <h5>Produto</h5>
   <div id="ctl">{control}</div>
 </div>

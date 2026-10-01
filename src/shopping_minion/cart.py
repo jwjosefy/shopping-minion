@@ -5,6 +5,7 @@ module clicks are the product page's "Adicionar ao carrinho" and the stepper's `
 header cart button to open the drawer. Nothing here goes past the cart.
 """
 
+import re
 import time
 from collections.abc import Callable
 
@@ -18,12 +19,18 @@ CLICK_TIMEOUT_MS = 5_000
 STEPPER_WAIT_SECONDS = 5.0
 PAGE_WAIT_MS = 10_000
 
-# The main buy box of the product page (name, price, add button or stepper). Seen in T4:
-# it is a div with this class, and it does not contain the "Da mesma categoria" cards.
-BUY_BOX = ".product-header-summary"
+# The main buy box of the product page (name, SKU, price, add button or stepper). Seen live
+# at 1366x900: `.product-renderer-info-box` is visible and does not contain the "Da mesma
+# categoria" cards. `.product-header-summary` also exists but is hidden (a sticky summary).
+BUY_BOX = ".product-renderer-info-box"
 # The stepper is a div with exactly two direct buttons (trash and `+`) whose text is the
 # quantity (site-notes). Classes are utility classes, so it is found by structure.
-STEPPER = "xpath=.//div[count(./button)=2]"
+# The Peso/Unidade switch also has two buttons (role=radio), so it is excluded.
+STEPPER = "xpath=.//div[count(./button)=2 and not(./button[@role='radio'])]"
+# While the number animates, the stepper briefly holds the old and new values ("1 2"); a
+# settled reading is one quantity token, unchanged for STABLE_MS (seen live).
+QUANTITY_TEXT = re.compile(r"^\d+(,\d+)?\s*(g|kg|un)?$", re.IGNORECASE)
+STABLE_MS = 300
 UNIT_SWITCH_NAME = "Seletor de unidade de venda"
 
 
@@ -44,9 +51,15 @@ def _text(locator: Locator) -> str | None:
 def _wait_stepper_change(stepper: Locator, page: Page, before: str | None) -> str | None:
     """Poll until the stepper shows text different from `before`; None on timeout."""
     deadline = time.monotonic() + STEPPER_WAIT_SECONDS
+    candidate: str | None = None
+    since = 0.0
     while time.monotonic() < deadline:
         now = _text(stepper)
-        if now is not None and now != before:
+        if now is None or now == before or not QUANTITY_TEXT.match(now):
+            candidate = None
+        elif now != candidate:
+            candidate, since = now, time.monotonic()
+        elif (time.monotonic() - since) * 1000 >= STABLE_MS:
             return now
         page.wait_for_timeout(100)
     return None
@@ -121,9 +134,9 @@ def add_all(
 def read_cart_drawer(page: Page) -> list[tuple[str, str]]:
     """Open the header cart drawer and return (name, quantity text) per line. Leaves it open.
 
-    Inference, not observed with products in it: each line is a stepper (two direct buttons)
-    inside the drawer dialog, and its name is the first text line of the nearest ancestor that
-    has one besides the quantity and prices.
+    Each line is a stepper (two direct buttons, quantity text) inside the drawer dialog; its
+    name is the first text line of the nearest ancestor that has one besides the quantity and
+    prices. Checked live with two products (atum 3, frango 300g).
     """
     page.locator(CART_BUTTON).click(timeout=CLICK_TIMEOUT_MS)
     drawer = page.get_by_role("dialog")
@@ -131,7 +144,8 @@ def read_cart_drawer(page: Page) -> list[tuple[str, str]]:
     lines = []
     for stepper in drawer.first.locator(STEPPER).all():
         quantity = _text(stepper)
-        if quantity is None:
+        # "Instruções | Remover" also has two buttons; only quantity text is a stepper (seen live).
+        if quantity is None or not QUANTITY_TEXT.match(quantity):
             continue
         lines.append((_line_name(stepper, quantity), quantity))
     return lines
