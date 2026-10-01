@@ -252,3 +252,10 @@ def test_live_add_to_cart_papel_higienico():
         )
         assert (result.status, result.quantity_shown) == ("added", "2"), result.message
         assert [q for _, q in read_cart_drawer(page)] == ["2"]
+
+
+def test_add_all_stops_before_the_next_product(page):
+    serve(page)
+    pairs = [(candidate(), CartTarget(product_id="1", clicks=1))] * 3
+    results = add_all(page, pairs, should_stop=lambda: True, wait_sync=False)
+    assert results == []

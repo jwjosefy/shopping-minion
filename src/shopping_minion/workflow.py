@@ -46,12 +46,13 @@ class DraftEdit(Contract):
 
 class CartOutcome(Contract):
     before: CartLines | None  # None: the cart couldn't be read (see before_error)
-    results: list[CartResult]  # one per draft line, in order
+    results: list[CartResult]  # one per attempted draft line, in order (fewer if stopped)
     after: CartLines | None
     checks: list[Check]  # one per draft line, in order; empty if `after` is None
     extras: CartLines  # in the final cart, not in the draft
     before_error: str | None = None
     after_error: str | None = None
+    stopped: bool = False  # should_stop ended the cart pass early
 
 
 # --- search and decide ----------------------------------------------------------------------
@@ -152,14 +153,22 @@ def _read(page: Page) -> tuple[CartLines | None, str | None]:
         return None, str(exc)
 
 
-def fill_cart(page: Page, draft: CartDraft, progress: FillProgress | None = None) -> CartOutcome:
+def fill_cart(
+    page: Page,
+    draft: CartDraft,
+    progress: FillProgress | None = None,
+    should_stop: Callable[[], bool] | None = None,
+) -> CartOutcome:
     """Read the cart, add every line one after another, read it again, and reconcile.
 
     The expectation for a line is its summed target, so a merged duplicate is checked for
-    the total. `progress(i, total, candidate, result)` after each product.
+    the total. `progress(i, total, candidate, result)` after each product. If `should_stop`
+    returns True before a product, nothing more is added (`stopped`), the cart is still read
+    and checked, and the lines not attempted show as missing unless they were already there.
     """
     before, before_error = _read(page)
-    results = add_all(page, [(line.candidate, line.target) for line in draft.lines], progress)
+    targets = [(line.candidate, line.target) for line in draft.lines]
+    results = add_all(page, targets, progress, should_stop=should_stop)
     after, after_error = _read(page)
     checks: list[Check] = []
     extras: CartLines = []
@@ -174,4 +183,5 @@ def fill_cart(page: Page, draft: CartDraft, progress: FillProgress | None = None
         extras=extras,
         before_error=before_error,
         after_error=after_error,
+        stopped=len(results) < len(draft.lines),
     )

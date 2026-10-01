@@ -142,7 +142,7 @@ class World:
                 progress(i, len(items), item, found)
             return results
 
-        def add_all(page, targets, progress=None):
+        def add_all(page, targets, progress=None, should_stop=None):
             self.cart_calls.append(targets)
             results = []
             for i, (candidate, target) in enumerate(targets, start=1):

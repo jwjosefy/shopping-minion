@@ -261,11 +261,13 @@ class FakeCart:
             raise value
         return value
 
-    def add(self, page, targets, progress=None):
+    def add(self, page, targets, progress=None, should_stop=None):
         self.calls.append("add")
         self.targets = targets
         results = []
         for i, (candidate, target) in enumerate(targets, start=1):
+            if should_stop is not None and should_stop():
+                break
             result = CartResult(
                 product_id=candidate.product_id,
                 status="added",
@@ -347,3 +349,23 @@ def test_fill_cart_goes_on_when_the_cart_cannot_be_read(monkeypatch):
 def test_workflow_has_no_terminal_io():
     source = Path(workflow.__file__).read_text(encoding="utf-8")
     assert "input(" not in source and "print(" not in source
+
+
+def test_fill_cart_stops_when_asked_and_still_checks(monkeypatch):
+    """A cancel during filling: nothing more is added, the cart is read, the rest is missing."""
+    FakeCart(monkeypatch, [[], [("Atum Gomes 170g", "1")]])
+    draft = draft_cart(
+        [
+            decision(item("atum"), [ATUM], "1"),
+            decision(item("frango", Quantity(value=1, unit="kg")), [FRANGO], "3"),
+        ],
+        {},
+    )
+    added = []
+    outcome = fill_cart(
+        "page", draft, lambda *args: added.append(args), should_stop=lambda: len(added) >= 1
+    )
+    assert outcome.stopped
+    assert len(outcome.results) == 1
+    assert [c.ok for c in outcome.checks] == [True, False]
+    assert outcome.checks[1].verdict == "FALTANDO no carrinho"
