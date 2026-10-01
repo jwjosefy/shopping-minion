@@ -86,6 +86,11 @@ class Storage:
     def save_cart(self, run_id: int, results: Sequence[CartResult]) -> None:
         self._replace("cart", "result_json", run_id, results)
 
+    def set_photo(self, run_id: int, photo: str) -> None:
+        """The web app learns the file name (<run_id>.<ext>) only after the run row exists."""
+        with self._conn:
+            self._conn.execute("UPDATE runs SET photo = ? WHERE id = ?", (photo, run_id))
+
     def set_status(self, run_id: int, status: str) -> None:
         with self._conn:
             self._conn.execute("UPDATE runs SET status = ? WHERE id = ?", (status, run_id))
@@ -93,6 +98,17 @@ class Storage:
     def list_runs(self) -> list[dict]:
         rows = self._conn.execute(
             "SELECT id, created_at, photo, status FROM runs ORDER BY id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def recent_runs(self, limit: int = 5) -> list[dict]:
+        """Newest first: {run_id, created_at, items (confirmed count), status}."""
+        rows = self._conn.execute(
+            "SELECT r.id AS run_id, r.created_at, r.status, "
+            "(SELECT COUNT(*) FROM items i WHERE i.run_id = r.id "
+            " AND i.confirmed_json IS NOT NULL) AS items "
+            "FROM runs r ORDER BY r.id DESC LIMIT ?",
+            (limit,),
         ).fetchall()
         return [dict(row) for row in rows]
 

@@ -61,6 +61,30 @@ def _cmd_run(args: argparse.Namespace) -> int:
     return run(args.list, prefs_path=args.preferences, db_path=args.db, yes=args.yes)
 
 
+def _cmd_serve(args: argparse.Namespace) -> int:
+    import uvicorn
+
+    from shopping_minion.web.app import create_app, make_access, print_qr
+    from shopping_minion.web.statemachine import RunStateMachine
+
+    access = make_access(local=args.local, port=args.port)
+    if access is None:
+        print("Could not find this machine's LAN address; use --local.", file=sys.stderr)
+        return 1
+    app = create_app(RunStateMachine(), access=access)
+    if args.local:
+        host = "127.0.0.1"
+        print(f"Listening on http://127.0.0.1:{args.port}/ (this machine only, no token).")
+    else:
+        host = "0.0.0.0"  # every interface: the desktop on 127.0.0.1 and the phone on the LAN
+        print(f"Open on the phone (same Wi-Fi): {access.url}")
+        print_qr(access.url)
+        print(f"On this machine: http://127.0.0.1:{args.port}/")
+    # One worker: the run lives in this process's memory, and so does the browser.
+    uvicorn.run(app, host=host, port=args.port, workers=1, proxy_headers=False)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="shopping-minion",
@@ -82,6 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--db", type=Path, default=Path("data/shopping-minion.sqlite"))
     run.add_argument("--yes", action="store_true", help="add to the cart without asking")
     run.set_defaults(func=_cmd_run)
+
+    serve = sub.add_parser("serve", help="start the web app (on the LAN, with a token, by default)")
+    serve.add_argument("--local", action="store_true", help="127.0.0.1 only: no token, no QR")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.set_defaults(func=_cmd_serve)
     return parser
 
 
