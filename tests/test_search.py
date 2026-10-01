@@ -33,6 +33,8 @@ def test_atum_mapping():
     assert first.unit_of_sale == "un"
     assert first.step_kg is None
     assert first.available is True
+    assert first.image == load("atum")["hits"][0]["image"]
+    assert first.image.startswith("https://")
 
 
 def test_promotion_gives_list_price():
@@ -68,6 +70,22 @@ def test_every_fixture_maps_with_slug_and_id(name):
         assert c.product_id.isdigit()
         assert c.slug
         assert c.price is not None
+
+
+@pytest.mark.parametrize("name", ["atum", "file-de-peito-de-frango", "papel-higienico"])
+def test_every_fixture_hit_keeps_its_image(name):
+    body = load(name)
+    candidates = candidates_from_response(body)
+    assert [c.image for c in candidates] == [hit["image"] for hit in body["hits"]]
+
+
+def test_a_hit_without_an_image_gives_none():
+    body = load("atum")
+    del body["hits"][0]["image"]
+    body["hits"][1]["image"] = ""
+    candidates = candidates_from_response(body)
+    assert candidates[0].image is None
+    assert candidates[1].image is None
 
 
 def test_empty_response_gives_no_candidates():

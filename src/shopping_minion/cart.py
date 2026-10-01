@@ -196,10 +196,17 @@ def add_all(
     targets: list[tuple[Candidate, CartTarget]],
     progress: Callable[[int, int, Candidate, CartResult], None] | None = None,
     wait_sync: bool = True,
+    should_stop: Callable[[], bool] | None = None,
 ) -> list[CartResult]:
-    """Add the products strictly one after another; a failure does not stop the run."""
+    """Add the products strictly one after another; a failure does not stop the run.
+
+    `should_stop` is checked before each product (a cancel stops after the current one), so
+    the result list can be shorter than `targets`.
+    """
     results = []
     for i, (candidate, target) in enumerate(targets, start=1):
+        if should_stop is not None and should_stop():
+            break
         result = add_to_cart(page, candidate, target, wait_sync=wait_sync)
         results.append(result)
         if progress:

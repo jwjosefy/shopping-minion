@@ -48,6 +48,7 @@ def candidate_from_hit(hit: dict) -> Candidate:
         unit_of_sale=unit,
         step_kg=quantity.get("fraction") if unit == "kg" else None,
         available=(quantity.get("inStock") or 0) > 0,
+        image=hit.get("image") or None,
     )
 
 
