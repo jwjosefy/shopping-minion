@@ -117,3 +117,34 @@ def test_save_cart_roundtrip(tmp_path):
     storage.save_cart(run_id, results)
     got = rows(path, "SELECT result_json FROM cart ORDER BY idx")
     assert [CartResult.model_validate_json(g[0]) for g in got] == results
+
+
+def test_run_log_appends_with_a_seq_per_run(tmp_path):
+    storage = Storage(tmp_path / "db.sqlite")
+    first, second = storage.new_run("a.jpg"), storage.new_run("b.jpg")
+    storage.log(first, "state", {"state": "reading_list"})
+    storage.log(second, "state", {"state": "searching"})
+    storage.log(first, "pick", {"item": "ação", "chosen": None})
+    log = storage.read_log(first)
+    assert [(r["seq"], r["kind"]) for r in log] == [(1, "state"), (2, "pick")]
+    assert log[1]["data"] == {"item": "ação", "chosen": None}
+    assert [r["seq"] for r in storage.read_log(second)] == [1]
+    assert storage.read_log(999) == []
+    at = log[0]["at"]  # UTC, with milliseconds
+    assert at.endswith("+00:00") and len(at.split("T")[1].split("+")[0].split(".")[1]) == 3
+
+
+def test_run_log_table_is_added_to_an_existing_db(tmp_path):
+    path = tmp_path / "old.sqlite"
+    conn = sqlite3.connect(path)
+    conn.execute(
+        "CREATE TABLE runs (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "created_at TEXT NOT NULL, photo TEXT, status TEXT NOT NULL)"
+    )
+    conn.execute("INSERT INTO runs (created_at, photo, status) VALUES ('x', NULL, 'done')")
+    conn.commit()
+    conn.close()
+    storage = Storage(path)
+    storage.log(1, "state", {"state": "done"})
+    assert [r["kind"] for r in storage.read_log(1)] == ["state"]
+    assert [r["id"] for r in storage.list_runs()] == [1]

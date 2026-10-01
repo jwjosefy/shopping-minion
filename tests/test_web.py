@@ -16,6 +16,7 @@ from shopping_minion.browser import NotLoggedInError
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
 from shopping_minion.merge import line_label
 from shopping_minion.reconcile import expected_amount, format_amount, reconcile
+from shopping_minion.storage import Storage
 from shopping_minion.web.app import (
     Access,
     create_app,
@@ -363,6 +364,60 @@ def test_the_whole_flow_in_state_order(client, world):
     assert world.closed == 1
     assert client.get("/api/run").json()["state"] == "idle"
     assert upload(client).status_code == 202  # and a new run can start
+
+
+def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, monkeypatch):
+    monkeypatch.setitem(RESULTS, "sal", [ATUM_A])
+    monkeypatch.setitem(DECISIONS, "sal", ("2", 0.6, "ask"))
+    to_picking(client)
+    # atum: Jev said "3" -> confirm; feijão preto: Jev said none -> another; sal: skip
+    client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
+    client.post("/api/run/picks", json={"index": 2, "product_id": "4"})
+    client.post("/api/run/picks", json={"index": 3, "product_id": None})
+    wait_for(client, "reviewing_cart")
+    edits = [
+        {"line_id": "1", "quantity": {"value": 500, "unit": "g"}, "remove": False},
+        {"line_id": "4", "quantity": None, "remove": True},
+    ]
+    assert client.put("/api/run/cart-draft", json={"lines": edits}).status_code == 200
+    client.post("/api/run/cart-draft/confirm")
+    wait_for(client, "done")
+
+    db = Storage(world.tmp_path / "db" / "t.sqlite")
+    log = db.read_log(1)
+    db.close()
+    assert [r["seq"] for r in log] == list(range(1, len(log) + 1))
+    assert [r["data"]["state"] for r in log if r["kind"] == "state"] == [
+        "reading_list",
+        "reviewing_list",
+        "searching",
+        "deciding",
+        "picking",
+        "reviewing_cart",
+        "filling_cart",
+        "done",
+    ]
+    assert [r["at"] for r in log] == sorted(r["at"] for r in log)
+    assert [r["data"] for r in log if r["kind"] == "pick"] == [
+        {"index": 1, "item": "atum", "jev_choice": "3", "jev_confidence": 0.6, "chosen": "3"},
+        {
+            "index": 2,
+            "item": "feijão preto",
+            "jev_choice": None,
+            "jev_confidence": 0.9,
+            "chosen": "4",
+        },
+        {"index": 3, "item": "sal", "jev_choice": "2", "jev_confidence": 0.6, "chosen": None},
+    ]
+    assert [r["data"] for r in log if r["kind"] == "cart_edit"] == [
+        {"line_id": "1", "quantity": {"value": 500.0, "unit": "g"}, "remove": False},
+        {"line_id": "4", "quantity": None, "remove": True},
+    ]
+    kinds = [r["kind"] for r in log]
+    assert kinds.index("check") < len(kinds) - 1  # the check comes before the final state row
+    assert [r["data"] for r in log if r["kind"] == "check"] == [
+        {"ok_count": 2, "total": 2, "extras": 1}
+    ]
 
 
 def test_nothing_to_pick_goes_straight_to_reviewing_cart(client, monkeypatch):
