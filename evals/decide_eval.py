@@ -20,6 +20,7 @@ import yaml
 from shopping_minion.config import DecideConfig, load_decide_config
 from shopping_minion.decide import decide, nothing_fit
 from shopping_minion.items import Candidate, Decision, Item, Quantity
+from shopping_minion.preferences import load_preferences
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -150,13 +151,16 @@ def totals(outcomes: list[Outcome]) -> dict[str, int]:
     }
 
 
-def run(config: DecideConfig, cases: list[Case], client) -> list[Outcome]:
-    decisions = decide([(c.item, c.candidates) for c in cases], {}, config, client)
+def run(
+    config: DecideConfig, cases: list[Case], client, prefs: dict | None = None
+) -> list[Outcome]:
+    decisions = decide([(c.item, c.candidates) for c in cases], prefs or {}, config, client)
     return [score(c, d, config) for c, d in zip(cases, decisions, strict=True)]
 
 
 def print_report(config: DecideConfig, outcomes: list[Outcome]) -> None:
-    print(f"\n== batch_size={config.batch_size} model={config.model} ==")
+    served = sorted({o.decision.model for o in outcomes if o.decision.model})
+    print(f"\n== batch_size={config.batch_size} model={config.model} served={served} ==")
     for o in outcomes:
         confidence = "-" if o.decision.confidence is None else f"{o.decision.confidence:.2f}"
         flag = " (nothing fit)" if o.flag_nothing_fit else ""
@@ -173,6 +177,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--batch-size", type=int, help="default: run 5 and 1")
     parser.add_argument("--max-candidates", type=int, help="default: all recorded (20)")
+    parser.add_argument("--preferences", type=Path, help="preferencias.yaml to send as context")
     args = parser.parse_args(argv)
 
     if not os.environ.get("TYPESAFE_API_KEY"):
@@ -184,10 +189,11 @@ def main(argv: list[str] | None = None) -> int:
     base = load_decide_config(Path(__file__).parent.parent / "config" / "decide.yaml")
     cases = load_cases(max_candidates=args.max_candidates)
     sizes = [args.batch_size] if args.batch_size else [5, 1]
+    prefs = load_preferences(args.preferences) if args.preferences else {}
     with TypeSafeClient(model=base.model) as client:
         for size in sizes:
             config = base.model_copy(update={"batch_size": size})
-            print_report(config, run(config, cases, client))
+            print_report(config, run(config, cases, client, prefs))
     return 0
 
 

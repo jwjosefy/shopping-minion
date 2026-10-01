@@ -196,14 +196,19 @@ def main(argv: list[str] | None = None) -> int:
     source.add_argument("--photo", type=Path, help="photo of the list (runs claude -p once)")
     source.add_argument("--result", type=Path, help="YAML written by `shopping-minion ocr`")
     parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
+    parser.add_argument("--model", default="haiku", help="claude model for --photo")
+    parser.add_argument("--save", type=Path, help="also write the OCR result as YAML here")
     args = parser.parse_args(argv)
 
     fixture = yaml.safe_load(args.fixture.read_text(encoding="utf-8"))
     try:
-        items = transcribe(args.photo) if args.photo else load_items(args.result)
+        items = transcribe(args.photo, model=args.model) if args.photo else load_items(args.result)
     except IntakeError as exc:
         print(f"intake failed: {exc}", file=sys.stderr)
         return 1
+    if args.save:
+        dump = {"items": [item.model_dump(mode="json") for item in items]}
+        args.save.write_text(yaml.safe_dump(dump, allow_unicode=True, sort_keys=False), "utf-8")
     print_report(compare(fixture, items))
     return 0
 

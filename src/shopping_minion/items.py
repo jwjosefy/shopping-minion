@@ -48,6 +48,7 @@ class Decision(Contract):
     confidence: float | None  # Jev's answer; None when the user chose
     probabilities: dict[str, float] = {}
     status: Literal["accepted", "ask", "no_match", "user_chosen", "skipped"]
+    model: str | None = None  # Jev version that answered, as the response reports it
 
 
 class CartTarget(Contract):

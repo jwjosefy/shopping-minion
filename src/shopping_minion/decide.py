@@ -122,6 +122,7 @@ def _decide_batch(
                 confidence=answer.confidence,
                 probabilities={_product_id(k): p for k, p in answer.probabilities.items()},
                 status=apply_policy(choice, answer.confidence, config),
+                model=getattr(response, "model", None),
             )
         )
     return decisions

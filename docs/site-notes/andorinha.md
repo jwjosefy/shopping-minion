@@ -6,6 +6,7 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 
 - `/busca/<term>` loads the results by itself. The page shows "Encontramos N itens": atum 32, papel higiênico 20, file de peito de frango 265.
 - The page receives the results as JSON from `sense.osuper.com.br/269/1327/search?...`, in pages of 12 (`size=12&from=0`, then `from=12`). Both pages arrived within 8 s without scrolling. This is the page's own request; we only read its response. Match it by URL path `/search` and the `search=` parameter equal to the term.
+- **The page double-encodes the term** in its own call (seen in T4): "papel higienico" goes out as `search=papel%2520higienico`, and the store still answers with the right hits. Match the `search` parameter as it is or decoded once more.
 - Response: `hits[]`, `total`, `nextFrom`, `hasNext`, `hasPrevious`, `extraData`.
 - Fields of a hit that matter:
 

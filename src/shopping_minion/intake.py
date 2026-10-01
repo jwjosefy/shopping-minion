@@ -82,13 +82,16 @@ def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def build_command(photo_copy: Path) -> list[str]:
+DEFAULT_MODEL = "haiku"
+
+
+def build_command(photo_copy: Path, model: str = DEFAULT_MODEL) -> list[str]:
     return [
         "claude",
         "-p",
         f"Transcribe the grocery list in the file {photo_copy}",
         "--model",
-        "haiku",
+        model,
         "--system-prompt",
         PROMPT_PATH.read_text(encoding="utf-8"),
         "--tools",
@@ -101,7 +104,7 @@ def build_command(photo_copy: Path) -> list[str]:
     ]
 
 
-def transcribe(photo: Path, runner: Runner = _run) -> list[Item]:
+def transcribe(photo: Path, runner: Runner = _run, model: str = DEFAULT_MODEL) -> list[Item]:
     """Copy the photo to a fresh temp dir, run claude there, and return the items."""
     photo = Path(photo)
     if not photo.is_file():
@@ -111,7 +114,7 @@ def transcribe(photo: Path, runner: Runner = _run) -> list[Item]:
         copy = workdir / photo.name
         shutil.copyfile(photo, copy)
         try:
-            proc = runner(build_command(copy), workdir)
+            proc = runner(build_command(copy, model), workdir)
         except subprocess.TimeoutExpired as exc:
             raise IntakeError(f"claude timed out after {TIMEOUT_SECONDS} s") from exc
         except OSError as exc:
