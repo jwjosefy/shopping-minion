@@ -51,8 +51,9 @@ class Item(BaseModel):                     # one line item, after OCR and review
     quantity: Quantity | None = None
     needs_review: bool = False
 
-class Candidate(BaseModel):                # one search result
+class Candidate(BaseModel):                # one search result (field sources: §7.1)
     product_id: str
+    slug: str                              # for /produtos/<id>/<slug> (§7.2)
     name: str
     brand: str | None
     price: Decimal | None
@@ -119,6 +120,9 @@ The `Candidate` fields are the HLD's list. T0 may show that a field isn't availa
 
 ### 3.3 search
 
+> See §7.1 (field mapping) and §7.7 (two pages of 12).
+
+
 - For each item, in order:
   1. go to `/busca/<search_term>`, URL-encoded;
   2. collect the search JSON responses the page receives (`page.on("response")`, with the URL path pattern from T0);
@@ -181,6 +185,9 @@ The `Candidate` fields are the HLD's list. T0 may show that a field isn't availa
 An item matches an entry when its `name` or `search_term` equals the key or one of the `apelidos` (accent- and case-insensitive). The whole entry goes to Jev as context.
 
 ### 3.7 cart
+
+> Superseded in part by §7.2–7.6: cart works on the product page, not the search card.
+
 
 - For each `CartTarget`, one at a time:
   1. go to `/busca/<product name>`;
@@ -272,9 +279,34 @@ Every brief repeats these rules:
 
 ## 6. Questions resolved in review
 
-| # | Question | Answer (Johann, 2026-10-01) |
-|---|---|---|
-| 1 | M1 review step | An edited `lista.yaml`. No review screen until M2. |
-| 2 | Jev model | Pinned to `jev-1.13`, moved up on purpose. |
-| 3 | M1 items | atum, papel higiênico, filé de peito de frango (with a quantity in kg). |
-| 4 | Account | Johann's real account, logged in. He clears the cart afterwards. |
+| #   | Question       | Answer (Johann, 2026-10-01)                                             |
+| --- | -------------- | ----------------------------------------------------------------------- |
+| 1   | M1 review step | An edited `lista.yaml`. No review screen until M2.                      |
+| 2   | Jev model      | Pinned to `jev-1.13`, moved up on purpose.                              |
+| 3   | M1 items       | atum, papel higiênico, filé de peito de frango (with a quantity in kg). |
+| 4   | Account        | Johann's real account, logged in. He clears the cart afterwards.        |
+
+## 7. M0 changes (approved by Johann on 2026-10-01)
+
+From [site-notes/andorinha.md](site-notes/andorinha.md). Where these differ from the sections above, **this section wins**.
+
+1. **`Candidate` (§2) gets `slug`, and the field sources are now known.**
+   - `product_id` ← `id`
+   - `brand` ← `brandName`
+   - `price` ← `pricing.promotionalPrice`
+   - `list_price` ← `pricing.price` when `pricing.promotion` is true, else null
+   - `unit_of_sale` ← `saleUnit` (`UN` → `un`, `KG` → `kg`)
+   - `step_kg` ← `quantity.fraction` when KG
+   - `available` ← `quantity.inStock > 0`
+
+   Proposal: add `slug: str`. Nothing else changes.
+2. **add_cart reaches the product through its page, not the search card (§3.7).**
+   - Search cards don't carry the product id in the DOM.
+   - The site publishes `/produtos/<id>/<slug>` for every result (in the search page's ld+json), and that page has "Adicionar ao carrinho" and the stepper.
+
+   Proposal: cart opens `/produtos/<id>/<slug>`, clicks "Adicionar ao carrinho" once, then `+` `clicks − 1` times. It reads the stepper text after each click (e.g. "2", "200g") and waits for it to change. This is navigating to a link the site itself gives, like opening a bookmarked product. It is not building a request.
+3. **"Already in the cart" check (§3.7).** Proposal: if the product page shows the stepper instead of "Adicionar ao carrinho", the product is already in the cart. The item is marked failed and left alone.
+4. **Weight products with the Peso/Unidade switch.** Proposal: M1 makes sure `Peso` is checked before adding. If it isn't, the item fails rather than being switched. What "Unidade" means wasn't observed.
+5. **Reading the cart (§3.7).** The cart is a drawer opened from the header button, not a page. Proposal: at the end, open the drawer and read each line's name and stepper text for the report, and leave the drawer open.
+6. **Checkout guard.** The "never" test greps for `Finalizar pedido` and `checkout`.
+7. **Search reads both pages of 12 (§3.3)** to reach ~15 candidates: wait for `from=0`, then `from=12` if `hasNext`, with a 10 s cap. Then keep the first 15.
