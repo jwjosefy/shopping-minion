@@ -119,11 +119,11 @@ def test_unidade_mode_fails_without_touching_anything(page):
     assert page.get_by_role("button", name="Adicionar ao carrinho").count() == 1
 
 
-def test_already_in_cart_fails_and_leaves_it_alone(page):
+def test_already_in_cart_is_left_untouched(page):
     serve(page, control=STEPPER_ALREADY)
     result = add_to_cart(page, candidate(), CartTarget(product_id="1", clicks=2))
-    assert result.status == "failed"
-    assert result.message == "já está no carrinho"
+    assert result.status == "untouched"
+    assert result.message == "não mexido: já estava no carrinho"
     assert result.quantity_shown == "2"
     assert page.locator("#ctl span").inner_text() == "2"
 

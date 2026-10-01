@@ -59,6 +59,6 @@ class CartTarget(Contract):
 
 class CartResult(Contract):
     product_id: str
-    status: Literal["added", "failed"]
+    status: Literal["added", "failed", "untouched"]  # untouched: was already in the cart
     quantity_shown: str | None  # as the cart displays it
     message: str | None

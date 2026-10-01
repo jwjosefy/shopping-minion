@@ -158,7 +158,12 @@ def _add(
     dismiss_cookie_banner(page)
 
     if not add_button.count() or not add_button.first.is_visible():
-        return _failed(target, "já está no carrinho", shown=_text(stepper))
+        return CartResult(
+            product_id=target.product_id,
+            status="untouched",
+            quantity_shown=_text(stepper),
+            message="não mexido: já estava no carrinho",
+        )
 
     # Weight products have a Peso/Unidade switch; only Peso is supported (LLD 7.4).
     switch = page.get_by_role("radiogroup", name=UNIT_SWITCH_NAME)
