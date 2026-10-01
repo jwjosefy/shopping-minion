@@ -1,0 +1,11 @@
+# Example. The real file is data/preferencias.yaml (git-ignored).
+# An item matches an entry when its name or search term equals the key or one of
+# the apelidos (accent- and case-insensitive).
+feijão:
+  apelidos: [feijão normal]
+  variante: carioca
+  excluir: [preto]
+  quantidade: { valor: 1, unidade: kg }
+presunto:
+  fatiado: true
+  quantidade: { valor: 300, unidade: g }
