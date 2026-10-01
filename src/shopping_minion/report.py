@@ -117,7 +117,8 @@ def build_report(storage: Storage, run_id: int) -> list[str]:
     decisions = storage.read_decisions(run_id)
     cart = storage.read_cart(run_id)
 
-    when = run["created_at"][:16].replace("T", " ")
+    # Stored in UTC; shown in this machine's local time.
+    when = datetime.fromisoformat(run["created_at"]).astimezone().strftime("%Y-%m-%d %H:%M")
     head = f"Rodada {run_id} — {when} — {len(confirmed)} itens na lista"
     in_cart = sum(r.status in ("added", "untouched") for r in cart)
     if cart:
@@ -132,7 +133,8 @@ def build_report(storage: Storage, run_id: int) -> list[str]:
     edited, deleted, added = list_corrections(ocr, confirmed)
     out.append("Correções")
     out.append(
-        f"  lista: {edited} linhas editadas, {deleted} apagadas, {added} adicionadas"
+        f"  lista: {_plural(edited, 'linha editada', 'linhas editadas')},"
+        f" {_plural(deleted, 'apagada', 'apagadas')}, {_plural(added, 'adicionada', 'adicionadas')}"
         f" (de {len(ocr)} lidas pelo OCR)"
     )
     if log:  # products and cart edits exist only in the log
@@ -142,7 +144,8 @@ def build_report(storage: Storage, run_id: int) -> list[str]:
         other = len(picks) - skipped - same
         accepted = sum(d.status == "accepted" for d in decisions)
         out.append(
-            f"  produtos: {accepted} aceitos pelo Jev sozinho; dos {len(picks)} que vieram para"
+            f"  produtos: {_plural(accepted, 'aceito', 'aceitos')} pelo Jev sozinho;"
+            f" dos {len(picks)} que vieram para"
             f" você:\n            {same} você confirmou a escolha do Jev,"
             f" {other} escolheu outro, {skipped} pulou"
         )

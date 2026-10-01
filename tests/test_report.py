@@ -135,8 +135,8 @@ def test_the_report_of_a_run_with_a_log(tmp_path, capsys):
         "  referência (estimativa do Johann): mais de 1 h à mão",
         "",
         "Correções",
-        "  lista: 1 linhas editadas, 1 apagadas, 1 adicionadas (de 4 lidas pelo OCR)",
-        "  produtos: 1 aceitos pelo Jev sozinho; dos 4 que vieram para você:",
+        "  lista: 1 linha editada, 1 apagada, 1 adicionada (de 4 lidas pelo OCR)",
+        "  produtos: 1 aceito pelo Jev sozinho; dos 4 que vieram para você:",
         "            2 você confirmou a escolha do Jev, 1 escolheu outro, 1 pulou",
         "  carrinho: 1 quantidade mudada, 1 removido",
         "",
@@ -153,7 +153,7 @@ def test_a_run_without_a_log(tmp_path, capsys):
     assert report(path, run_id) == 0
     out = capsys.readouterr().out
     assert "sem registro de tempo" in out
-    assert "lista: 0 linhas editadas, 1 apagadas, 0 adicionadas (de 2 lidas pelo OCR)" in out
+    assert "lista: 0 linhas editadas, 1 apagada, 0 adicionadas (de 2 lidas pelo OCR)" in out
     assert "produtos" not in out
     assert "Conferência: sem dados" in out
 
