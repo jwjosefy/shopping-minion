@@ -1,6 +1,6 @@
 # Shopping Minion — Low-Level Design (M2: the web app)
 
-- **Status:** Draft, for Johann's review (round 2 folded in)
+- **Status:** Approved by Johann on 2026-10-01
 - **Date:** 2026-10-01
 - **Implements:** [hld.md](hld.md) §3.9 (approved). It builds on [lld.md](lld.md) (M0, M1, accepted).
 
