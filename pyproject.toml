@@ -10,6 +10,9 @@ dependencies = [
     "typesafe-sdk",
     "pydantic>=2",
     "pyyaml",
+    "fastapi>=0.142.2",
+    "uvicorn>=0.54.0",
+    "python-multipart>=0.0.32",
 ]
 
 [project.scripts]
