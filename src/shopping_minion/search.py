@@ -13,7 +13,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from playwright.sync_api import Page, Response
 
-from shopping_minion.browser import BASE_URL, dismiss_cookie_banner
+from shopping_minion.browser import BASE_URL, dismiss_cookie_banner, settle
 from shopping_minion.items import Candidate, Item
 
 MAX_CANDIDATES = 15
@@ -89,6 +89,7 @@ def search(page: Page, item: Item) -> list[Candidate]:
     page.on("response", on_response)
     try:
         page.goto(search_url(term))
+        settle(page)
         candidates = _collect(page, seen)
     finally:
         page.remove_listener("response", on_response)

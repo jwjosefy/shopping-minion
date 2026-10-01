@@ -207,3 +207,23 @@ def test_live_add_to_cart_atum_and_frango():
             "3",
             "300g",
         ]
+
+
+@pytest.mark.live
+def test_live_add_to_cart_papel_higienico():
+    """The product a live run had trouble with (2026-10-01), on an anonymous fresh cart."""
+    from shopping_minion.browser import open_browser
+    from shopping_minion.items import Item
+    from shopping_minion.search import search
+
+    with open_browser(auth_file=Path("/nonexistent/anonymous.json")) as (_browser, context):
+        page = context.new_page()
+        item = Item(source_line="papel", name="papel higiênico", search_term="papel higiênico")
+        papel = next(
+            c
+            for c in search(page, item)
+            if c.name.startswith("Papel Higiênico Fancy Folha Dupla 30m")
+        )
+        [result] = add_all(page, [(papel, CartTarget(product_id=papel.product_id, clicks=2))])
+        assert (result.status, result.quantity_shown) == ("added", "2"), result.message
+        assert [q for _, q in read_cart_drawer(page)] == ["2"]

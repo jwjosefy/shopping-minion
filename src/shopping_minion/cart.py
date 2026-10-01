@@ -12,7 +12,7 @@ from collections.abc import Callable
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Locator, Page
 
-from shopping_minion.browser import BASE_URL, CART_BUTTON, dismiss_cookie_banner
+from shopping_minion.browser import BASE_URL, CART_BUTTON, dismiss_cookie_banner, settle
 from shopping_minion.items import Candidate, CartResult, CartTarget
 
 CLICK_TIMEOUT_MS = 5_000
@@ -83,6 +83,7 @@ def add_to_cart(page: Page, candidate: Candidate, target: CartTarget) -> CartRes
 
 def _add(page: Page, candidate: Candidate, target: CartTarget) -> CartResult:
     page.goto(product_url(candidate.product_id, candidate.slug))
+    settle(page)
     box = page.locator(BUY_BOX)
     add_button = box.get_by_role("button", name="Adicionar ao carrinho")
     stepper = box.locator(STEPPER)
@@ -105,8 +106,10 @@ def _add(page: Page, candidate: Candidate, target: CartTarget) -> CartResult:
     for click in range(target.clicks):
         if click == 0:
             add_button.first.click(timeout=CLICK_TIMEOUT_MS)
+            settle(page)
         else:
             stepper.first.locator("xpath=./button[last()]").click(timeout=CLICK_TIMEOUT_MS)
+            settle(page)
         new = _wait_stepper_change(stepper, page, shown)
         if new is None:
             return _failed(target, f"a quantidade não mudou após o clique {click + 1}", shown)
@@ -139,6 +142,7 @@ def read_cart_drawer(page: Page) -> list[tuple[str, str]]:
     prices. Checked live with two products (atum 3, frango 300g).
     """
     page.locator(CART_BUTTON).click(timeout=CLICK_TIMEOUT_MS)
+    settle(page)
     drawer = page.get_by_role("dialog")
     drawer.first.wait_for(state="visible", timeout=PAGE_WAIT_MS)
     lines = []

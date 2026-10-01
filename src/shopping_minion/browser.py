@@ -56,11 +56,22 @@ def save_session(context: BrowserContext, auth_file: Path = AUTH_FILE) -> Path:
     return auth_file
 
 
+# Johann, 2026-10-01: after any action on the site (navigation or click), wait at least this
+# long before the next one. Without it, a live run moved on too fast on a product page.
+ACTION_PAUSE_MS = 500
+
+
+def settle(page: Page) -> None:
+    """Pause after an action so the page can catch up (ACTION_PAUSE_MS)."""
+    page.wait_for_timeout(ACTION_PAUSE_MS)
+
+
 def dismiss_cookie_banner(page: Page) -> bool:
     """Click "Recusar" if the cookie banner is showing. Returns whether it clicked."""
     refuse = page.get_by_role("button", name="Recusar", exact=True)
     if refuse.count() and refuse.first.is_visible():
         refuse.first.click()
+        settle(page)
         return True
     return False
 
@@ -88,5 +99,6 @@ def is_logged_in(page: Page, timeout_ms: int = 10_000) -> bool | None:
 def ensure_logged_in(page: Page) -> None:
     """Open the home page and raise NotLoggedInError unless the session is logged in."""
     page.goto(BASE_URL)
+    settle(page)
     if is_logged_in(page) is not True:
         raise NotLoggedInError("Not logged in: run `shopping-minion login`.")
