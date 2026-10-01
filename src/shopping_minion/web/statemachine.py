@@ -253,6 +253,7 @@ class RunStateMachine:
             if index != run.pending[0]:
                 raise BadRequest(f"índice inesperado {index}; o próximo é {run.pending[0]}")
             decision = run.decisions[index]
+            chosen = product_id
             if product_id is None:
                 update = {"choice": None, "status": "skipped"}
             elif product_id in {c.product_id for c in decision.candidates}:
@@ -263,6 +264,17 @@ class RunStateMachine:
             run.pending.pop(0)
             with self._db() as db:
                 db.save_decisions(run.id, run.decisions)
+                db.log(  # Jev's own pick, before the decision is overwritten
+                    run.id,
+                    "pick",
+                    {
+                        "index": index,
+                        "item": decision.item.name,
+                        "jev_choice": decision.choice,
+                        "jev_confidence": decision.confidence,
+                        "chosen": chosen,
+                    },
+                )
             if not run.pending:
                 self._enter_cart_review(run)
 
@@ -274,6 +286,14 @@ class RunStateMachine:
                 run.draft = edit_draft(run.draft, edits)
             except ValueError as exc:
                 raise BadRequest(str(exc)) from exc
+            with self._db() as db:
+                for edit in edits:
+                    quantity = None if edit.quantity is None else edit.quantity.model_dump()
+                    db.log(
+                        run.id,
+                        "cart_edit",
+                        {"line_id": edit.line_id, "quantity": quantity, "remove": edit.remove},
+                    )
             return run.draft
 
     def confirm_cart(self) -> None:
@@ -351,6 +371,9 @@ class RunStateMachine:
 
     def _set_state(self, state: str) -> None:
         self._state = state
+        if self._run is not None:
+            with self._db() as db:
+                db.log(self._run.id, "state", {"state": state})
         self._seq += 1
         self._events.append(
             {"seq": self._seq, "state": state, "kind": "state", "data": {"state": state}}
@@ -509,6 +532,16 @@ class RunStateMachine:
             run.outcome = outcome
             with self._db() as db:
                 db.save_cart(run.id, outcome.results)
+                if outcome.after is not None:  # what the report needs for its check line
+                    db.log(
+                        run.id,
+                        "check",
+                        {
+                            "ok_count": sum(c.ok for c in outcome.checks),
+                            "total": len(outcome.checks),
+                            "extras": len(outcome.extras),
+                        },
+                    )
             if outcome.stopped:
                 run.message = "cancelado; o carrinho pode estar incompleto"
                 self._set_status(run, "cancelled")

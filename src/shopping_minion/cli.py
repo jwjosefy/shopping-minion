@@ -61,6 +61,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
     return run(args.list, prefs_path=args.preferences, db_path=args.db, yes=args.yes)
 
 
+def _cmd_report(args: argparse.Namespace) -> int:
+    from shopping_minion.report import report
+
+    return report(args.db, args.run_id)
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
@@ -106,6 +112,13 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--db", type=Path, default=Path("data/shopping-minion.sqlite"))
     run.add_argument("--yes", action="store_true", help="add to the cart without asking")
     run.set_defaults(func=_cmd_run)
+
+    report_parser = sub.add_parser(
+        "report", help="times and corrections of a run (the latest by default)"
+    )
+    report_parser.add_argument("run_id", type=int, nargs="?", help="default: the latest run")
+    report_parser.add_argument("--db", type=Path, default=Path("data/shopping-minion.sqlite"))
+    report_parser.set_defaults(func=_cmd_report)
 
     serve = sub.add_parser("serve", help="start the web app (on the LAN, with a token, by default)")
     serve.add_argument("--local", action="store_true", help="127.0.0.1 only: no token, no QR")

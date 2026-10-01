@@ -14,6 +14,7 @@ from shopping_minion import workflow as workflow_module
 from shopping_minion.browser import NotLoggedInError
 from shopping_minion.cli import build_parser
 from shopping_minion.items import Candidate, CartResult
+from shopping_minion.storage import Storage
 
 
 def cand(pid, name, unit="un", step_kg=None, price="9.50", available=True):
@@ -425,6 +426,14 @@ def test_storage_rows_are_written_for_every_stage(world):
         ("10", "added"),
         ("20", "added"),
     ]
+
+    storage = Storage(world.db)
+    log = [r["data"] for r in storage.read_log(1)]
+    storage.close()
+    states = [r["state"] for r in log if "state" in r]
+    assert states == ["searching", "deciding", "picking", "reviewing_cart", "filling_cart", "done"]
+    (pick,) = [r for r in log if "jev_choice" in r]
+    assert pick["item"] == "papel higiênico" and pick["chosen"] == "10"
 
 
 # --- quantity ---------------------------------------------------------------------------------

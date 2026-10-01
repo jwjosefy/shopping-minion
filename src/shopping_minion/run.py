@@ -196,13 +196,36 @@ def run(
         )
     except (EOFError, KeyboardInterrupt):
         storage.set_status(run_id, "interrupted")
+        _state(storage, run_id, "cancelled")
         print_fn("\ninterrompido.")
         return 130
     except Exception:
         storage.set_status(run_id, "error")
+        _state(storage, run_id, "failed")
         raise
     finally:
         storage.close()
+
+
+def _state(storage: Storage, run_id: int, state: str) -> None:
+    storage.log(run_id, "state", {"state": state})
+
+
+def _log_picks(storage: Storage, run_id: int, before: list[Decision], after: list[Decision]):
+    """A `pick` row per question the user answered, with Jev's own pick as it was."""
+    for index, (old, new) in enumerate(zip(before, after, strict=True)):
+        if old.status in ("ask", "no_match") and old.candidates:
+            storage.log(
+                run_id,
+                "pick",
+                {
+                    "index": index,
+                    "item": old.item.name,
+                    "jev_choice": old.choice,
+                    "jev_confidence": old.confidence,
+                    "chosen": new.choice,
+                },
+            )
 
 
 def _run_stages(
@@ -219,10 +242,13 @@ def _run_stages(
             ensure_logged_in(page)
         except NotLoggedInError as exc:
             storage.set_status(run_id, "not_logged_in")
+            _state(storage, run_id, "failed")
             print_fn(str(exc))
             return 1
 
         # 1. search
+        _state(storage, run_id, "searching")
+
         def progress(i, total, item, candidates):
             print_fn(f"[{i}/{total}] {item.search_term}: {len(candidates)} resultados")
 
@@ -230,27 +256,35 @@ def _run_stages(
         storage.set_status(run_id, "searched")
 
         # 2. decide
+        _state(storage, run_id, "deciding")
         print_fn("decidindo com o Jev...")
         decisions = decide_list(items, candidates_per_item, prefs, config, client_factory())
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "decided")
 
         # 3. the user resolves what Jev wasn't sure about
+        asked = decisions
+        if any(d.status in ("ask", "no_match") for d in decisions):
+            _state(storage, run_id, "picking")
         decisions = resolve_all(decisions, config, input_fn=input_fn, print_fn=print_fn)
+        _log_picks(storage, run_id, asked, decisions)
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "resolved")
 
         # 4. quantity, duplicates merged, and the final table
+        _state(storage, run_id, "reviewing_cart")
         draft = draft_cart(decisions, prefs)
         print_table(draft, print_fn)
         if not draft.lines:
             storage.set_status(run_id, "nothing_to_add")
+            _state(storage, run_id, "done")
             print_fn("nada a adicionar ao carrinho.")
             return 0
         if yes:
             print_fn("--yes: adicionando sem perguntar.")
         elif not _yes(input_fn("adicionar ao carrinho? [s/N] ")):
             storage.set_status(run_id, "declined")
+            _state(storage, run_id, "cancelled")
             print_fn("nada foi adicionado.")
             return 0
 
@@ -260,9 +294,21 @@ def _run_stages(
             print_fn(f"[{i}/{total}] {candidate.name}: {result.status}{detail}")
 
         storage.set_status(run_id, "adding")
+        _state(storage, run_id, "filling_cart")
         outcome = fill_cart(page, draft, cart_progress)
         storage.save_cart(run_id, outcome.results)
+        if outcome.after is not None:
+            storage.log(
+                run_id,
+                "check",
+                {
+                    "ok_count": sum(c.ok for c in outcome.checks),
+                    "total": len(outcome.checks),
+                    "extras": len(outcome.extras),
+                },
+            )
         storage.set_status(run_id, "done")
+        _state(storage, run_id, "done")
 
         print_report(draft, outcome, print_fn)
         print_fn(OPEN_MESSAGE)

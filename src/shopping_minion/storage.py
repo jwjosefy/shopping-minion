@@ -1,5 +1,6 @@
 """SQLite storage: one table per stage, JSON from the contracts (LLD section 3.8)."""
 
+import json
 import sqlite3
 from collections.abc import Sequence
 from datetime import UTC, datetime
@@ -34,6 +35,14 @@ CREATE TABLE IF NOT EXISTS cart (
     idx INTEGER NOT NULL,
     result_json TEXT NOT NULL,
     PRIMARY KEY (run_id, idx)
+);
+CREATE TABLE IF NOT EXISTS run_log (
+    run_id INTEGER NOT NULL REFERENCES runs(id),
+    seq    INTEGER NOT NULL,
+    at     TEXT    NOT NULL,      -- UTC, ISO 8601 with milliseconds
+    kind   TEXT    NOT NULL,      -- state | pick | cart_edit | check
+    data   TEXT    NOT NULL,      -- JSON
+    PRIMARY KEY (run_id, seq)
 );
 """
 
@@ -111,6 +120,46 @@ class Storage:
             (limit,),
         ).fetchall()
         return [dict(row) for row in rows]
+
+    def log(self, run_id: int, kind: str, data: dict) -> None:
+        """Append a row to the run's log; `seq` is the next one for this run."""
+        at = datetime.now(UTC).isoformat(timespec="milliseconds")
+        with self._conn:
+            self._conn.execute(
+                "INSERT INTO run_log (run_id, seq, at, kind, data) "
+                "SELECT ?, COALESCE(MAX(seq), 0) + 1, ?, ?, ? FROM run_log WHERE run_id = ?",
+                (run_id, at, kind, json.dumps(data, ensure_ascii=False), run_id),
+            )
+
+    def read_log(self, run_id: int) -> list[dict]:
+        """{seq, at, kind, data} per row, in order."""
+        rows = self._conn.execute(
+            "SELECT seq, at, kind, data FROM run_log WHERE run_id = ? ORDER BY seq", (run_id,)
+        ).fetchall()
+        return [{**dict(row), "data": json.loads(row["data"])} for row in rows]
+
+    def read_items(self, run_id: int) -> tuple[list[Item], list[Item]]:
+        """(OCR items, confirmed items), in order, without the padding NULLs."""
+        rows = self._conn.execute(
+            "SELECT ocr_json, confirmed_json FROM items WHERE run_id = ? ORDER BY idx", (run_id,)
+        ).fetchall()
+        ocr = [Item.model_validate_json(r["ocr_json"]) for r in rows if r["ocr_json"]]
+        confirmed = [
+            Item.model_validate_json(r["confirmed_json"]) for r in rows if r["confirmed_json"]
+        ]
+        return ocr, confirmed
+
+    def read_decisions(self, run_id: int) -> list[Decision]:
+        rows = self._conn.execute(
+            "SELECT decision_json FROM decisions WHERE run_id = ? ORDER BY idx", (run_id,)
+        ).fetchall()
+        return [Decision.model_validate_json(r["decision_json"]) for r in rows]
+
+    def read_cart(self, run_id: int) -> list[CartResult]:
+        rows = self._conn.execute(
+            "SELECT result_json FROM cart WHERE run_id = ? ORDER BY idx", (run_id,)
+        ).fetchall()
+        return [CartResult.model_validate_json(r["result_json"]) for r in rows]
 
     def _replace(self, table: str, column: str, run_id: int, models: Sequence[BaseModel]) -> None:
         rows = [(run_id, idx, model.model_dump_json()) for idx, model in enumerate(models)]
