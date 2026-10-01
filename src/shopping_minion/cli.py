@@ -43,6 +43,12 @@ def _login() -> int:
     return 0
 
 
+def _cmd_run(args: argparse.Namespace) -> int:
+    from shopping_minion.run import run
+
+    return run(args.list, prefs_path=args.preferences, db_path=args.db, yes=args.yes)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="shopping-minion",
@@ -57,6 +63,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     login = sub.add_parser("login", help="log in to the store by hand and save the session")
     login.set_defaults(func=lambda _args: _login())
+
+    run = sub.add_parser("run", help="search, decide and add the items of a list to the cart")
+    run.add_argument("list", type=Path, help="the YAML written by `ocr`")
+    run.add_argument("--preferences", type=Path, default=Path("data/preferencias.yaml"))
+    run.add_argument("--db", type=Path, default=Path("data/shopping-minion.sqlite"))
+    run.add_argument("--yes", action="store_true", help="add to the cart without asking")
+    run.set_defaults(func=_cmd_run)
     return parser
 
 
