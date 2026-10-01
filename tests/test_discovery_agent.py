@@ -199,6 +199,26 @@ def test_the_prompt_embeds_the_examples_and_the_rules():
         assert phrase in SYSTEM_PROMPT
 
 
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "response_detail",  # look at one item before writing field paths
+        "do not guess",
+        "prices, stock and units of sale",  # check the draft's candidates before submitting
+        "Prefer the response over the DOM",
+        "do not spend many steps on `inspect`",
+        "never `{query}`",  # the url template uses item fields
+        "`{name}`",
+        "second response",  # more results may load; the first matching one is read
+        "first response that matches",
+        "Your steps are limited",
+        "`try_search` early",
+    ],
+)
+def test_the_prompt_has_the_s1_guidance(phrase):
+    assert phrase in " ".join(SYSTEM_PROMPT.split())  # the prompt is wrapped
+
+
 def test_the_prompt_names_the_exploration_tools():
     tools = build_tools(DiscoverySession(None, None, "examplestore", BASE, ["atum"]))
     for t in tools:
