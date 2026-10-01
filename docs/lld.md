@@ -92,7 +92,7 @@ The `Candidate` fields are the HLD's list. T0 may show that a field isn't availa
 
   ```
   claude -p "<request: transcribe the list in the file <absolute path>>" \
-    --model haiku --system-prompt "<prompts/intake.md>" \
+    --model sonnet --system-prompt "<prompts/intake.md>" \
     --tools Read --json-schema '<schema>' --output-format json \
     --no-session-persistence
   ```
@@ -314,6 +314,6 @@ From [site-notes/andorinha.md](site-notes/andorinha.md). Where these differ from
 ## 8. Wave 2 changes (approved by Johann on 2026-10-01, see [review-wave2.md](review-wave2.md))
 
 1. **Jev model:** `jev-latest`, since the API only accepts `jev-latest` and `jev-preview`. `Decision.model` records the version each response reports (`jev-1.13.0` on 2026-10-01). It is saved with the decision and printed by the eval.
-2. **OCR model:** `intake` takes a `model` argument (default `haiku`), and the eval takes `--model`. Measured on list-001 on 2026-10-01: Haiku 26/32 in 160 s, Sonnet 31/32 in 22 s.
+2. **OCR model:** `intake` takes a `model` argument (default `haiku` until 2026-10-01, now `sonnet` by Johann's decision), and the eval takes `--model`. Measured on list-001 on 2026-10-01: Haiku 26/32 in 160 s, Sonnet 31/32 in 22 s.
 3. **Preferences for testing:** `data/preferencias.yaml` holds the first search hit for each M1 item. Real preferences come later.
 4. **list-001:** "Saco lixo pia e banheiro" is crossed out on the paper and now expects no items.

@@ -196,7 +196,7 @@ def main(argv: list[str] | None = None) -> int:
     source.add_argument("--photo", type=Path, help="photo of the list (runs claude -p once)")
     source.add_argument("--result", type=Path, help="YAML written by `shopping-minion ocr`")
     parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
-    parser.add_argument("--model", default="haiku", help="claude model for --photo")
+    parser.add_argument("--model", default="sonnet", help="claude model for --photo")
     parser.add_argument("--save", type=Path, help="also write the OCR result as YAML here")
     args = parser.parse_args(argv)
 

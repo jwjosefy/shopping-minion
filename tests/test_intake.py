@@ -99,7 +99,7 @@ def test_transcribe_runs_claude_in_a_temp_dir_with_a_copy(photo):
     assert items == [Item.model_validate(ITEM)]
     args, cwd = runner.calls[0]
     assert args[:2] == ["claude", "-p"]
-    assert args[args.index("--model") + 1] == "haiku"
+    assert args[args.index("--model") + 1] == "sonnet"
     assert args[args.index("--tools") + 1] == "Read"
     assert args[args.index("--output-format") + 1] == "json"
     assert "--no-session-persistence" in args

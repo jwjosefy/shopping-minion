@@ -82,7 +82,7 @@ def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-DEFAULT_MODEL = "haiku"
+DEFAULT_MODEL = "sonnet"
 
 
 def build_command(photo_copy: Path, model: str = DEFAULT_MODEL) -> list[str]:

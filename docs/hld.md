@@ -16,7 +16,7 @@ Principle: **complexity has to be earned before it's introduced.** One store, co
 
 ```mermaid
 flowchart TD
-    up[/"1. Upload photo"/] --> ocr["2. OCR<br/>claude -p, Haiku"]
+    up[/"1. Upload photo"/] --> ocr["2. OCR<br/>claude -p, Sonnet"]
     ocr --> rev1(["3. Review and edit the list"])
     rev1 --> search["4. search — every item<br/>Playwright, deterministic"]
     search --> decide["5. decide — every item<br/>Jev, Choice"]
@@ -42,7 +42,7 @@ One Python package, `src/shopping_minion/`, with one module per step. No framewo
 
 ### 3.1 OCR (`intake`)
 
-- Runs `claude -p` with the Haiku model, the prompt in [`src/shopping_minion/prompts/intake.md`](../src/shopping_minion/prompts/intake.md), and a JSON Schema for the output (`--json-schema`). It reads the photo with the Read tool and no other tool is enabled. It uses Johann's Claude login, so it needs no API key.
+- Runs `claude -p` with the Sonnet model (Haiku until 2026-10-01; changed by Johann after the list-001 comparison, LLD §8.2), the prompt in [`src/shopping_minion/prompts/intake.md`](../src/shopping_minion/prompts/intake.md), and a JSON Schema for the output (`--json-schema`). It reads the photo with the Read tool and no other tool is enabled. It uses Johann's Claude login, so it needs no API key.
 - The JSON Schema itself is defined in the LLD. Structured outputs require one ([docs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)).
 
 - Each item has `source_line`, `name`, `search_term`, `constraints`, `brand`, `quantity`, `unit` and `needs_review`. The prompt has the rules for slashes: separate products vs. a qualifier of the same product.
