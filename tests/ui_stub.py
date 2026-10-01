@@ -1,0 +1,506 @@
+"""A stub of the HTTP API in LLD-M2 section 5, for test_ui.py.
+
+Canned data and a scripted run, serving the real static files. It never touches the store.
+States listed in `hold` wait at the end of that state until the test calls
+POST /_stub/release/<state>, so a test can look at a working screen as long as it likes.
+"""
+
+import asyncio
+import json
+import socket
+import threading
+import time
+from pathlib import Path
+
+import uvicorn
+from fastapi import FastAPI, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+
+STATIC = Path(__file__).resolve().parent.parent / "src" / "shopping_minion" / "web" / "static"
+
+LIST_ITEMS = [
+    {
+        "source_line": "leite int. 1l",
+        "name": "leite integral",
+        "search_term": "leite integral 1l",
+        "constraints": ["integral"],
+        "brand": None,
+        "quantity": {"value": 1, "unit": "l"},
+        "needs_review": False,
+    },
+    {
+        "source_line": "tomate ??",
+        "name": "tomate",
+        "search_term": "tomate italiano",
+        "constraints": [],
+        "brand": None,
+        "quantity": {"value": 1, "unit": "kg"},
+        "needs_review": True,
+    },
+    {
+        "source_line": "requeijão",
+        "name": "requeijão",
+        "search_term": "requeijão cremoso",
+        "constraints": ["cremoso", "sem lactose"],
+        "brand": "Catupiry",
+        "quantity": None,
+        "needs_review": False,
+    },
+]
+
+
+def _candidate(pid, name, price, *, brand="Marca", list_price=None, unit="un", step=None, ok=True):
+    return {
+        "product_id": pid,
+        "slug": pid,
+        "name": name,
+        "brand": brand,
+        "price": price,
+        "list_price": list_price,
+        "unit_of_sale": unit,
+        "step_kg": step,
+        "available": ok,
+        "image": f"/stub-img/{pid}.svg",
+        "description": "",
+    }
+
+
+PICKS = [
+    {
+        "item": LIST_ITEMS[1],
+        "candidates": [
+            _candidate("t-1", "Tomate italiano bandeja", "9.90", unit="kg", step=0.5),
+            _candidate(
+                "t-jev", "Tomate italiano kg", "7.50", list_price="9.00", unit="kg", step=0.5
+            ),
+            _candidate("t-3", "Tomate cereja 300g", "6.99", ok=False),
+        ],
+        "jev": {"choice": "t-jev", "confidence": 0.56, "nothing_fit": False},
+    },
+    {
+        "item": LIST_ITEMS[2],
+        "candidates": [
+            _candidate("r-1", "Requeijão cremoso 200g", "8.49"),
+            _candidate("r-2", "Requeijão light 200g", "7.99"),
+        ],
+        "jev": {"choice": None, "confidence": None, "nothing_fit": True},
+    },
+]
+
+# Draft lines: (line_id, candidate, item names, quantity, flags)
+DRAFT = [
+    (
+        "p-leite",
+        _candidate("p-leite", "Leite integral 1L", "4.50"),
+        ["leite integral"],
+        {"value": 1, "unit": "un"},
+        [],
+    ),
+    (
+        "p-tomate",
+        _candidate("p-tomate", "Tomate italiano kg", "8.00", unit="kg", step=0.5),
+        ["tomate"],
+        {"value": 1, "unit": "kg"},
+        ["QUANTITY_INEXACT"],
+    ),
+    (
+        "p-req",
+        _candidate("p-req", "Requeijão cremoso 200g", "5.00"),
+        ["requeijão", "requeijão"],
+        {"value": 2, "unit": "un"},
+        ["QUANTITY_ASSUMED"],
+    ),
+]
+
+OUTCOME = {
+    "checks": [
+        {
+            "item_names": ["leite integral"],
+            "product_name": "Leite integral 1L",
+            "expected": "1",
+            "found": "1",
+            "was_before": False,
+            "ok": True,
+            "verdict": "ok",
+        },
+        {
+            "item_names": ["tomate"],
+            "product_name": "Tomate italiano kg",
+            "expected": "1kg",
+            "found": None,
+            "was_before": False,
+            "ok": False,
+            "verdict": "FALTANDO no carrinho",
+        },
+        {
+            "item_names": ["requeijão", "requeijão"],
+            "product_name": "Requeijão cremoso 200g",
+            "expected": "2",
+            "found": "1",
+            "was_before": False,
+            "ok": False,
+            "verdict": "QUANTIDADE DIFERENTE: carrinho tem 1, esperado 2",
+        },
+    ],
+    "extras": [{"name": "Sabão em pó 1kg", "quantity": "1", "was_before": True}],
+    "ok_count": 1,
+    "total": 3,
+}
+
+WORKING = {"reading_list", "searching", "deciding", "filling_cart"}
+WAITING = {"reviewing_list", "picking", "reviewing_cart"}
+
+
+class WrongState(Exception):
+    pass
+
+
+class Stub:
+    def __init__(self, hold=(), access=True):
+        self.hold = set(hold)
+        self.access = access
+        self.lock = threading.RLock()
+        self.closing = False
+        self.events: list[dict] = []  # not cleared by reset(): seq only grows
+        self.reset()
+        self.released: set[str] = set()
+        self.pending: dict = {}
+        # what the tests assert on
+        self.uploads: list[str] = []
+        self.list_puts: list[dict] = []
+        self.picks_posted: list[dict] = []
+        self.cart_puts: list[dict] = []
+
+    def reset(self):
+        self.state = "idle"
+        self.message = None
+        self.items = [dict(i) for i in LIST_ITEMS]
+        self.pick_at = 0
+        self.skipped: list[str] = []
+        self.lines = [
+            {"id": i, "cand": c, "items": n, "quantity": dict(q), "flags": list(f)}
+            for i, c, n, q, f in DRAFT
+        ]
+
+    # -- events and states ---------------------------------------------------------
+    def emit(self, kind, data):
+        with self.lock:
+            seq = len(self.events) + 1
+            self.events.append({"seq": seq, "state": self.state, "kind": kind, "data": data})
+
+    def go(self, state, message=None):
+        with self.lock:
+            self.state, self.message = state, message
+            self.emit("state", {"state": state})
+
+    def need(self, *states):
+        if self.state not in states:
+            raise WrongState
+
+    def later(self, fn, delay=0.05):
+        threading.Timer(delay, fn).start()
+
+    def gate(self, name, fn):
+        """Run fn soon, or when the test releases `name` if it is held."""
+        with self.lock:
+            if name in self.hold and name not in self.released:
+                self.pending[name] = fn
+            else:
+                self.later(fn)
+
+    def release(self, name):
+        with self.lock:
+            self.released.add(name)
+            fn = self.pending.pop(name, None)
+        if fn:
+            self.later(fn)
+
+    # -- the script ------------------------------------------------------------------------
+    def start_run(self, filename):
+        self.reset()
+        self.uploads.append(filename)
+        self.go("reading_list")
+        self.gate(
+            "reading_list", lambda: self._if("reading_list", lambda: self.go("reviewing_list"))
+        )
+
+    def _if(self, state, fn):
+        with self.lock:
+            if self.state == state:
+                fn()
+
+    def confirm_list(self):
+        self.go("searching")
+        for n, item in enumerate(self.items, start=1):
+            self.emit(
+                "search",
+                {"i": n, "n": len(self.items), "term": item["search_term"], "found": 15 - n},
+            )
+        self.gate("searching", lambda: self._if("searching", self._decide))
+
+    def _decide(self):
+        self.go("deciding")
+        self.emit("decide", {"phase": "start", "accepted": 0, "to_pick": 0})
+        self.gate("deciding", lambda: self._if("deciding", self._to_picking))
+
+    def _to_picking(self):
+        self.emit("decide", {"phase": "end", "accepted": 1, "to_pick": len(PICKS)})
+        self.go("picking")
+
+    def draft(self):
+        lines = []
+        for ln in self.lines:
+            cand, q = ln["cand"], ln["quantity"]
+            if cand["unit_of_sale"] == "kg":
+                kg = q["value"] / 1000 if q["unit"] == "g" else q["value"]
+                clicks = max(1, round(kg / cand["step_kg"]))
+                amount = clicks * cand["step_kg"]
+            else:
+                clicks = max(1, round(q["value"]))
+                amount = clicks
+            lines.append(
+                {
+                    "line_id": ln["id"],
+                    "product": cand,
+                    "items": ln["items"],
+                    "quantity": q,
+                    "clicks": clicks,
+                    "flags": ln["flags"],
+                    "estimated_price": f"{float(cand['price']) * amount:.2f}",
+                }
+            )
+        total = sum(float(ln["estimated_price"]) for ln in lines) if lines else None
+        return {
+            "lines": lines,
+            "skipped": list(self.skipped),
+            "estimated_total": None if total is None else f"{total:.2f}",
+        }
+
+    def confirm_cart(self):
+        self.go("filling_cart")
+        n = len(self.lines)
+        self.emit(
+            "fill",
+            {
+                "i": 1,
+                "n": n,
+                "name": self.lines[0]["cand"]["name"],
+                "status": "added",
+                "message": None,
+            },
+        )
+        self.gate("filling_cart", lambda: self._if("filling_cart", self._finish))
+
+    def _finish(self):
+        n = len(self.lines)
+        for i, ln in enumerate(self.lines[1:], start=2):
+            self.emit(
+                "fill",
+                {
+                    "i": i,
+                    "n": n,
+                    "name": ln["cand"]["name"],
+                    "status": "added" if i < n else "failed",
+                    "message": None if i < n else "botão não apareceu",
+                },
+            )
+        self.go("done")
+
+    def snapshot(self):
+        body = {"state": self.state, "run_id": 1, "message": self.message}
+        if self.state == "idle":
+            return {"state": "idle"}
+        if self.state == "reviewing_list":
+            body["list"] = {"items": self.items}
+        if self.state == "picking":
+            body["picks_left"] = len(PICKS) - self.pick_at
+        if self.state == "reviewing_cart":
+            body["cart_draft"] = self.draft()
+        if self.state == "done":
+            body["outcome"] = OUTCOME
+        return body
+
+
+def create_app(stub: Stub) -> FastAPI:
+    app = FastAPI()
+
+    @app.exception_handler(WrongState)
+    async def _wrong_state(request, exc):
+        return JSONResponse({"state": stub.state}, status_code=409)
+
+    @app.get("/")
+    def index():
+        return FileResponse(STATIC / "index.html")
+
+    @app.get("/stub-img/{name}.svg")
+    def image(name: str):
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">'
+            '<rect width="96" height="96" fill="#cfe3ff"/>'
+            f'<text x="8" y="52" font-size="14">{name}</text></svg>'
+        )
+        return Response(svg, media_type="image/svg+xml")
+
+    @app.get("/api/run")
+    def get_run():
+        return stub.snapshot()
+
+    @app.get("/api/run/events")
+    async def events(request: Request, after: int = 0):
+        async def gen():
+            seen = after
+            yield ": ok\n\n"
+            while not stub.closing and not await request.is_disconnected():
+                with stub.lock:
+                    fresh = [e for e in stub.events if e["seq"] > seen]
+                for event in fresh:
+                    seen = event["seq"]
+                    yield f"data: {json.dumps(event)}\n\n"
+                await asyncio.sleep(0.05)
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
+
+    @app.post("/api/run", status_code=202)
+    async def post_run(photo: UploadFile):
+        with stub.lock:
+            stub.need("idle")
+            stub.start_run(photo.filename or "photo")
+        return {"run_id": 1}
+
+    @app.put("/api/run/list")
+    async def put_list(request: Request):
+        body = await request.json()
+        with stub.lock:
+            stub.need("reviewing_list")
+            stub.list_puts.append(body)
+            stub.items = body["items"]
+        return {}
+
+    @app.post("/api/run/list/confirm", status_code=202)
+    def confirm_list():
+        with stub.lock:
+            stub.need("reviewing_list")
+            stub.confirm_list()
+        return {}
+
+    @app.get("/api/run/picks/next")
+    def picks_next():
+        with stub.lock:
+            stub.need("picking")
+            pick = PICKS[stub.pick_at]
+            return {"index": stub.pick_at, "left": len(PICKS) - stub.pick_at, **pick}
+
+    @app.post("/api/run/picks")
+    async def post_pick(request: Request):
+        body = await request.json()
+        with stub.lock:
+            stub.need("picking")
+            if body.get("index") != stub.pick_at:
+                return JSONResponse({"detail": "índice errado", "state": stub.state}, 409)
+            stub.picks_posted.append(body)
+            if body.get("product_id") is None:
+                stub.skipped.append(PICKS[stub.pick_at]["item"]["name"])
+            stub.pick_at += 1
+            if stub.pick_at >= len(PICKS):
+                stub.go("reviewing_cart")
+        return {}
+
+    @app.put("/api/run/cart-draft")
+    async def put_cart(request: Request):
+        body = await request.json()
+        with stub.lock:
+            stub.need("reviewing_cart")
+            stub.cart_puts.append(body)
+            for edit in body["lines"]:
+                for ln in list(stub.lines):
+                    if ln["id"] != edit["line_id"]:
+                        continue
+                    if edit.get("remove"):
+                        stub.lines.remove(ln)
+                    elif edit.get("quantity"):
+                        ln["quantity"] = edit["quantity"]
+            return {"cart_draft": stub.draft()}
+
+    @app.post("/api/run/cart-draft/confirm", status_code=202)
+    def confirm_cart():
+        with stub.lock:
+            stub.need("reviewing_cart")
+            stub.confirm_cart()
+        return {}
+
+    @app.post("/api/run/cancel")
+    def cancel():
+        with stub.lock:
+            stub.need(*(WORKING | WAITING))
+            stub.go("cancelled", "Rodada cancelada.")
+        return {}
+
+    @app.delete("/api/run")
+    def delete_run():
+        with stub.lock:
+            stub.need("done", "failed", "cancelled")
+            stub.go("idle")
+        return {}
+
+    @app.get("/api/runs")
+    def runs():
+        return [
+            {"run_id": 7, "created_at": "2026-09-30T18:20:00", "items": 12, "status": "done"},
+            {"run_id": 6, "created_at": "2026-09-28T09:05:00", "items": 1, "status": "cancelled"},
+        ]
+
+    @app.get("/api/access")
+    def access():
+        if not stub.access:
+            return JSONResponse({"detail": "só no desktop"}, 403)
+        return {
+            "url": "http://192.168.0.10:8000/?t=stubtoken",
+            "qr_svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
+            '<rect width="5" height="5"/></svg>',
+        }
+
+    @app.post("/_stub/release/{name}")
+    def release(name: str):
+        stub.release(name)
+        return {}
+
+    app.mount("/static", StaticFiles(directory=STATIC), name="static")
+    return app
+
+
+class StubServer:
+    """The stub app on 127.0.0.1, run by uvicorn in a thread. Use as a context manager."""
+
+    def __init__(self, **options):
+        self.stub = Stub(**options)
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", 0))
+            self.port = s.getsockname()[1]
+        config = uvicorn.Config(
+            create_app(self.stub),
+            host="127.0.0.1",
+            port=self.port,
+            log_level="warning",
+            timeout_graceful_shutdown=1,
+        )
+        self.server = uvicorn.Server(config)
+        self.thread = threading.Thread(target=self.server.run, daemon=True)
+
+    @property
+    def url(self) -> str:
+        return f"http://127.0.0.1:{self.port}"
+
+    def __enter__(self):
+        self.thread.start()
+        deadline = time.time() + 10
+        while not self.server.started:
+            if time.time() > deadline:
+                raise RuntimeError("the stub server did not start")
+            time.sleep(0.02)
+        return self
+
+    def __exit__(self, *exc):
+        self.stub.closing = True
+        self.server.should_exit = True
+        self.thread.join(timeout=5)

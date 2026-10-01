@@ -1,0 +1,518 @@
+"""The states of one run, its event log and the worker thread (LLD-M2 section 4).
+
+One run at a time. The photo is read in a plain thread (OCR, no browser). A worker thread
+owns the Playwright browser for the whole run, because the sync API must stay on the thread
+that created it: it opens the browser at `searching`, runs the search and the decide pass,
+then waits on a queue for the cart pass and for the "close" job. The web layer only calls the
+public methods below; every one takes the lock, checks the state and returns or raises
+`WrongState` (the app turns it into `409 {state}`).
+
+Everything that touches a browser, the network, the model or the disk is injected, so the
+tests run the whole flow with fakes.
+"""
+
+import contextlib
+import queue
+import re
+import threading
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
+from shopping_minion.config import DecideConfig, load_decide_config
+from shopping_minion.decide import nothing_fit
+from shopping_minion.items import Candidate, CartDraft, Decision, Item
+from shopping_minion.preferences import load_preferences
+from shopping_minion.run import _ordered_candidates
+from shopping_minion.storage import Storage
+from shopping_minion.workflow import (
+    CartOutcome,
+    DraftEdit,
+    decide_list,
+    draft_cart,
+    edit_draft,
+    fill_cart,
+    search_list,
+)
+
+LOGIN_MESSAGE = "faça login: `shopping-minion login`"
+JOIN_SECONDS = 60  # how long DELETE waits for the worker to close the browser
+
+WORKING = ("reading_list", "searching", "deciding", "filling_cart")
+WAITING = ("reviewing_list", "picking", "reviewing_cart")
+FINISHED = ("done", "failed", "cancelled")
+
+
+class WrongState(Exception):
+    """The call doesn't fit the run's current state (HTTP 409 with the state)."""
+
+    def __init__(self, state: str) -> None:
+        super().__init__(state)
+        self.state = state
+
+
+class BadRequest(ValueError):
+    """The call fits the state but its content doesn't (HTTP 422)."""
+
+
+class _Cancelled(Exception):
+    """Raised inside the worker's progress callback to end a search the user cancelled."""
+
+
+@dataclass
+class Snapshot:
+    state: str
+    run_id: int | None
+    message: str | None
+    items: list[Item] | None
+    picks_left: int | None
+    draft: CartDraft | None
+    outcome: CartOutcome | None
+
+
+@dataclass
+class PickView:
+    index: int  # position of the item in the run's list
+    left: int  # picks still to make, this one included
+    position: int  # 1-based position among the picks of this run
+    total: int  # picks in this run
+    decision: Decision
+    candidates: list[Candidate]  # Jev's pick first
+    nothing_fit: bool
+
+
+class _Run:
+    def __init__(self, run_id: int, photo: Path) -> None:
+        self.id = run_id
+        self.photo = photo
+        self.message: str | None = None
+        self.ocr_items: list[Item] = []
+        self.items: list[Item] | None = None
+        self.config: DecideConfig | None = None
+        self.prefs: dict[str, dict] = {}
+        self.decisions: list[Decision] = []
+        self.pending: list[int] = []  # indexes into `decisions` still to pick, in order
+        self.total_picks = 0
+        self.draft: CartDraft | None = None
+        self.outcome: CartOutcome | None = None
+        self.cancel = threading.Event()
+        self.jobs: queue.Queue[tuple] = queue.Queue()
+        self.worker: threading.Thread | None = None
+
+
+def _describe(exc: Exception) -> str:
+    return str(exc) or type(exc).__name__
+
+
+def _transcribe(photo: Path) -> list[Item]:
+    from shopping_minion.intake import transcribe
+
+    return transcribe(photo)
+
+
+def _jev_client() -> Any:
+    from typesafe_sdk import TypeSafeClient
+
+    return TypeSafeClient()
+
+
+class RunStateMachine:
+    def __init__(
+        self,
+        *,
+        db_path: str | Path = "data/shopping-minion.sqlite",
+        prefs_path: str | Path = "data/preferencias.yaml",
+        config_path: str | Path = "config/decide.yaml",
+        uploads_dir: str | Path = "data/uploads",
+        transcribe_fn: Callable[[Path], list[Item]] | None = None,
+        open_browser_fn: Callable[[], Any] = open_browser,
+        ensure_logged_in_fn: Callable[[Any], None] = ensure_logged_in,
+        search_fn: Callable[..., list[list[Candidate]]] = search_list,
+        decide_fn: Callable[..., list[Decision]] = decide_list,
+        fill_fn: Callable[..., CartOutcome] = fill_cart,
+        client_factory: Callable[[], Any] | None = None,
+    ) -> None:
+        self._db_path = Path(db_path)
+        self._prefs_path = Path(prefs_path)
+        self._config_path = Path(config_path)
+        self._uploads_dir = Path(uploads_dir)
+        self._transcribe_fn = transcribe_fn or _transcribe
+        self._open_browser_fn = open_browser_fn
+        self._ensure_logged_in_fn = ensure_logged_in_fn
+        self._search_fn = search_fn
+        self._decide_fn = decide_fn
+        self._fill_fn = fill_fn
+        self._client_factory = client_factory or _jev_client
+
+        self._lock = threading.RLock()
+        self._state = "idle"
+        self._run: _Run | None = None
+        self._events: list[dict] = []
+        self._seq = 0  # never reset, so a client's cursor survives from one run to the next
+
+    # --- reading ----------------------------------------------------------------------------
+
+    @property
+    def state(self) -> str:
+        return self._state
+
+    @property
+    def last_seq(self) -> int:
+        return self._seq
+
+    def snapshot(self) -> Snapshot:
+        with self._lock:
+            run = self._run
+            if run is None:
+                return Snapshot(self._state, None, None, None, None, None, None)
+            return Snapshot(
+                state=self._state,
+                run_id=run.id,
+                message=run.message,
+                items=None if run.items is None else list(run.items),
+                picks_left=len(run.pending) if self._state == "picking" else None,
+                draft=run.draft,
+                outcome=run.outcome,
+            )
+
+    def events_after(self, seq: int) -> list[dict]:
+        with self._lock:
+            return [event for event in self._events if event["seq"] > seq]
+
+    def recent_runs(self, limit: int = 5) -> list[dict]:
+        with self._db() as db:
+            return db.recent_runs(limit)
+
+    def photo_path(self) -> Path | None:
+        with self._lock:
+            return None if self._run is None else self._run.photo
+
+    # --- the run's steps, called by the web layer -------------------------------------------
+
+    def start(self, photo: bytes, suffix: str = ".jpg") -> int:
+        """idle -> reading_list: save the photo and read it in a plain thread."""
+        with self._lock:
+            if self._state != "idle":
+                raise WrongState(self._state)
+            suffix = suffix.lower()
+            if not re.fullmatch(r"\.[a-z0-9]{1,5}", suffix):
+                suffix = ".jpg"
+            with self._db() as db:
+                run_id = db.new_run(photo=None)
+                path = self._uploads_dir / f"{run_id}{suffix}"
+                self._uploads_dir.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(photo)
+                db.set_photo(run_id, str(path))
+            run = _Run(run_id, path)
+            self._run = run
+            self._events.clear()
+            self._set_state("reading_list")
+            threading.Thread(target=self._ocr, args=(run,), daemon=True).start()
+            return run_id
+
+    def save_list(self, items: list[Item]) -> None:
+        """reviewing_list: keep the edits (SQLite too, so a reload finds them)."""
+        with self._lock:
+            run = self._require("reviewing_list")
+            run.items = list(items)
+            with self._db() as db:
+                db.save_items(run.id, run.ocr_items, run.items)
+
+    def confirm_list(self) -> None:
+        """reviewing_list -> searching: the worker opens the browser and searches."""
+        with self._lock:
+            run = self._require("reviewing_list")
+            if not run.items:
+                raise BadRequest("a lista não tem itens")
+            self._set_status(run, "items_saved")
+            self._set_state("searching")
+            run.worker = threading.Thread(target=self._work, args=(run,), daemon=True)
+            run.worker.start()
+
+    def next_pick(self) -> PickView:
+        with self._lock:
+            run = self._require("picking")
+            index = run.pending[0]
+            decision = run.decisions[index]
+            return PickView(
+                index=index,
+                left=len(run.pending),
+                position=run.total_picks - len(run.pending) + 1,
+                total=run.total_picks,
+                decision=decision,
+                candidates=_ordered_candidates(decision),
+                nothing_fit=nothing_fit(decision, run.config),
+            )
+
+    def pick(self, index: int, product_id: str | None) -> None:
+        """picking: the answer for the item `next_pick` showed; None skips it."""
+        with self._lock:
+            run = self._require("picking")
+            if index != run.pending[0]:
+                raise BadRequest(f"índice inesperado {index}; o próximo é {run.pending[0]}")
+            decision = run.decisions[index]
+            if product_id is None:
+                update = {"choice": None, "status": "skipped"}
+            elif product_id in {c.product_id for c in decision.candidates}:
+                update = {"choice": product_id, "confidence": None, "status": "user_chosen"}
+            else:
+                raise BadRequest(f"produto {product_id!r} não está entre os candidatos")
+            run.decisions[index] = decision.model_copy(update=update)
+            run.pending.pop(0)
+            with self._db() as db:
+                db.save_decisions(run.id, run.decisions)
+            if not run.pending:
+                self._enter_cart_review(run)
+
+    def edit_cart(self, edits: list[DraftEdit]) -> CartDraft:
+        """reviewing_cart: apply the edits; the draft comes back recomputed."""
+        with self._lock:
+            run = self._require("reviewing_cart")
+            try:
+                run.draft = edit_draft(run.draft, edits)
+            except ValueError as exc:
+                raise BadRequest(str(exc)) from exc
+            return run.draft
+
+    def confirm_cart(self) -> None:
+        """reviewing_cart -> filling_cart: the worker adds the products."""
+        with self._lock:
+            run = self._require("reviewing_cart")
+            if not run.draft.lines:
+                raise BadRequest("nada a adicionar ao carrinho")
+            self._set_status(run, "adding")
+            self._set_state("filling_cart")
+            run.jobs.put(("fill", run.draft))
+
+    def cancel(self) -> str:
+        """Any working or waiting state -> cancelled. In filling_cart it only asks the worker
+        to stop: the state changes once the current product is done."""
+        with self._lock:
+            run = self._run
+            if self._state not in WORKING + WAITING or run is None:
+                raise WrongState(self._state)
+            run.cancel.set()
+            if self._state != "filling_cart":
+                run.message = "cancelado"
+                self._set_status(run, "cancelled")
+                self._set_state("cancelled")
+                run.jobs.put(("close",))  # a worker waiting for a job closes the browser
+            return self._state
+
+    def dispose(self) -> None:
+        """done / failed / cancelled -> idle: close the browser and forget the run."""
+        with self._lock:
+            run = self._require(*FINISHED)
+            run.jobs.put(("close",))
+            worker = run.worker
+        if worker is not None:
+            worker.join(JOIN_SECONDS)
+        with self._lock:
+            if self._run is run:
+                self._run = None
+                self._set_state("idle")
+
+    def shutdown(self) -> None:
+        """Server stopping: close the browser if a run holds it."""
+        with self._lock:
+            run = self._run
+            if run is not None:
+                run.cancel.set()
+                run.jobs.put(("close",))
+        if run is not None and run.worker is not None:
+            run.worker.join(JOIN_SECONDS)
+
+    # --- internals, all under the lock ------------------------------------------------------
+
+    @contextlib.contextmanager
+    def _db(self) -> Iterator[Storage]:
+        # A connection per use: sqlite connections belong to the thread that opened them.
+        db = Storage(self._db_path)
+        try:
+            yield db
+        finally:
+            db.close()
+
+    def _require(self, *states: str) -> _Run:
+        if self._state not in states or self._run is None:
+            raise WrongState(self._state)
+        return self._run
+
+    def _emit(self, run: _Run, kind: str, data: dict) -> None:
+        with self._lock:
+            if self._run is not run:  # a thread of a run that is gone
+                return
+            self._seq += 1
+            self._events.append(
+                {"seq": self._seq, "state": self._state, "kind": kind, "data": data}
+            )
+
+    def _set_state(self, state: str) -> None:
+        self._state = state
+        self._seq += 1
+        self._events.append(
+            {"seq": self._seq, "state": state, "kind": "state", "data": {"state": state}}
+        )
+
+    def _advance(self, run: _Run, expected: tuple[str, ...], new: str) -> bool:
+        """Move to `new` if this run is still current and in one of `expected`."""
+        with self._lock:
+            if self._run is not run or self._state not in expected:
+                return False
+            self._set_state(new)
+            return True
+
+    def _set_status(self, run: _Run, status: str) -> None:
+        with self._db() as db:
+            db.set_status(run.id, status)
+
+    def _fail(self, run: _Run, message: str, status: str = "error") -> None:
+        with self._lock:
+            if self._run is not run or self._state not in WORKING + WAITING:
+                return  # cancelled or gone meanwhile
+            run.message = message
+            self._emit(run, "error", {"message": message})
+            self._set_status(run, status)
+            self._set_state("failed")
+
+    def _enter_cart_review(self, run: _Run) -> None:
+        with self._lock:
+            run.draft = draft_cart(run.decisions, run.prefs)
+            self._set_status(run, "resolved")
+            self._set_state("reviewing_cart")
+
+    # --- reading_list: OCR in a plain thread ------------------------------------------------
+
+    def _ocr(self, run: _Run) -> None:
+        try:
+            items = self._transcribe_fn(run.photo)
+        except Exception as exc:
+            self._fail(run, f"não consegui ler a lista: {_describe(exc)}")
+            return
+        with self._lock:
+            if self._run is not run or self._state != "reading_list":
+                return
+            run.ocr_items = list(items)
+            run.items = list(items)
+            with self._db() as db:
+                db.save_items(run.id, run.ocr_items, run.items)
+            self._set_status(run, "ocr_done")
+            self._set_state("reviewing_list")
+
+    # --- the worker: owns the browser from searching until the run is closed ----------------
+
+    def _work(self, run: _Run) -> None:
+        try:
+            run.config = load_decide_config(self._config_path)
+            run.prefs = load_preferences(self._prefs_path)
+        except Exception as exc:
+            self._fail(run, f"configuração inválida: {_describe(exc)}")
+            return
+        try:
+            with self._open_browser_fn() as (_browser, context):
+                page = context.new_page()
+                try:
+                    self._ensure_logged_in_fn(page)
+                except NotLoggedInError:
+                    self._fail(run, LOGIN_MESSAGE, status="not_logged_in")
+                    return
+                if not self._search_and_decide(run, page):
+                    return  # the browser closes: there is nothing to look at in it
+                while True:  # waiting: the cart pass, or the end of the run
+                    job = run.jobs.get()
+                    if job[0] == "close":
+                        return
+                    if job[0] == "fill":
+                        self._fill(run, page, job[1])
+        except Exception as exc:  # the browser failed to open, or the page died
+            self._fail(run, _describe(exc))
+
+    def _search_and_decide(self, run: _Run, page: Any) -> bool:
+        """True when the run reached a waiting state; False when it ended or was cancelled."""
+
+        def progress(i: int, n: int, item: Item, candidates: list[Candidate]) -> None:
+            if run.cancel.is_set():
+                raise _Cancelled
+            self._emit(
+                run, "search", {"i": i, "n": n, "term": item.search_term, "found": len(candidates)}
+            )
+
+        try:
+            candidates = self._search_fn(page, run.items, progress)
+        except _Cancelled:
+            return False
+        except Exception as exc:
+            self._fail(run, f"a busca falhou: {_describe(exc)}")
+            return False
+        if not self._advance(run, ("searching",), "deciding"):
+            return False
+        self._set_status(run, "searched")
+        self._emit(run, "decide", {"phase": "start", "accepted": None, "to_pick": None})
+        try:
+            decisions = self._decide_fn(
+                run.items, candidates, run.prefs, run.config, self._client_factory()
+            )
+        except Exception as exc:
+            self._fail(run, f"o Jev falhou: {_describe(exc)}")
+            return False
+        with self._lock:
+            if self._run is not run or self._state != "deciding":
+                return False
+            # An item with no results never gets a prompt (as in the terminal): skipped.
+            run.decisions = [
+                d.model_copy(update={"status": "skipped"})
+                if d.status in ("ask", "no_match") and not d.candidates
+                else d
+                for d in decisions
+            ]
+            run.pending = [
+                i for i, d in enumerate(run.decisions) if d.status in ("ask", "no_match")
+            ]
+            run.total_picks = len(run.pending)
+            with self._db() as db:
+                db.save_decisions(run.id, run.decisions)
+            self._set_status(run, "decided")
+            accepted = sum(d.status == "accepted" for d in run.decisions)
+            self._emit(
+                run, "decide", {"phase": "end", "accepted": accepted, "to_pick": run.total_picks}
+            )
+            if run.pending:
+                self._set_state("picking")
+            else:
+                self._enter_cart_review(run)
+        return True
+
+    def _fill(self, run: _Run, page: Any, draft: CartDraft) -> None:
+        def progress(i: int, n: int, candidate: Candidate, result: Any) -> None:
+            self._emit(
+                run,
+                "fill",
+                {
+                    "i": i,
+                    "n": n,
+                    "name": candidate.name,
+                    "status": result.status,
+                    "message": result.message,
+                },
+            )
+
+        try:
+            outcome = self._fill_fn(page, draft, progress, should_stop=run.cancel.is_set)
+        except Exception as exc:  # the window stays open on whatever the cart holds
+            self._fail(run, f"não consegui completar o carrinho: {_describe(exc)}")
+            return
+        with self._lock:
+            if self._run is not run or self._state != "filling_cart":
+                return
+            run.outcome = outcome
+            with self._db() as db:
+                db.save_cart(run.id, outcome.results)
+            if outcome.stopped:
+                run.message = "cancelado; o carrinho pode estar incompleto"
+                self._set_status(run, "cancelled")
+                self._set_state("cancelled")
+            else:  # a cancel that came after the last product changes nothing
+                self._set_status(run, "done")
+                self._set_state("done")

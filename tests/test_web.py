@@ -1,0 +1,824 @@
+"""The web app with fakes: no browser, no Jev, no claude, no site."""
+
+import asyncio
+import contextlib
+import json
+import threading
+import time
+from decimal import Decimal
+from types import SimpleNamespace
+
+import pytest
+from fastapi.testclient import TestClient
+
+from shopping_minion import cli
+from shopping_minion.browser import NotLoggedInError
+from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
+from shopping_minion.merge import line_label
+from shopping_minion.reconcile import expected_amount, format_amount, reconcile
+from shopping_minion.web.app import (
+    Access,
+    create_app,
+    is_loopback,
+    lan_ip,
+    make_access,
+    qr_svg,
+    sse_stream,
+)
+from shopping_minion.web.statemachine import RunStateMachine
+from shopping_minion.workflow import CartOutcome
+
+
+def cand(pid, name, unit="un", step_kg=None, price="10.00", image=None):
+    return Candidate(
+        product_id=pid,
+        slug=f"slug-{pid}",
+        name=name,
+        brand="Marca",
+        price=Decimal(price),
+        list_price=None,
+        unit_of_sale=unit,
+        step_kg=step_kg,
+        available=True,
+        image=image,
+    )
+
+
+def item(name, quantity=None):
+    return Item(source_line=name, name=name, search_term=name, quantity=quantity)
+
+
+FRANGO = cand("1", "Filé de Frango kg", unit="kg", step_kg=0.1, price="27.99", image="http://img/1")
+ATUM_A = cand("2", "Atum Gomes 170g", price="13.98")
+ATUM_B = cand("3", "Atum Coqueiro 170g", price="12.00")
+FEIJAO = cand("4", "Feijão Camil 1kg", price="8.00")
+
+LIST = [
+    item("frango", Quantity(value=1, unit="kg")),
+    item("atum"),
+    item("feijão preto"),
+    item("sal"),
+]
+RESULTS = {"frango": [FRANGO], "atum": [ATUM_A, ATUM_B], "feijão preto": [FEIJAO], "sal": []}
+# name -> (choice, confidence, status)
+DECISIONS = {
+    "frango": ("1", 0.95, "accepted"),
+    "atum": ("3", 0.6, "ask"),
+    "feijão preto": (None, 0.9, "no_match"),
+    "sal": (None, None, "no_match"),
+}
+
+
+class World:
+    """The fakes, and what they saw."""
+
+    def __init__(self, tmp_path):
+        self.tmp_path = tmp_path
+        self.logged_in = True
+        self.opened = 0
+        self.closed = 0
+        self.searched = 0
+        self.items_seen = None
+        self.transcribe_error = None
+        self.fill_gate: threading.Event | None = None  # when set, fill waits after a product
+        self.fill_gate_at = 1  # ... after this one (1-based)
+        self.fill_started = threading.Event()
+        self.cart_before = [("Leite UHT", "1")]
+
+    # injected functions
+    def transcribe(self, photo):
+        assert photo.read_bytes() == b"fake-jpeg"
+        if self.transcribe_error:
+            raise RuntimeError(self.transcribe_error)
+        return list(LIST)
+
+    @contextlib.contextmanager
+    def open_browser(self):
+        self.opened += 1
+        try:
+            yield None, SimpleNamespace(new_page=lambda: "page")
+        finally:
+            self.closed += 1
+
+    def ensure_logged_in(self, page):
+        assert page == "page"
+        if not self.logged_in:
+            raise NotLoggedInError("Not logged in")
+
+    def search(self, page, items, progress):
+        self.searched += 1
+        self.items_seen = items
+        out = []
+        for i, it in enumerate(items, start=1):
+            found = RESULTS[it.name]
+            out.append(found)
+            progress(i, len(items), it, found)
+        return out
+
+    def decide(self, items, candidates, prefs, config, client):
+        assert client == "jev-client"
+        decisions = []
+        for it, found in zip(items, candidates, strict=True):
+            choice, confidence, status = DECISIONS[it.name]
+            decisions.append(
+                Decision(
+                    item=it,
+                    candidates=found,
+                    choice=choice,
+                    confidence=confidence,
+                    status=status,
+                )
+            )
+        return decisions
+
+    def fill(self, page, draft, progress, should_stop=None):
+        results = []
+        for i, line in enumerate(draft.lines, start=1):
+            if should_stop is not None and should_stop():
+                break
+            result = CartResult(
+                product_id=line.line_id, status="added", quantity_shown=None, message=None
+            )
+            results.append(result)
+            progress(i, len(draft.lines), line.candidate, result)
+            if self.fill_gate is not None and i == self.fill_gate_at:
+                self.fill_started.set()
+                assert self.fill_gate.wait(5)
+        after = list(self.cart_before)
+        for line in draft.lines[: len(results)]:
+            quantity = format_amount(expected_amount(line.candidate, line.target))
+            after.append((line.candidate.name, quantity))
+        planned = [(line_label(ln), ln.candidate, ln.target) for ln in draft.lines]
+        checks, extras = reconcile(planned, self.cart_before, after)
+        return CartOutcome(
+            before=self.cart_before,
+            results=results,
+            after=after,
+            checks=checks,
+            extras=extras,
+            stopped=len(results) < len(draft.lines),
+        )
+
+
+@pytest.fixture
+def world(tmp_path):
+    (tmp_path / "decide.yaml").write_text(
+        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\n"
+    )
+    return World(tmp_path)
+
+
+def make_machine(world):
+    return RunStateMachine(
+        db_path=world.tmp_path / "db" / "t.sqlite",
+        prefs_path=world.tmp_path / "preferencias.yaml",  # absent: no preferences
+        config_path=world.tmp_path / "decide.yaml",
+        uploads_dir=world.tmp_path / "uploads",
+        # lambdas, so a test can swap one of the world's methods after the machine exists
+        transcribe_fn=lambda photo: world.transcribe(photo),
+        open_browser_fn=lambda: world.open_browser(),
+        ensure_logged_in_fn=lambda page: world.ensure_logged_in(page),
+        search_fn=lambda *a: world.search(*a),
+        decide_fn=lambda *a: world.decide(*a),
+        fill_fn=lambda *a, **kw: world.fill(*a, **kw),
+        client_factory=lambda: "jev-client",
+    )
+
+
+@pytest.fixture
+def machine(world):
+    return make_machine(world)
+
+
+@pytest.fixture
+def client(machine):
+    app = create_app(machine, access=Access(is_loopback=lambda _host: True))
+    with TestClient(app) as test_client:
+        yield test_client
+    machine.shutdown()
+
+
+def wait_for(client, state, timeout=5.0):
+    deadline = time.monotonic() + timeout
+    snap = None
+    while time.monotonic() < deadline:
+        snap = client.get("/api/run").json()
+        if snap["state"] == state:
+            return snap
+        time.sleep(0.01)
+    raise AssertionError(f"state stayed {snap['state']!r}, wanted {state!r}: {snap}")
+
+
+def upload(client):
+    return client.post("/api/run", files={"photo": ("lista.jpg", b"fake-jpeg", "image/jpeg")})
+
+
+def events(client, after=0):
+    text = client.get(f"/api/run/events?after={after}&follow=false").text
+    return [json.loads(line[6:]) for line in text.splitlines() if line.startswith("data: ")]
+
+
+def to_reviewing_list(client):
+    assert upload(client).status_code == 202
+    return wait_for(client, "reviewing_list")
+
+
+def to_picking(client):
+    to_reviewing_list(client)
+    assert client.post("/api/run/list/confirm").status_code == 202
+    return wait_for(client, "picking")
+
+
+def to_reviewing_cart(client):
+    to_picking(client)
+    client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
+    client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    return wait_for(client, "reviewing_cart")
+
+
+# --- the whole flow ---------------------------------------------------------------------------
+
+
+def test_the_whole_flow_in_state_order(client, world):
+    assert client.get("/api/run").json() == {"state": "idle", "run_id": None, "message": None}
+    assert client.get("/api/runs").json() == []
+
+    # upload -> reading_list -> reviewing_list
+    response = upload(client)
+    assert response.status_code == 202
+    run_id = response.json()["run_id"]
+    snap = wait_for(client, "reviewing_list")
+    assert snap["run_id"] == run_id
+    assert [i["name"] for i in snap["list"]] == ["frango", "atum", "feijão preto", "sal"]
+    assert (world.tmp_path / "uploads" / f"{run_id}.jpg").read_bytes() == b"fake-jpeg"
+    assert client.get("/api/run/photo").content == b"fake-jpeg"
+
+    # PUT list keeps the edits across a reload
+    edited = [i.model_dump(mode="json") for i in LIST]
+    edited[1]["constraints"] = ["em lata"]
+    assert client.put("/api/run/list", json={"items": edited}).status_code == 200
+    assert client.get("/api/run").json()["list"][1]["constraints"] == ["em lata"]
+
+    # confirm -> searching -> deciding -> picking
+    assert client.post("/api/run/list/confirm").status_code == 202
+    snap = wait_for(client, "picking")
+    assert snap["picks_left"] == 2
+    assert world.opened == 1 and world.closed == 0  # the window stays open
+
+    first = client.get("/api/run/picks/next").json()
+    assert (first["index"], first["left"], first["position"], first["total"]) == (1, 2, 1, 2)
+    assert first["item"]["name"] == "atum"
+    assert [c["product_id"] for c in first["candidates"]] == ["3", "2"]  # Jev's pick first
+    assert first["candidates"][0]["description"].startswith("Atum Coqueiro 170g, marca Marca")
+    assert first["candidates"][0]["price"] == 12.0
+    assert first["jev"] == {"choice": "3", "confidence": 0.6, "nothing_fit": False}
+
+    assert client.post("/api/run/picks", json={"index": 1, "product_id": "2"}).status_code == 200
+    second = client.get("/api/run/picks/next").json()
+    assert (second["index"], second["left"], second["position"]) == (2, 1, 2)
+    assert second["jev"] == {"choice": None, "confidence": 0.9, "nothing_fit": False}
+    assert client.post("/api/run/picks", json={"index": 2, "product_id": None}).status_code == 200
+
+    # reviewing_cart
+    snap = wait_for(client, "reviewing_cart")
+    draft = snap["cart_draft"]
+    assert [line["line_id"] for line in draft["lines"]] == ["1", "2"]
+    frango, atum = draft["lines"]
+    assert frango["items"] == ["frango"]
+    assert frango["quantity"] == {"value": 1.0, "unit": "kg"}
+    assert frango["clicks"] == 10 and frango["flags"] == []
+    assert frango["estimated_price"] == 27.99
+    assert frango["product"]["image"] == "http://img/1"
+    assert atum["flags"] == ["QUANTITY_ASSUMED"] and atum["clicks"] == 1
+    assert draft["skipped"] == ["feijão preto", "sal"]
+    assert draft["estimated_total"] == pytest.approx(27.99 + 13.98)
+
+    edit = {"lines": [{"line_id": "1", "quantity": {"value": 500, "unit": "g"}, "remove": False}]}
+    response = client.put("/api/run/cart-draft", json=edit)
+    assert response.status_code == 200
+    edited_draft = response.json()["cart_draft"]
+    assert edited_draft["lines"][0]["clicks"] == 5
+    assert edited_draft["estimated_total"] == pytest.approx(13.995 + 13.98, abs=0.01)
+    assert client.get("/api/run").json()["cart_draft"]["lines"][0]["clicks"] == 5
+
+    # confirm -> filling_cart -> done
+    assert client.post("/api/run/cart-draft/confirm").status_code == 202
+    snap = wait_for(client, "done")
+    outcome = snap["outcome"]
+    assert outcome["total"] == 2 and outcome["ok_count"] == 2 and outcome["stopped"] is False
+    assert outcome["checks"][0] == {
+        "item_names": ["frango"],
+        "product_name": "Filé de Frango kg",
+        "expected": "500g",
+        "found": "500g",
+        "was_before": False,
+        "ok": True,
+        "verdict": "ok",
+    }
+    assert outcome["extras"] == [{"name": "Leite UHT", "quantity": "1", "was_before": True}]
+    assert [r["status"] for r in outcome["results"]] == ["added", "added"]
+    assert world.closed == 0  # still open on the cart
+
+    # the events, in the order of the LLD
+    log = events(client)
+    assert [e["data"]["state"] for e in log if e["kind"] == "state"] == [
+        "reading_list",
+        "reviewing_list",
+        "searching",
+        "deciding",
+        "picking",
+        "reviewing_cart",
+        "filling_cart",
+        "done",
+    ]
+    assert [e["seq"] for e in log] == sorted({e["seq"] for e in log})
+    searches = [e for e in log if e["kind"] == "search"]
+    assert [e["data"] for e in searches][:2] == [
+        {"i": 1, "n": 4, "term": "frango", "found": 1},
+        {"i": 2, "n": 4, "term": "atum", "found": 2},
+    ]
+    assert {e["state"] for e in searches} == {"searching"}
+    decides = [e["data"] for e in log if e["kind"] == "decide"]
+    assert decides == [
+        {"phase": "start", "accepted": None, "to_pick": None},
+        {"phase": "end", "accepted": 1, "to_pick": 2},
+    ]
+    fills = [e["data"] for e in log if e["kind"] == "fill"]
+    assert fills[0] == {
+        "i": 1,
+        "n": 2,
+        "name": "Filé de Frango kg",
+        "status": "added",
+        "message": None,
+    }
+    assert len(fills) == 2
+
+    # the history, from SQLite
+    (history,) = client.get("/api/runs").json()
+    assert history["run_id"] == run_id and history["status"] == "done" and history["items"] == 4
+    assert history["created_at"]
+
+    # DELETE closes the browser and goes back to idle
+    assert client.delete("/api/run").status_code == 200
+    assert world.closed == 1
+    assert client.get("/api/run").json()["state"] == "idle"
+    assert upload(client).status_code == 202  # and a new run can start
+
+
+def test_nothing_to_pick_goes_straight_to_reviewing_cart(client, monkeypatch):
+    monkeypatch.setitem(DECISIONS, "atum", ("3", 0.95, "accepted"))
+    monkeypatch.setitem(DECISIONS, "feijão preto", ("4", 0.9, "accepted"))
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    snap = wait_for(client, "reviewing_cart")
+    assert [line["line_id"] for line in snap["cart_draft"]["lines"]] == ["1", "3", "4"]
+    states = [e["data"]["state"] for e in events(client) if e["kind"] == "state"]
+    assert "picking" not in states
+
+
+def test_a_picked_product_is_saved_as_user_chosen(client, world):
+    to_reviewing_cart(client)
+    import sqlite3
+
+    con = sqlite3.connect(world.tmp_path / "db" / "t.sqlite")
+    rows = [json.loads(r[0]) for r in con.execute("SELECT decision_json FROM decisions")]
+    atum = rows[1]
+    assert (atum["status"], atum["choice"], atum["confidence"]) == ("user_chosen", "3", None)
+    assert rows[2]["status"] == "skipped" and rows[3]["status"] == "skipped"  # sal: no results
+    assert con.execute("SELECT status FROM runs").fetchone()[0] == "resolved"
+
+
+# --- 409 and 4xx ------------------------------------------------------------------------------
+
+CALLS = {
+    "upload": lambda c: upload(c),
+    "put_list": lambda c: c.put("/api/run/list", json={"items": []}),
+    "confirm_list": lambda c: c.post("/api/run/list/confirm"),
+    "next_pick": lambda c: c.get("/api/run/picks/next"),
+    "pick": lambda c: c.post("/api/run/picks", json={"index": 0, "product_id": None}),
+    "put_cart": lambda c: c.put("/api/run/cart-draft", json={"lines": []}),
+    "confirm_cart": lambda c: c.post("/api/run/cart-draft/confirm"),
+    "cancel": lambda c: c.post("/api/run/cancel"),
+    "delete": lambda c: c.delete("/api/run"),
+}
+ALLOWED = {
+    "idle": {"upload"},
+    "reviewing_list": {"put_list", "confirm_list", "cancel"},
+    "picking": {"next_pick", "pick", "cancel"},
+    "reviewing_cart": {"put_cart", "confirm_cart", "cancel"},
+    "done": {"delete"},
+}
+REACH = {
+    "idle": lambda c: None,
+    "reviewing_list": to_reviewing_list,
+    "picking": to_picking,
+    "reviewing_cart": to_reviewing_cart,
+}
+
+
+@pytest.mark.parametrize("state", ["idle", "reviewing_list", "picking", "reviewing_cart"])
+def test_every_wrong_state_call_is_409_with_the_state(client, state):
+    REACH[state](client)
+    for name, call in CALLS.items():
+        if name in ALLOWED[state]:
+            continue
+        response = call(client)
+        assert response.status_code == 409, (state, name)
+        assert response.json() == {"state": state}, (state, name)
+    assert client.get("/api/run").json()["state"] == state  # nothing moved
+
+
+def test_wrong_state_calls_in_done(client):
+    to_reviewing_cart(client)
+    client.post("/api/run/cart-draft/confirm")
+    wait_for(client, "done")
+    for name, call in CALLS.items():
+        if name in ALLOWED["done"]:
+            continue
+        response = call(client)
+        assert (response.status_code, response.json()) == (409, {"state": "done"}), name
+
+
+def test_a_second_run_is_409_and_does_not_disturb_the_first(client):
+    to_reviewing_list(client)
+    response = upload(client)
+    assert response.status_code == 409 and response.json() == {"state": "reviewing_list"}
+    assert client.get("/api/run").json()["state"] == "reviewing_list"
+
+
+def test_a_pick_for_the_wrong_index_or_product_is_422(client):
+    to_picking(client)
+    wrong_index = client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    assert wrong_index.status_code == 422
+    assert client.post("/api/run/picks", json={"index": 99, "product_id": None}).status_code == 422
+    unknown = client.post("/api/run/picks", json={"index": 1, "product_id": "999"})
+    assert unknown.status_code == 422
+    assert client.get("/api/run").json()["picks_left"] == 2  # nothing was consumed
+
+
+def test_bad_bodies_are_rejected(client):
+    to_reviewing_list(client)
+    assert client.put("/api/run/list", json={"items": [{"name": "x"}]}).status_code == 422
+    assert client.post("/api/run").status_code == 422  # no photo
+    assert client.put("/api/run/list", json={"items": []}).status_code == 200
+    assert client.post("/api/run/list/confirm").status_code == 422  # empty list
+
+
+def test_a_draft_edit_for_an_unknown_line_is_422_and_remove_moves_it_to_skipped(client):
+    to_reviewing_cart(client)
+    body = {"lines": [{"line_id": "nope", "quantity": None, "remove": True}]}
+    assert client.put("/api/run/cart-draft", json=body).status_code == 422
+    body = {"lines": [{"line_id": "3", "quantity": None, "remove": True}]}
+    draft = client.put("/api/run/cart-draft", json=body).json()["cart_draft"]
+    assert [line["line_id"] for line in draft["lines"]] == ["1"]
+    assert draft["skipped"] == ["feijão preto", "sal", "atum"]
+    body = {"lines": [{"line_id": "1", "quantity": None, "remove": True}]}
+    assert client.put("/api/run/cart-draft", json=body).json()["cart_draft"]["lines"] == []
+    assert client.post("/api/run/cart-draft/confirm").status_code == 422  # nothing to add
+
+
+# --- failures and cancel ----------------------------------------------------------------------
+
+
+def test_not_logged_in_fails_without_searching_and_closes_the_browser(client, world):
+    world.logged_in = False
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    snap = wait_for(client, "failed")
+    assert snap["message"] == "faça login: `shopping-minion login`"
+    assert world.searched == 0
+    errors = [e for e in events(client) if e["kind"] == "error"]
+    assert errors[0]["data"] == {"message": "faça login: `shopping-minion login`"}
+    assert client.delete("/api/run").status_code == 200
+    assert world.closed == 1
+    assert client.get("/api/run").json()["state"] == "idle"
+    status = client.get("/api/runs").json()[0]["status"]
+    assert status == "not_logged_in"
+
+
+def test_an_ocr_error_fails_the_run(client, world):
+    world.transcribe_error = "claude saiu com erro"
+    upload(client)
+    snap = wait_for(client, "failed")
+    assert "claude saiu com erro" in snap["message"]
+    client.delete("/api/run")
+    assert client.get("/api/run").json()["state"] == "idle"
+
+
+def test_a_search_error_fails_the_run(client, world, monkeypatch):
+    def boom(page, items, progress):
+        raise RuntimeError("sem resultados")
+
+    monkeypatch.setattr(world, "search", boom)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    snap = wait_for(client, "failed")
+    assert "sem resultados" in snap["message"]
+    client.delete("/api/run")
+    assert world.closed == 1
+
+
+def test_a_jev_error_fails_the_run(client, world, monkeypatch):
+    def boom(*args):
+        raise RuntimeError("sem chave")
+
+    monkeypatch.setattr(world, "decide", boom)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    snap = wait_for(client, "failed")
+    assert "sem chave" in snap["message"]
+
+
+def test_cancel_in_picking_ends_the_run_and_closes_the_browser(client, world):
+    to_picking(client)
+    assert client.post("/api/run/cancel").json() == {"state": "cancelled"}
+    snap = client.get("/api/run").json()
+    assert snap["state"] == "cancelled" and snap["message"] == "cancelado"
+    deadline = time.monotonic() + 5
+    while world.closed == 0 and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert world.closed == 1
+    assert client.delete("/api/run").status_code == 200
+
+
+def test_cancel_in_reviewing_list_needs_no_browser(client, world):
+    to_reviewing_list(client)
+    assert client.post("/api/run/cancel").status_code == 200
+    assert client.get("/api/run").json()["state"] == "cancelled"
+    assert world.opened == 0
+    client.delete("/api/run")
+    assert client.get("/api/run").json()["state"] == "idle"
+
+
+def test_cancel_during_reading_ignores_the_ocr_result(client, world, monkeypatch):
+    gate = threading.Event()
+    original = world.transcribe
+
+    def slow(photo):
+        gate.wait(5)
+        return original(photo)
+
+    monkeypatch.setattr(world, "transcribe", slow)
+    upload(client)
+    assert client.post("/api/run/cancel").status_code == 200
+    gate.set()
+    time.sleep(0.1)
+    assert client.get("/api/run").json()["state"] == "cancelled"
+    assert "list" not in client.get("/api/run").json()
+
+
+def test_cancel_during_the_search_stops_it_and_closes_the_browser(client, world, monkeypatch):
+    release = threading.Event()
+    inside = threading.Event()
+    seen = []
+
+    def slow_search(page, items, progress):
+        inside.set()
+        assert release.wait(5)
+        for i, it in enumerate(items, start=1):
+            seen.append(i)
+            progress(i, len(items), it, RESULTS[it.name])  # raises once cancelled
+        return [RESULTS[it.name] for it in items]
+
+    monkeypatch.setattr(world, "search", slow_search)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    assert inside.wait(5)
+    assert client.post("/api/run/cancel").status_code == 200
+    release.set()
+    deadline = time.monotonic() + 5
+    while world.closed == 0 and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert world.closed == 1 and seen == [1]
+    assert client.get("/api/run").json()["state"] == "cancelled"
+
+
+def test_cancel_mid_fill_stops_after_the_current_product(client, world):
+    world.fill_gate = threading.Event()
+    to_reviewing_cart(client)
+    client.post("/api/run/cart-draft/confirm")
+    assert world.fill_started.wait(5)  # product 1 added, the fake waits
+    assert client.post("/api/run/cancel").json() == {"state": "filling_cart"}
+    assert client.get("/api/run").json()["state"] == "filling_cart"  # not yet
+    world.fill_gate.set()
+    snap = wait_for(client, "cancelled")
+    outcome = snap["outcome"]
+    assert outcome["stopped"] is True
+    assert len(outcome["results"]) == 1
+    assert outcome["total"] == 2 and outcome["ok_count"] == 1
+    missing = outcome["checks"][1]
+    assert missing["ok"] is False and missing["verdict"].startswith("FALTANDO")
+    assert world.closed == 0  # the cart stays open to look at
+    assert client.delete("/api/run").status_code == 200
+    assert world.closed == 1
+
+
+def test_a_cancel_after_the_last_product_leaves_the_run_done(client, world):
+    world.fill_gate = threading.Event()
+    world.fill_gate_at = 2  # waits after the last product
+    to_reviewing_cart(client)
+    client.post("/api/run/cart-draft/confirm")
+    assert world.fill_started.wait(5)
+    assert client.post("/api/run/cancel").json() == {"state": "filling_cart"}
+    world.fill_gate.set()
+    snap = wait_for(client, "done")
+    assert snap["outcome"]["stopped"] is False
+
+
+def test_a_fill_error_fails_the_run_and_keeps_the_browser(client, world, monkeypatch):
+    def boom(page, draft, progress, should_stop=None):
+        raise RuntimeError("a página morreu")
+
+    monkeypatch.setattr(world, "fill", boom)
+    to_reviewing_cart(client)
+    client.post("/api/run/cart-draft/confirm")
+    snap = wait_for(client, "failed")
+    assert "a página morreu" in snap["message"]
+    assert world.closed == 0
+    client.delete("/api/run")
+    assert world.closed == 1
+
+
+# --- access (LLD-M2 5.1) ----------------------------------------------------------------------
+
+
+def lan_client(
+    machine, token="s3cret", url="http://192.168.0.5:8000/?t=s3cret", host="192.168.0.9"
+):
+    access = Access(token=token, url=url, is_loopback=lambda h: h == "127.0.0.1")
+    return TestClient(create_app(machine, access=access), client=(host, 5000))
+
+
+def test_lan_without_token_is_401(machine):
+    with lan_client(machine) as client:
+        assert client.get("/api/run").status_code == 401
+        assert client.get("/").status_code == 401
+        assert client.post("/api/run").status_code == 401
+        assert client.get("/api/run?t=wrong").status_code == 401
+
+
+def test_lan_with_the_token_sets_a_cookie_and_redirects_without_it(machine):
+    with lan_client(machine) as client:
+        response = client.get("/api/run?t=s3cret&x=1", follow_redirects=False)
+        assert response.status_code == 303
+        assert response.headers["location"] == "/api/run?x=1"
+        cookie = response.headers["set-cookie"]
+        assert "sm_token=s3cret" in cookie and "HttpOnly" in cookie
+        # the client keeps the cookie: no token needed now
+        assert client.get("/api/run").json()["state"] == "idle"
+        client.cookies.clear()
+        assert client.get("/api/run").status_code == 401
+        response = client.get("/?t=s3cret", follow_redirects=False)
+        assert response.headers["location"] == "/"
+
+
+def test_a_wrong_cookie_is_401(machine):
+    with lan_client(machine) as client:
+        client.cookies.set("sm_token", "nope")
+        assert client.get("/api/run").status_code == 401
+
+
+def test_loopback_needs_no_token(machine):
+    with lan_client(machine, host="127.0.0.1") as client:
+        assert client.get("/api/run").status_code == 200
+
+
+def test_api_access_answers_only_loopback(machine):
+    with lan_client(machine, host="127.0.0.1") as client:
+        body = client.get("/api/access").json()
+        assert body["url"] == "http://192.168.0.5:8000/?t=s3cret"
+        assert body["qr_svg"].lstrip().startswith(("<?xml", "<svg"))
+    with lan_client(machine) as client:
+        client.cookies.set("sm_token", "s3cret")  # authorised, but not the desktop
+        assert client.get("/api/access").status_code == 403
+
+
+def test_local_mode_has_no_token_and_no_qr(machine):
+    access = make_access(local=True, port=8000)
+    assert access.token is None and access.url is None
+    with TestClient(create_app(machine, access=access), client=("127.0.0.1", 1)) as client:
+        assert client.get("/api/access").json() == {"url": None, "qr_svg": None}
+        assert client.get("/api/run").status_code == 200
+    with TestClient(create_app(machine, access=access), client=("192.168.0.9", 1)) as client:
+        assert client.get("/api/run").status_code == 401  # nobody else gets in
+
+
+def test_a_form_from_another_site_is_refused_even_on_loopback(machine):
+    with lan_client(machine, host="127.0.0.1") as client:
+        response = client.post("/api/run/cancel", headers={"Origin": "http://evil.example"})
+        assert response.status_code == 403
+        same = client.post("/api/run/cancel", headers={"Origin": "http://testserver"})
+        assert same.status_code == 409  # allowed through; idle has nothing to cancel
+
+
+def test_is_loopback():
+    assert is_loopback("127.0.0.1") and is_loopback("::1") and is_loopback("::ffff:127.0.0.1")
+    assert not is_loopback("192.168.0.9") and not is_loopback("testclient")
+    assert not is_loopback(None)
+
+
+def test_make_access_builds_a_random_token_url():
+    a = make_access(local=False, port=8123, ip="192.168.0.5")
+    b = make_access(local=False, port=8123, ip="192.168.0.5")
+    assert a.url == f"http://192.168.0.5:8123/?t={a.token}"
+    assert len(a.token) >= 32 and a.token != b.token
+
+
+def test_make_access_without_a_lan_address(monkeypatch):
+    monkeypatch.setattr("shopping_minion.web.app.lan_ip", lambda: None)
+    assert make_access(local=False, port=8000) is None
+
+
+def test_lan_ip_is_a_non_loopback_address_or_none():
+    ip = lan_ip()
+    assert ip is None or (ip.count(".") == 3 and not is_loopback(ip))
+
+
+def test_qr_svg_is_an_svg():
+    assert "<svg" in qr_svg("http://192.168.0.5:8000/?t=abc")
+
+
+# --- serve ------------------------------------------------------------------------------------
+
+
+def test_serve_local_binds_127_0_0_1(monkeypatch, capsys):
+    seen = {}
+    monkeypatch.setattr("uvicorn.run", lambda app, **kw: seen.update(kw))
+    cli.main(["serve", "--local", "--port", "8123"])
+    assert seen["host"] == "127.0.0.1" and seen["port"] == 8123 and seen["workers"] == 1
+    assert "?t=" not in capsys.readouterr().out
+
+
+def test_serve_lan_prints_the_url_and_a_qr(monkeypatch, capsys):
+    seen = {}
+    monkeypatch.setattr("uvicorn.run", lambda app, **kw: seen.update(kw))
+    monkeypatch.setattr("shopping_minion.web.app.lan_ip", lambda: "192.168.0.5")
+    cli.main(["serve"])
+    out = capsys.readouterr().out
+    assert seen["host"] == "0.0.0.0" and seen["port"] == 8000
+    assert "http://192.168.0.5:8000/?t=" in out
+    assert "█" in out or "▀" in out or "▄" in out  # the QR, as text
+
+
+def test_serve_without_a_lan_address_exits_1(monkeypatch):
+    monkeypatch.setattr("shopping_minion.web.app.lan_ip", lambda: None)
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["serve"])
+    assert exc.value.code == 1
+
+
+# --- server-sent events -----------------------------------------------------------------------
+
+
+def test_events_after_a_seq_only_returns_the_newer_ones(client):
+    to_reviewing_list(client)
+    everything = events(client)
+    assert [e["kind"] for e in everything] == ["state", "state"]
+    assert events(client, after=everything[0]["seq"]) == everything[1:]
+    assert events(client, after=everything[-1]["seq"]) == []
+    response = client.get("/api/run/events?follow=false")
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert response.text.startswith("data: {")
+
+
+def test_events_keep_their_seq_across_runs_and_a_stale_cursor_starts_over(client):
+    to_reviewing_list(client)
+    last = events(client)[-1]["seq"]
+    client.post("/api/run/cancel")
+    client.delete("/api/run")
+    upload(client)
+    wait_for(client, "reviewing_list")
+    fresh = events(client)
+    assert fresh[0]["seq"] > last  # the log restarted, the numbers did not
+    assert [e["seq"] for e in events(client, after=last)] == [e["seq"] for e in fresh]
+    assert events(client, after=10_000) == fresh  # cursor from another server life
+
+
+def test_the_stream_follows_new_events_and_sends_keepalives(machine, world):
+    got = []
+
+    async def read():
+        async for chunk in sse_stream(machine, 0, poll=0.01, keepalive=0.05):
+            got.append(chunk)
+            if '"reviewing_list"' in chunk and chunk.startswith("data:"):
+                return
+
+    def start_later():
+        time.sleep(0.15)  # no event yet: the stream has to wait and send a comment
+        machine.start(b"fake-jpeg", ".jpg")
+
+    threading.Thread(target=start_later).start()
+    asyncio.run(asyncio.wait_for(read(), 5))
+    assert ": keepalive\n\n" in got
+    payloads = [json.loads(c[6:]) for c in got if c.startswith("data: ")]
+    assert [p["data"]["state"] for p in payloads] == ["reading_list", "reviewing_list"]
+    assert got[-1].endswith("\n\n")
+    machine.shutdown()
+
+
+# --- static -----------------------------------------------------------------------------------
+
+
+def test_the_index_page_is_served(client):
+    response = client.get("/")
+    assert response.status_code == 200 and "<html" in response.text

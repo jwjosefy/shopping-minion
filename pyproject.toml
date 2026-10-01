@@ -10,6 +10,10 @@ dependencies = [
     "typesafe-sdk",
     "pydantic>=2",
     "pyyaml",
+    "fastapi>=0.142.2",
+    "uvicorn>=0.54.0",
+    "python-multipart>=0.0.32",
+    "qrcode>=8.2",
 ]
 
 [project.scripts]
@@ -17,6 +21,7 @@ shopping-minion = "shopping_minion.cli:main"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest",
     "ruff",
 ]

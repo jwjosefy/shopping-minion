@@ -17,10 +17,16 @@ HAND_MADE_REQUEST_PATTERNS = [
 ]
 
 
-def hits(patterns: list[str], root: Path = SRC) -> list[str]:
+CODE_SUFFIXES = {".py", ".md", ".yaml", ".json"}
+# The web page's own files. They call our API with fetch(), so only the checkout guard
+# applies to them: no page may link to or click the store's checkout.
+WEB_SUFFIXES = {".js", ".html", ".css"}
+
+
+def hits(patterns: list[str], root: Path = SRC, suffixes: set[str] = CODE_SUFFIXES) -> list[str]:
     found = []
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.suffix not in {".py", ".md", ".yaml", ".json"}:
+        if not path.is_file() or path.suffix not in suffixes:
             continue
         for number, line in enumerate(path.read_text().splitlines(), start=1):
             if any(re.search(p, line, re.IGNORECASE) for p in patterns):
@@ -30,6 +36,10 @@ def hits(patterns: list[str], root: Path = SRC) -> list[str]:
 
 def test_no_checkout_path_in_src():
     assert hits(CHECKOUT_PATTERNS) == []
+
+
+def test_no_checkout_path_in_the_web_page():
+    assert hits(CHECKOUT_PATTERNS, suffixes=WEB_SUFFIXES) == []
 
 
 def test_no_hand_made_requests_in_src():
