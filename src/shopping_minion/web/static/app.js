@@ -39,6 +39,14 @@ createApp({
     const access = ref(null);
     const uploading = ref(false);
     const photoUrl = ref(null); // object URL of the File picked in this browser session
+    const photoFailed = ref(false); // the server's copy (GET /api/run/photo) didn't load
+    // The File picked here if there is one, else the server's copy, so the photo also shows
+    // after a reload or when the upload came from the phone.
+    const listPhoto = computed(() => {
+      if (photoUrl.value) return photoUrl.value;
+      const id = run.value && run.value.run_id;
+      return id && !photoFailed.value ? `/api/run/photo?run=${id}` : null;
+    });
 
     // reviewing_list
     const rows = ref([]);
@@ -241,6 +249,7 @@ createApp({
     function clearPhoto() {
       if (photoUrl.value) URL.revokeObjectURL(photoUrl.value);
       photoUrl.value = null;
+      photoFailed.value = false;
     }
 
     async function onPhoto(ev) {
@@ -404,11 +413,15 @@ createApp({
       if (at > 0) list.unshift(...list.splice(at, 1));
       cands.value = list;
       selected.value = at >= 0 && list[0].available ? 0 : -1;
-      pickTotal.value = Math.max(pickTotal.value, p.left || 0);
+      // `position`/`total` come from the backend; the max of `left` is the fallback.
+      pickTotal.value = p.total || Math.max(pickTotal.value, p.left || 0);
       pick.value = p;
     }
 
-    const pickPosition = computed(() => (pick.value ? pickTotal.value - pick.value.left + 1 : 0));
+    const pickPosition = computed(() => {
+      if (!pick.value) return 0;
+      return pick.value.position || pickTotal.value - pick.value.left + 1;
+    });
 
     const jevNote = computed(() => {
       const j = pick.value && pick.value.jev;
@@ -570,6 +583,7 @@ createApp({
 
     return {
       units: UNITS, run, state, toast, offline, busy, canCancel, runs, access, uploading, photoUrl,
+      listPhoto, photoFailed,
       rows, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
       elapsed, searchList, searchLast, searchTotal, searchDone, fillList, fillTotal, fillDone,
       outcome, problems, oks, extras,

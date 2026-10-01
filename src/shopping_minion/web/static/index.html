@@ -73,9 +73,9 @@
     <!-- 3. reviewing_list: Revisar lista -->
     <section v-else-if="state === 'reviewing_list'" data-screen="reviewing_list">
       <h2>Revisar lista</h2>
-      <div class="split" :class="{ withphoto: photoUrl }">
-        <figure v-if="photoUrl" class="photo">
-          <img :src="photoUrl" alt="Foto da lista" data-test="list-photo">
+      <div class="split" :class="{ withphoto: listPhoto }">
+        <figure v-if="listPhoto" class="photo">
+          <img :src="listPhoto" alt="Foto da lista" data-test="list-photo" @error="photoFailed = true">
         </figure>
         <div class="tablewrap">
           <table class="grid editable">
