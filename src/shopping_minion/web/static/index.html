@@ -3,9 +3,360 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>Shopping Minion</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <p>Shopping Minion: a interface ainda não foi instalada.</p>
+<div id="app" v-cloak>
+  <header class="topbar">
+    <h1>Shopping Minion</h1>
+    <button v-if="canCancel" class="btn ghost danger" data-test="cancel" @click="cancelRun">
+      {{ state === 'filling_cart' ? 'cancelar (após o produto atual)' : 'cancelar' }}
+    </button>
+  </header>
+
+  <div v-if="toast" class="banner error" role="alert" data-test="toast">
+    <span>{{ toast }}</span>
+    <button class="btn ghost small" @click="toast = ''">ok</button>
+  </div>
+  <div v-if="offline" class="banner warn">sem conexão com o servidor; tentando de novo…</div>
+
+  <main class="screen">
+    <!-- loading -->
+    <section v-if="state === null" class="card center">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Carregando…</p>
+    </section>
+
+    <!-- 1. idle: Enviar lista -->
+    <section v-else-if="state === 'idle'" data-screen="idle">
+      <h2>Enviar lista</h2>
+      <div class="card">
+        <p class="muted">Fotografe a lista de compras (ou escolha uma imagem).</p>
+        <label class="btn primary big upload">
+          <input type="file" accept="image/*" capture="environment" data-test="photo"
+                 :disabled="uploading" @change="onPhoto">
+          {{ uploading ? 'Enviando…' : 'Enviar foto da lista' }}
+        </label>
+      </div>
+
+      <div v-if="access" class="card access" data-test="access">
+        <div class="qr" v-html="access.qr_svg"></div>
+        <div>
+          <p><strong>Abra no celular para fotografar a lista.</strong></p>
+          <p class="muted">Mesma rede Wi-Fi:</p>
+          <p class="mono url" data-test="access-url">{{ access.url }}</p>
+        </div>
+      </div>
+
+      <div v-if="runs.length" class="card">
+        <h3>Últimas listas</h3>
+        <ul class="runs">
+          <li v-for="r in runs" :key="r.run_id">
+            <span class="mono">#{{ r.run_id }}</span>
+            <span>{{ dateText(r.created_at) }}</span>
+            <span>{{ countText(r.items) }}</span>
+            <span class="pill">{{ r.status }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. reading_list: Lendo a lista -->
+    <section v-else-if="state === 'reading_list'" data-screen="reading_list" class="card center">
+      <h2>Lendo a lista</h2>
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="muted" data-test="elapsed">{{ elapsed }} s</p>
+    </section>
+
+    <!-- 3. reviewing_list: Revisar lista -->
+    <section v-else-if="state === 'reviewing_list'" data-screen="reviewing_list">
+      <h2>Revisar lista</h2>
+      <div class="split" :class="{ withphoto: photoUrl }">
+        <figure v-if="photoUrl" class="photo">
+          <img :src="photoUrl" alt="Foto da lista" data-test="list-photo">
+        </figure>
+        <div class="tablewrap">
+          <table class="grid editable">
+            <thead>
+              <tr>
+                <th>linha</th><th>nome</th><th>busca</th><th>restrições</th>
+                <th>marca</th><th>quantidade</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, i) in rows" :key="row.key"
+                  :class="{ review: row.needs_review }" data-test="list-row">
+                <td data-label="linha">
+                  <input type="text" v-model="row.source_line" @input="touchList" aria-label="linha">
+                </td>
+                <td data-label="nome">
+                  <input type="text" v-model="row.name" @input="touchList" aria-label="nome">
+                </td>
+                <td data-label="busca">
+                  <input type="text" v-model="row.search_term" @input="touchList" aria-label="busca">
+                </td>
+                <td data-label="restrições">
+                  <input type="text" v-model="row.constraints" @input="touchList"
+                         placeholder="separadas por vírgula" aria-label="restrições">
+                </td>
+                <td data-label="marca">
+                  <input type="text" v-model="row.brand" @input="touchList" aria-label="marca">
+                </td>
+                <td data-label="quantidade" class="qty">
+                  <input type="number" min="0" step="any" inputmode="decimal"
+                         v-model="row.qty_value" @input="touchList" aria-label="quantidade">
+                  <select v-model="row.qty_unit" @change="touchList" aria-label="unidade">
+                    <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
+                  </select>
+                </td>
+                <td class="actions">
+                  <button v-if="row.needs_review" class="badge amber" type="button"
+                          title="marcar como revisado" @click="row.needs_review = false; touchList()">
+                    revisar ✓
+                  </button>
+                  <button class="btn ghost small danger" type="button" @click="removeRow(i)"
+                          aria-label="remover linha" title="remover linha">✕</button>
+                </td>
+              </tr>
+              <tr v-if="!rows.length"><td class="muted" colspan="7">A lista está vazia.</td></tr>
+            </tbody>
+          </table>
+          <div class="bar">
+            <button class="btn" type="button" data-test="add-row" @click="addRow">+ adicionar linha</button>
+            <span class="muted saved">{{ saveText }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="actions-bar">
+        <button class="btn primary big" data-test="confirm-list" :disabled="!rows.length || busy"
+                @click="confirmList">buscar no site</button>
+      </div>
+    </section>
+
+    <!-- 4. searching / deciding: Buscando -->
+    <section v-else-if="state === 'searching' || state === 'deciding'" data-screen="searching"
+             class="card">
+      <h2>Buscando</h2>
+      <template v-if="state === 'searching'">
+        <div class="progress" role="progressbar" :aria-valuenow="searchDone" aria-valuemin="0"
+             :aria-valuemax="searchTotal">
+          <div class="fill" :style="{ width: pct(searchDone, searchTotal) }"></div>
+        </div>
+        <p data-test="search-count">{{ searchDone }}/{{ searchTotal || '?' }}</p>
+        <p v-if="searchLast" class="muted">buscando “{{ searchLast.term }}”</p>
+        <ul class="steps" v-if="searchList.length">
+          <li v-for="s in searchList" :key="s.i">
+            <span class="mono">{{ s.i }}</span>
+            <span class="grow">{{ s.term }}</span>
+            <span class="pill">{{ s.found }} {{ s.found === 1 ? 'resultado' : 'resultados' }}</span>
+          </li>
+        </ul>
+      </template>
+      <template v-else>
+        <div class="spinner" aria-hidden="true"></div>
+        <p data-test="deciding">Jev está decidindo…</p>
+      </template>
+    </section>
+
+    <!-- 5. picking: Escolher produto -->
+    <section v-else-if="state === 'picking'" data-screen="picking">
+      <h2>Escolher produto</h2>
+      <div v-if="!pick" class="card center"><div class="spinner" aria-hidden="true"></div></div>
+      <template v-else>
+        <div class="card">
+          <p class="muted" data-test="pick-count">item {{ pickPosition }} de {{ pickTotal }}</p>
+          <h3 data-test="pick-item">{{ pick.item.name }}</h3>
+          <p v-if="pick.item.source_line" class="muted">na lista: “{{ pick.item.source_line }}”</p>
+          <p v-if="pick.item.constraints && pick.item.constraints.length" class="chips">
+            <span class="chip" v-for="c in pick.item.constraints" :key="c">{{ c }}</span>
+          </p>
+          <p v-if="jevNote" class="note" data-test="jev-note">{{ jevNote }}</p>
+        </div>
+
+        <div class="cands" role="listbox" aria-label="produtos">
+          <div v-for="(c, i) in cands" :key="c.product_id" role="option" class="cand"
+               :class="{ selected: i === selected, unavailable: !c.available,
+                         jev: c.product_id === pick.jev.choice }"
+               :aria-selected="i === selected" :data-test="'cand-' + c.product_id"
+               @click="takeCandidate(i)">
+            <div class="thumb">
+              <img v-if="c.image" :src="c.image" :alt="c.name" loading="lazy">
+              <span v-else class="noimg">sem foto</span>
+            </div>
+            <div class="body">
+              <p class="name">{{ c.name }}</p>
+              <p class="muted">{{ c.brand || '—' }}</p>
+              <p class="price">
+                <s v-if="c.list_price" class="muted">{{ money(c.list_price) }}</s>
+                <strong>{{ c.price == null ? 'sem preço' : money(c.price) }}</strong>
+                <span class="muted">{{ c.unit_of_sale === 'kg' ? 'por kg' : 'por unidade' }}</span>
+              </p>
+              <p>
+                <span v-if="c.product_id === pick.jev.choice" class="badge blue">escolha do Jev</span>
+                <span v-if="!c.available" class="badge red">indisponível</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="actions-bar">
+          <button class="btn" data-test="skip" :disabled="busy" @click="skipPick">pular (0)</button>
+          <button class="btn primary" data-test="take" :disabled="busy || selected < 0"
+                  @click="takeCandidate(selected)">escolher (Enter)</button>
+        </div>
+        <p class="muted hint">Enter escolhe o produto marcado, ← → mudam a seleção, 0 pula.</p>
+      </template>
+    </section>
+
+    <!-- 6. reviewing_cart: Revisar carrinho -->
+    <section v-else-if="state === 'reviewing_cart'" data-screen="reviewing_cart">
+      <h2>Revisar carrinho</h2>
+      <div v-if="!cart" class="card center"><div class="spinner" aria-hidden="true"></div></div>
+      <template v-else>
+        <div class="tablewrap">
+          <table class="grid cart">
+            <thead>
+              <tr><th>produto</th><th>preço</th><th>quantidade</th><th>cliques</th><th>estimado</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="l in cart.lines" :key="l.line_id" data-test="cart-line"
+                  :data-line="l.line_id">
+                <td data-label="produto" class="prod">
+                  <div class="prodcell">
+                  <img v-if="lineProduct(l).image" :src="lineProduct(l).image" alt="" class="mini">
+                  <div>
+                    <p class="name">{{ lineProduct(l).name }}</p>
+                    <p class="muted small">{{ lineItems(l).join(' + ') }}</p>
+                    <p class="flags">
+                      <span v-if="l.flags && l.flags.includes('QUANTITY_ASSUMED')" class="badge amber">quantidade assumida</span>
+                      <span v-if="l.flags && l.flags.includes('QUANTITY_INEXACT')" class="badge amber">aproximada</span>
+                      <span v-if="lineItems(l).length > 1" class="badge blue">{{ lineItems(l).length }} linhas da lista</span>
+                    </p>
+                  </div>
+                  </div>
+                </td>
+                <td data-label="preço">
+                  {{ lineProduct(l).price == null ? '—' : money(lineProduct(l).price) }}
+                  <span class="muted small">{{ lineProduct(l).unit_of_sale === 'kg' ? 'por kg' : 'por unidade' }}</span>
+                </td>
+                <td data-label="quantidade" class="qty">
+                  <input type="number" min="0" step="any" inputmode="decimal"
+                         :value="l.quantity.value" :data-test="'qty-' + l.line_id"
+                         aria-label="quantidade"
+                         @change="editLine(l, $event.target.value, l.quantity.unit)">
+                  <select :value="l.quantity.unit" aria-label="unidade"
+                          @change="editLine(l, l.quantity.value, $event.target.value)">
+                    <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
+                  </select>
+                </td>
+                <td data-label="cliques" :data-test="'clicks-' + l.line_id">{{ l.clicks }}</td>
+                <td data-label="estimado">{{ l.estimated_price == null ? '—' : money(l.estimated_price) }}</td>
+                <td class="actions">
+                  <button class="btn ghost small danger" @click="removeLine(l)"
+                          :data-test="'remove-' + l.line_id">remover</button>
+                </td>
+              </tr>
+              <tr v-if="!cart.lines.length"><td class="muted" colspan="6">Nenhum produto no carrinho.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" v-if="skipped.length">
+          <h3>Itens pulados</h3>
+          <ul class="plain" data-test="skipped"><li v-for="(s, i) in skipped" :key="i">{{ s }}</li></ul>
+        </div>
+
+        <div v-if="cart.warnings && cart.warnings.length" class="banner warn">
+          <span v-for="(w, i) in cart.warnings" :key="i">{{ w }}</span>
+        </div>
+
+        <div class="card total">
+          <span>Total <em>estimado</em></span>
+          <strong data-test="total">{{ cart.estimated_total == null ? '—' : money(cart.estimated_total) }}</strong>
+        </div>
+        <div class="actions-bar">
+          <button class="btn primary big" data-test="confirm-cart"
+                  :disabled="!cart.lines.length || busy" @click="confirmCart">adicionar ao carrinho</button>
+        </div>
+      </template>
+    </section>
+
+    <!-- 7. filling_cart: Adicionando -->
+    <section v-else-if="state === 'filling_cart'" data-screen="filling_cart" class="card">
+      <h2>Adicionando</h2>
+      <div class="progress" role="progressbar" :aria-valuenow="fillDone" aria-valuemin="0"
+           :aria-valuemax="fillTotal">
+        <div class="fill" :style="{ width: pct(fillDone, fillTotal) }"></div>
+      </div>
+      <p data-test="fill-count">{{ fillDone }}/{{ fillTotal || '?' }}</p>
+      <ul class="steps" v-if="fillList.length">
+        <li v-for="f in fillList" :key="f.i" :data-status="f.status">
+          <span class="mono">{{ f.i }}</span>
+          <span class="grow">{{ f.name }}<small v-if="f.message" class="muted"> — {{ f.message }}</small></span>
+          <span class="pill" :class="fillClass(f.status)">{{ fillLabel(f.status) }}</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 8. done / failed / cancelled: Pronto -->
+    <section v-else data-screen="done" :data-state="state">
+      <h2>{{ state === 'done' ? 'Pronto' : state === 'failed' ? 'Algo deu errado' : 'Cancelado' }}</h2>
+      <div v-if="state !== 'done'" class="banner" :class="state === 'failed' ? 'error' : 'warn'"
+           data-test="run-message">
+        {{ run.message || (state === 'failed' ? 'A rodada falhou.' : 'A rodada foi cancelada.') }}
+      </div>
+
+      <template v-if="outcome">
+        <p class="summary" data-test="summary">
+          {{ outcome.ok_count }} de {{ outcome.total }} itens da lista conferem.
+        </p>
+
+        <div v-if="problems.length" class="card problems" data-test="problems">
+          <h3>Problemas</h3>
+          <ul class="checks">
+            <li v-for="(c, i) in problems" :key="i" class="bad" data-test="problem">
+              <p class="name">{{ checkNames(c) }}</p>
+              <p class="muted small">{{ c.product_name }}</p>
+              <p><strong>{{ c.verdict }}</strong></p>
+              <p class="muted small">esperado {{ c.expected }}<span v-if="c.found">; no carrinho {{ c.found }}</span></p>
+            </li>
+          </ul>
+        </div>
+
+        <details v-if="oks.length" class="card oks" data-test="oks">
+          <summary>{{ oks.length }} {{ oks.length === 1 ? 'item confere' : 'itens conferem' }}</summary>
+          <ul class="checks">
+            <li v-for="(c, i) in oks" :key="i">
+              <span class="name">{{ checkNames(c) }}</span>
+              <span class="muted small"> — {{ c.product_name }} ({{ c.found || c.expected }})</span>
+            </li>
+          </ul>
+        </details>
+
+        <div v-if="extras.length" class="card extras" data-test="extras">
+          <h3>No carrinho, mas não são desta lista</h3>
+          <ul class="checks">
+            <li v-for="(e, i) in extras" :key="i" data-test="extra">
+              <span class="name">{{ e.name }}</span>
+              <span class="muted small"> — {{ e.quantity }}<span v-if="e.was_before"> (já estava antes desta rodada)</span></span>
+            </li>
+          </ul>
+        </div>
+      </template>
+
+      <p v-if="state === 'done'" class="open-note" data-test="open-note">
+        o carrinho está aberto na janela do navegador; revise e finalize no site
+      </p>
+      <div class="actions-bar">
+        <button class="btn" data-test="close-browser" :disabled="busy" @click="resetRun">fechar navegador</button>
+        <button class="btn primary" data-test="new-list" :disabled="busy" @click="resetRun">nova lista</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>
