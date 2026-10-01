@@ -26,21 +26,33 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
     return 0
 
 
+LOGIN_WAIT_SECONDS = 300
+
+
 def _login() -> int:
-    """Open the store, let Johann log in by hand, and save the session in .auth/."""
+    """Open the store, let Johann log in by hand, and save the session in .auth/.
+
+    It doesn't read stdin (it may have none, e.g. when run with `!` from Claude Code): it
+    polls the header every 2 s until the logged-out marker is gone, for up to 5 minutes.
+    """
+    import time
+
     from shopping_minion.browser import BASE_URL, is_logged_in, open_browser, save_session
 
     with open_browser() as (_browser, context):
         page = context.new_page()
         page.goto(BASE_URL)
-        print("A browser window opened on the store.")
-        print("Log in by hand in that window, then come back here and press Enter.")
-        input()
-        if is_logged_in(page) is not True:
-            print("The page still shows the logged-out header; nothing was saved.")
-            return 1
-        print(f"Session saved to {save_session(context)}")
-    return 0
+        print("A browser window opened on the store. Log in by hand in that window.")
+        print(f"Waiting up to {LOGIN_WAIT_SECONDS // 60} minutes for the login to show...")
+        deadline = time.monotonic() + LOGIN_WAIT_SECONDS
+        while time.monotonic() < deadline:
+            if is_logged_in(page, timeout_ms=2_000) is True:
+                page.wait_for_timeout(2_000)  # let the site finish writing its session
+                print(f"Logged in. Session saved to {save_session(context)}")
+                return 0
+            page.wait_for_timeout(2_000)
+        print("Still logged out after the wait; nothing was saved.")
+        return 1
 
 
 def build_parser() -> argparse.ArgumentParser:
