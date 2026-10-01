@@ -77,4 +77,5 @@ lines:
     items: [{ name: requeijão }]
   - raw: "Saco lixo pia e banheiro"
     tags: [crossed_out, multi_item]
-    items: [{ name: saco de lixo, variant: pia }, { name: saco de lixo, variant: banheiro }]
+    # Crossed out on the paper (Johann, 2026-10-01): no items expected. Was two items.
+    items: []

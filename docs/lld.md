@@ -137,7 +137,7 @@ The `Candidate` fields are the HLD's list. T0 may show that a field isn't availa
 - `config/decide.yaml`:
 
   ```yaml
-  model: jev-1.13          # pinned for reproducibility; jev-latest moves
+  model: jev-latest        # jev-1.13 can't be pinned (API: 400 Unknown model); each Decision records the served version
   batch_size: 5
   accept_at: 0.8           # placeholder, calibrate on the 7 cases
   ask_below: 0.5           # placeholder
@@ -310,3 +310,10 @@ From [site-notes/andorinha.md](site-notes/andorinha.md). Where these differ from
 5. **Reading the cart (§3.7).** The cart is a drawer opened from the header button, not a page. Proposal: at the end, open the drawer and read each line's name and stepper text for the report, and leave the drawer open.
 6. **Checkout guard.** The "never" test greps for `Finalizar pedido` and `checkout`.
 7. **Search reads both pages of 12 (§3.3)** to reach ~15 candidates: wait for `from=0`, then `from=12` if `hasNext`, with a 10 s cap. Then keep the first 15.
+
+## 8. Wave 2 changes (approved by Johann on 2026-10-01, see [review-wave2.md](review-wave2.md))
+
+1. **Jev model:** `jev-latest`, since the API only accepts `jev-latest` and `jev-preview`. `Decision.model` records the version each response reports (`jev-1.13.0` on 2026-10-01). It is saved with the decision and printed by the eval.
+2. **OCR model:** `intake` takes a `model` argument (default `haiku`), and the eval takes `--model`. Measured on list-001 on 2026-10-01: Haiku 26/32 in 160 s, Sonnet 31/32 in 22 s.
+3. **Preferences for testing:** `data/preferencias.yaml` holds the first search hit for each M1 item. Real preferences come later.
+4. **list-001:** "Saco lixo pia e banheiro" is crossed out on the paper and now expects no items.

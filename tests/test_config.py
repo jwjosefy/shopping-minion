@@ -10,7 +10,7 @@ REPO_CONFIG = Path(__file__).parent.parent / "config" / "decide.yaml"
 
 def test_repo_config_loads():
     config = load_decide_config(REPO_CONFIG)
-    assert config.model == "jev-1.13"
+    assert config.model == "jev-latest"
     assert config.batch_size == 5
     assert config.accept_at == 0.8
     assert config.ask_below == 0.5
