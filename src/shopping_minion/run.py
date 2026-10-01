@@ -17,6 +17,7 @@ from shopping_minion.decide import decide, describe_candidate, nothing_fit
 from shopping_minion.items import Candidate, CartResult, CartTarget, Decision, Item
 from shopping_minion.preferences import find_preference, load_preferences
 from shopping_minion.quantity import target_quantity, to_clicks
+from shopping_minion.reconcile import reconcile, report_lines
 from shopping_minion.search import search_all
 from shopping_minion.storage import Storage
 
@@ -280,35 +281,37 @@ def _run_stages(
             detail = f" ({result.message})" if result.message else ""
             print_fn(f"[{i}/{total}] {candidate.name}: {result.status}{detail}")
 
+        before = _read_cart(page, print_fn, "antes")
         storage.set_status(run_id, "adding")
         results = add_all(page, [(c, t) for _, c, t, _ in rows], cart_progress)
         storage.save_cart(run_id, results)
         storage.set_status(run_id, "done")
 
-        print_report(rows, results, page, print_fn)
+        print_report(rows, results, before, page, print_fn)
         print_fn(OPEN_MESSAGE)
         input_fn("")
     return 0
 
 
-def print_report(rows: list, results: list[CartResult], page, print_fn: PrintFn) -> None:
+def _read_cart(page, print_fn: PrintFn, when: str) -> list[tuple[str, str]] | None:
+    try:
+        return read_cart_drawer(page)
+    except Exception as exc:  # the run must go on; the report says what couldn't be checked
+        print_fn(f"não consegui ler o carrinho {when}: {exc}")
+        return None
+
+
+def print_report(rows: list, results: list[CartResult], before, page, print_fn: PrintFn) -> None:
     print_fn("")
-    print_fn("Relatório:")
+    print_fn("O que cada adição informou:")
     for (decision, candidate, _target, _text), result in zip(rows, results, strict=True):
         detail = f" - {result.message}" if result.message else ""
-        shown = f" (carrinho mostra: {result.quantity_shown})" if result.quantity_shown else ""
-        print_fn(f"  {decision.item.name} | {candidate.name}: {result.status}{detail}{shown}")
-    try:
-        lines = read_cart_drawer(page)
-    except Exception as exc:  # the report must not hide the results already saved
-        print_fn(f"não consegui ler o carrinho: {exc}")
+        print_fn(f"  {decision.item.name} | {candidate.name}: {result.status}{detail}")
+    after = _read_cart(page, print_fn, "no fim")
+    if after is None:
         return
-    print_fn("No carrinho (recarregado do site):")
-    for name, quantity in lines:
-        print_fn(f"  {quantity}  {name}")
-    in_cart = {" ".join(name.lower().split()) for name, _ in lines}
-    for (_decision, candidate, _target, _text), result in zip(rows, results, strict=True):
-        if result.status == "added" and " ".join(candidate.name.lower().split()) not in in_cart:
-            print_fn(
-                f"  ATENÇÃO: {candidate.name} foi dado como adicionado mas não está no carrinho"
-            )
+    planned = [(d.item.name, c, t) for d, c, t, _ in rows]
+    checks, extras = reconcile(planned, before, after)
+    print_fn("")
+    for line in report_lines(checks, extras, before):
+        print_fn(line)

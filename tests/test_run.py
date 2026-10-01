@@ -155,9 +155,12 @@ class World:
                 progress(i, len(targets), candidate, result)
             return results
 
+        # first read: before the cart pass; second: at the end
+        self.drawer_reads = [[], [("Atum Gomes 170g", "1"), ("Filé de Peito de Frango kg", "1kg")]]
+
         def read_cart_drawer(page):
             self.drawer_opened = True
-            return [("Atum Gomes 170g", "1"), ("Filé de Peito de Frango kg", "1kg")]
+            return self.drawer_reads.pop(0)
 
         monkeypatch.setattr(run_module, "ensure_logged_in", ensure_logged_in)
         monkeypatch.setattr(run_module, "search_all", search_all)
@@ -244,11 +247,10 @@ def test_transcript(world):
     )
     assert any("atum | Atum Gomes 170g" in line and "[QUANTITY_ASSUMED]" in line for line in lines)
     assert "[3/3] Filé de Peito de Frango kg: added" in lines
-    assert (
-        "  filé de peito de frango | Filé de Peito de Frango kg: added (carrinho mostra: 10)"
-        in lines
-    )
-    assert "No carrinho (recarregado do site):" in lines
+    assert "Conferência do carrinho (lido do site depois de recarregar):" in lines
+    assert "  !! papel higiênico | Papel Personal 8un | esperado 1: FALTANDO no carrinho" in lines
+    assert "  2 de 3 itens da lista conferem." in lines
+    assert not any("NÃO são desta lista" in line for line in lines)
 
 
 def test_yes_skips_the_confirm_prompt(world):
