@@ -248,7 +248,7 @@ def test_transcript(world):
         "  filé de peito de frango | Filé de Peito de Frango kg: added (carrinho mostra: 10)"
         in lines
     )
-    assert "No carrinho:" in lines
+    assert "No carrinho (recarregado do site):" in lines
 
 
 def test_yes_skips_the_confirm_prompt(world):

@@ -61,8 +61,14 @@ PAGE = """
       '<button class="t"></button><span id="q">' + fmt() + '</span>' +
       '<button class="p i" onclick="plus()"></button>';
   }}
-  function add() {{ qty = step; stepper(); }}
-  function plus() {{ if ({stuck}) return; qty = Math.round((qty + step) * 10) / 10; stepper(); }}
+  // Like the real site when logged in: an UpdateCart mutation shortly after each change.
+  const sync = () => {{ if ({sync}) setTimeout(() => fetch("/graphql", {{method: "POST",
+    body: JSON.stringify({{operationName: "UpdateCart"}})}}), 300); }};
+  function add() {{ qty = step; stepper(); sync(); }}
+  function plus() {{
+    if ({stuck}) return;
+    qty = Math.round((qty + step) * 10) / 10; stepper(); sync();
+  }}
 </script>
 """
 ADD = '<button onclick="add()"><p>Adicionar ao carrinho</p></button>'
@@ -76,10 +82,11 @@ SWITCH = (
 )
 
 
-def serve(page, control=ADD, step=1, unit="un", start=0, stuck="false", switch=""):
+def serve(page, control=ADD, step=1, unit="un", start=0, stuck="false", switch="", sync="true"):
     html = PAGE.format(
-        control=control, step=step, unit=unit, start=start, stuck=stuck, switch=switch
+        control=control, step=step, unit=unit, start=start, stuck=stuck, switch=switch, sync=sync
     )
+    page.route("**/graphql", lambda route: route.fulfill(status=200, body="{}"))
     page.route(
         "**/produtos/**",
         lambda route: route.fulfill(content_type="text/html; charset=utf-8", body=html),
@@ -144,6 +151,21 @@ def test_add_all_is_sequential_and_reports_progress(page):
     assert seen == [(1, 2, "added"), (2, 2, "added")]
 
 
+def test_unconfirmed_change_fails(page, monkeypatch):
+    """The stepper moved but the site never confirmed it (what lost papel higiênico live)."""
+    monkeypatch.setattr("shopping_minion.cart.SYNC_WAIT_SECONDS", 1.0)
+    serve(page, sync="false")
+    result = add_to_cart(page, candidate(), CartTarget(product_id="1", clicks=2))
+    assert result.status == "failed"
+    assert result.message == "o site não confirmou a mudança no carrinho"
+
+
+def test_anonymous_cart_needs_no_confirmation(page):
+    serve(page, sync="false")
+    result = add_to_cart(page, candidate(), CartTarget(product_id="1", clicks=2), wait_sync=False)
+    assert (result.status, result.quantity_shown) == ("added", "2")
+
+
 def test_read_cart_drawer(page):
     page.route(
         "**/*",
@@ -193,7 +215,8 @@ def test_live_add_to_cart_atum_and_frango():
         )
         results = add_all(
             page,
-            [
+            wait_sync=False,
+            targets=[
                 (atum, CartTarget(product_id=atum.product_id, clicks=3)),
                 (frango, CartTarget(product_id=frango.product_id, clicks=3)),
             ],
@@ -224,6 +247,8 @@ def test_live_add_to_cart_papel_higienico():
             for c in search(page, item)
             if c.name.startswith("Papel Higiênico Fancy Folha Dupla 30m")
         )
-        [result] = add_all(page, [(papel, CartTarget(product_id=papel.product_id, clicks=2))])
+        [result] = add_all(
+            page, [(papel, CartTarget(product_id=papel.product_id, clicks=2))], wait_sync=False
+        )
         assert (result.status, result.quantity_shown) == ("added", "2"), result.message
         assert [q for _, q in read_cart_drawer(page)] == ["2"]

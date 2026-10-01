@@ -303,6 +303,12 @@ def print_report(rows: list, results: list[CartResult], page, print_fn: PrintFn)
     except Exception as exc:  # the report must not hide the results already saved
         print_fn(f"não consegui ler o carrinho: {exc}")
         return
-    print_fn("No carrinho:")
+    print_fn("No carrinho (recarregado do site):")
     for name, quantity in lines:
         print_fn(f"  {quantity}  {name}")
+    in_cart = {" ".join(name.lower().split()) for name, _ in lines}
+    for (_decision, candidate, _target, _text), result in zip(rows, results, strict=True):
+        if result.status == "added" and " ".join(candidate.name.lower().split()) not in in_cart:
+            print_fn(
+                f"  ATENÇÃO: {candidate.name} foi dado como adicionado mas não está no carrinho"
+            )
