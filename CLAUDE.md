@@ -3,7 +3,7 @@
 ## What this project is
 Automation plus a web app that turns a photo of a handwritten grocery list into a cart at andorinhaonline.com.br, ready for a human to review and check out. The goal is to cut the time it takes to build a cart for long lists (50+ items). Public repo, built in the open.
 
-Read before working: `docs/project-reset.md` (the reset and its scope), `docs/lessons-learned.md`, and the new `docs/hld.md` / `docs/lld.md` once they exist.
+Read before working: `docs/roadmap.md` (what comes next, and where each milestone stands), `docs/hld.md` (the design), the LLD of the milestone at hand (`docs/lld.md` for M0–M1, `docs/lld-m<N>.md` from M2 on), `docs/site-notes/andorinha.md` (what was observed on the store), `docs/project-reset.md` and `docs/lessons-learned.md`.
 
 ## alfa0/ is an archive
 `alfa0/` holds the first implementation, with its HLD, LLD, ADRs, evals and goal-run logs. **Ignore it.** Its ADRs don't apply here, and its code isn't a base to build on. Read from it only when Johann asks, or to copy a specific asset he approves (e.g. an eval fixture). Never edit it.
@@ -28,6 +28,17 @@ Non-negotiables:
 - Checkout is always manual. No code path may place an order.
 - Keep it simple: one store, no generic layers until a second case exists.
 
+## Roadmap and milestones
+`docs/roadmap.md` is the source of truth for what comes next. If a milestone's scope or order changes, change the roadmap first, in a commit of its own. The README and the HLD point to it and don't repeat it.
+
+A milestone moves like this:
+1. **Defined** in the roadmap: its goal, what's in and out, and a *done when* that can be checked.
+2. **Designed** in its own LLD (`docs/lld-m<N>.md`), through the review pattern below. If the milestone changes the design (a new data source, a new runtime), update the HLD first and get it re-approved.
+3. **Built** in waves of tasks, each reviewed by Johann before merge.
+4. **Accepted** when Johann runs it for real. Record the acceptance in the LLD, then mark the milestone done in the roadmap with the date and a link to the evidence.
+
+A milestone is done when its *done when* was observed, not when its code is merged. Don't mark one done yourself without Johann's acceptance. Don't start a milestone's LLD before it is defined in the roadmap. Don't build ahead into the next milestone.
+
 ## How Johann reviews (follow this pattern)
 When you need Johann's input (interview, design questions, open points), don't ask in the chat. Write a `.md` in `docs/` (e.g. `docs/hld-interview-NNN.md`, or an "Open questions" section in the doc under review) with numbered questions, each with your proposal. Johann answers inline with `>` in Obsidian, then tells you in the chat. Read the answers, fold them into the documents, and report back. Keep questions direct, and don't ask what `docs/project-reset.md` already answers.
 
@@ -36,7 +47,7 @@ When you need Johann's input (interview, design questions, open points), don't a
 - **ADRs are always created with `Status: Draft`** and wait for Johann's review. Never mark one accepted yourself.
 - **A design option left open is not permission.** If the work depends on a choice that changes how the system reaches the store, the models or the data, stop and ask.
 - **Stay inside the task.** Report blockers; don't add flags or workarounds to get past them.
-- **The HLD needs Johann's approval before the LLD is written.** Plans are written by Opus, tasks run by Sonnet.
+- **The HLD needs Johann's approval before an LLD is written, and each LLD needs his approval before it is built.** Plans are written by Opus, tasks run by Sonnet.
 - Commit and push only what was asked. Small Conventional Commits.
 
 ## Journal
