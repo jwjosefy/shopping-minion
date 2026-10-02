@@ -70,6 +70,10 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 
 The stepper and the cart drawer write weights below 1 kg as grams (`900g`) and above 1 kg with a **dot** (`1.1kg`, `1.5kg`). In run 10, every kg product whose target passed 1 kg was reported as failed at the click that crossed 1 kg ("a quantidade não mudou"), and its drawer line was left out of the check. The cause was the stepper pattern accepting only a comma. The clicks themselves had gone through.
 
+## Several Peso/Unidade switches on a produce page, seen on 2026-10-02
+
+A produce product page (Banana Prata Kg) has 4 switches named "Seletor de unidade de venda": one in the buy box, and three on the suggested products' cards. In run 11, five kg products failed with a Playwright strict-mode error because the code looked for the switch on the whole page. The switch is now read inside the buy box.
+
 ## Order history (M4 T12), seen on 2026-10-02
 
 Looked at with Johann's logged-in session, headed. The script only navigated, and clicked only "Ver mais produtos". No personal data is written here: no order numbers, addresses, dates or totals. The values in the examples are made up.

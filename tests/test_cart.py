@@ -39,16 +39,20 @@ def test_fixture_candidates_have_buildable_urls():
 
 # A made-up product page with the structure site-notes describes. The buy box has the add
 # button, which turns into a stepper `[trash] qty [+]`. A "same category" card with its own
-# round `+` and a two-button div sits outside the buy box and must never be touched.
+# round `+`, a two-button div and its own Peso/Unidade switch (set to Unidade) sits outside
+# the buy box and must never be touched or read.
 PAGE = """
 <style>button {{ min-width: 20px; min-height: 20px }}</style>
 <div class="product-renderer-info-box">
   <h5>Produto</h5>
+  {switch}
   <div id="ctl">{control}</div>
 </div>
-{switch}
 <h2>Da mesma categoria</h2>
 <div class="item-product-wrapper">
+  <div role="radiogroup" aria-label="Seletor de unidade de venda">
+    <button role="radio" aria-checked="false">Peso</button>
+    <button role="radio" aria-checked="true">Unidade</button></div>
   <div id="other"><button>x</button><span>7</span><button id="otherplus"
     onclick="this.previousElementSibling.textContent='touched'">+</button></div>
 </div>

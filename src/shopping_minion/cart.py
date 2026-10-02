@@ -166,8 +166,10 @@ def _add(
             message="não mexido: já estava no carrinho",
         )
 
-    # Weight products have a Peso/Unidade switch; only Peso is supported (LLD 7.4).
-    switch = page.get_by_role("radiogroup", name=UNIT_SWITCH_NAME)
+    # Weight products have a Peso/Unidade switch; only Peso is supported (LLD 7.4). The one in
+    # the buy box: produce pages also show switches on the suggested products' cards (4 on the
+    # page, 1 in the box; seen 2026-10-02, run 11).
+    switch = box.get_by_role("radiogroup", name=UNIT_SWITCH_NAME)
     if switch.count() and not switch.get_by_role("radio", name="Peso", exact=True).is_checked():
         return _failed(target, "seletor de unidade não está em Peso")
 
