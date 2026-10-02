@@ -515,6 +515,13 @@ dotenvx run -- uv run python evals/history_eval.py --run 8 [--variants none,opti
 
 **Johann picks the variant from that report.** It goes in `config/decide.yaml`, and the choice is recorded in §14.
 
+**Johann delegated the choice up to T17** (2026-10-02: "implement everything up to T17; I validate in T18"). So Claude picks by a rule written here **before** the eval runs:
+1. The variant with the **highest hit rate on items with history** wins.
+2. It must not have more **wrong accepts** than `none`.
+3. **On a tie** (within 1 item), the simpler one wins: `options` (A), then `list` (B).
+4. **C** (the code prior) is picked only if it beats A and B by **2 or more items**, because its α is tuned on this same run.
+5. **If nothing beats `none`,** `history` stays `none`. The result is recorded, and M4 goes to Johann before T17.
+
 ## 13. Wiring (web app and CLI)
 
 - **Web, at the start of the worker** (`statemachine._work`, after the login check): a new state `syncing_history` runs `sync_orders`.
