@@ -316,6 +316,23 @@ Answer inline with `>` under each one. _The answers below were given by Johann i
 
 2. **Part 1 approval.** With T12 done and rounds 1–3 folded in, is Part 1 approved, so I can write Part 2 (contracts, tables, sync, eval, tasks in waves)?
 > approved
+### Round 5 (after the eval, §12.1)
+
+1. **The offer sentence.** It cost about 7 of 29 items on run 8 (§12.1, point 1), and it's merged in `main` (local, not pushed), so a live run uses it today. Proposal:
+   - remove the sentence and the offer text from Jev's question;
+   - keep offers in the picker's order (§4.8), where you review them anyway.
+
+   Or should a control run first separate the text from the sentence (1 × 30 questions)?
+
+2. **History in the question.** A and B make Jev confidently wrong. Proposal: drop A and B. Use history only where it showed no harm:
+   - the picker's order: products bought before, after Jev's pick;
+   - the quantity (§4.5);
+   - C as the decider, with α=1, which gained 1 item with 0 new wrong accepts. That gain is within noise on one run.
+
+   Then T17 wires that. OK, or do you want another direction?
+
+3. **The 95% target.** On run 8 the best variant is near 59%, and some misses aren't decidable from history. Proposal: keep 95% as the direction. Done-when becomes "at least as many hits as `none` and no more wrong accepts, measured on T18's live run plus run 8". The number is revisited once M5's preferences exist. OK?
+
 ## Design note: where the problem is, and where retrieval fits (chat of 2026-10-02)
 
 _Drafted by Claude from Johann's chat, for his review._
@@ -521,6 +538,50 @@ dotenvx run -- uv run python evals/history_eval.py --run 8 [--variants none,opti
 3. **On a tie** (within 1 item), the simpler one wins: `options` (A), then `list` (B).
 4. **C** (the code prior) is picked only if it beats A and B by **2 or more items**, because its α is tuned on this same run.
 5. **If nothing beats `none`,** `history` stays `none`. The result is recorded, and M4 goes to Johann before T17.
+
+### 12.1 Results on run 8 (2026-10-02)
+
+Run 8: 32 items, 29 with a final product. 27 of those have history, meaning at least one of their candidates was bought before. All numbers are hits out of decided items. "Wrong" means accepted without asking, and a miss.
+
+**Live, from run 8's own decisions (no call):** 16/27 with history, 18/29 overall (62%), 5 accepted, 0 wrong.
+
+**Replay with today's question** (wave 1's offer text and offer sentence), 3 × 30 questions:
+
+| Variant | With history | Overall | Accepted | Wrong | Picker |
+|---|---|---|---|---|---|
+| none | 9/27 | 9/29 (31%) | 9 | 2 | 20 |
+| options (A) | 14/27 | 14/29 (48%) | 17 | 7 | 12 |
+| list (B) | 12/27 | 12/29 (41%) | 19 | 12 | 10 |
+| prior α=0.5 / 1 / 2 (C) | 10 / 11 / 12 of 27 | 34% / 38% / 41% | 9 / 9 / 10 | 2 / 2 / 3 | 20 / 20 / 19 |
+
+**Control: the question as it was before wave 1** (no offer text, no offer sentence), 2 × 30 questions:
+
+| Variant | With history | Overall | Accepted | Wrong | Picker |
+|---|---|---|---|---|---|
+| none | 14/27 | 16/29 (55%) | 5 | 0 | 24 |
+| options (A) | 13/27 | 15/29 (52%) | 19 | 9 | 10 |
+| prior α=1 (C) | 15/27 | 17/29 (59%) | 7 | 0 | 22 |
+
+**What this shows, measured on one run of 29 items:**
+1. **The offer sentence and text cost about 7 items:** `none` fell from 16/29 (control) to 9/29.
+   - Several of the new misses are offer products: a 4-pack on offer instead of the single unit, another brand's spice on offer.
+   - Jev's own variance between days is part of the gap. The control (55%) vs the live run (62%) suggests about 2 items of it.
+   - The text and the sentence were turned off together, so their effects aren't separated.
+2. **History on the options makes Jev sure, not right.**
+   - Without offers, A gets 13/27 against `none`'s 14/27, and accepts 19 items, 9 of them wrong.
+   - "Bought before" moves the confidence over the threshold for products bought once, which are not this run's pick.
+   - B is worse: 12 wrong.
+3. **C (the code prior) is the only variant without new wrong accepts.** It gains 1 item over `none` in the control.
+4. **No variant comes near 95%.**
+   - Some misses are not decidable from the data: "luva" (glove) ended as a washing powder, likely a mis-pick in run 8. Others are size changes, such as 12 vs 20 eggs.
+   - **Inference, not measured:** the target needs more than one run as ground truth.
+
+**The rule written before the eval:**
+- A and B have more wrong accepts than `none`, so they fail rule 2.
+- C at α=2 has more wrong accepts too (3 > 2). C at α=1 doesn't, but it doesn't beat A and B by 2 items (rule 4).
+- **No variant qualifies,** so per rule 5 `history` stays `none` and this goes to Johann before T17.
+
+The full JSONs are in `data/evals/` (personal, not committed).
 
 ## 13. Wiring (web app and CLI)
 
