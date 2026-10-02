@@ -21,8 +21,8 @@ A milestone isn't done because its code is merged. It's done when its *done when
 | M1 | CLI: three items into the real cart | ✅ 2026-10-01 | [lld.md](lld.md) §9 |
 | M2 | Web app | ✅ 2026-10-01 | [lld-m2.md](lld-m2.md) §11 |
 | M3 | Full list, photo to cart, measured | ✅ 2026-10-01 | [lld-m3.md](lld-m3.md) §5 |
-| M4 | Preferences learned from history | ⬜ next | Johann to write up |
-| M5 | UX improvements | ⬜ | Johann to elaborate |
+| M4 | Purchase history for Jev | 🟡 designing | [lld-m4.md](lld-m4.md) |
+| M5 | UX improvements and preferences | ⬜ | Johann to elaborate |
 | M6 | Julia-1 as a local decide backend | ⬜ | to design |
 | M7 | Cloud migration | ⬜ | design TBD |
 
@@ -56,29 +56,32 @@ A milestone isn't done because its code is merged. It's done when its *done when
 
 **Done on 2026-10-01** ([lld-m3.md](lld-m3.md) §5). Run 8, 32 items: 8 min from photo to checked cart (5 min 15 s of it Johann's time) against over 1 h by hand; 2 list lines edited; 5 products accepted by Jev, 25 sent to Johann (13 confirmed Jev's pick, 11 chose another, 1 skipped); 0 cart edits; 28 of 28 checked.
 
-## M4 — Preferences learned from history ⬜
+## M4 — Purchase history for Jev 🟡
 
-**Goal:** Jev picks right more often, so you pick less. Today, with no preferences, Jev sent 32 of 34 items to you. With a preference entry for the 3 M1 items, its confidence went from 0.33–0.59 to 0.97–1.00 in the eval.
+**Goal:** Jev picks right more often, using what Johann actually bought. In run 8 (M3), Jev's pick was the final product in 18 of 29 decided items, and in 13 of the 25 sent to the picker it was right but not sure.
 
-**In:**
-- **Our own history first.** Every pick you make (`user_chosen`), every Jev pick you accept, and every quantity you set is already in SQLite. From it: for each list term, the product you chose last time and how often, plus your usual quantity.
-- **The store's order history**, read through the site as a user would, in the "meus pedidos" pages. It's the fastest way to seed preferences before our own history is large ([journal 0008](journal/2026-09-30-0008-purchase-history-is-the-fastest-preferences.md)). Those pages haven't been looked at yet, so they need an M0-style session first.
-- **How it reaches Jev:** the learned preference goes into the question as context, as `preferencias.yaml` does today. It also fills step B of the quantity rule (list → preference → 1 unit flagged).
-- **The hand-written `preferencias.yaml` stays.** It wins over what's learned.
+**In** (design: [lld-m4.md](lld-m4.md), from Johann's [ideas-m4.md](ideas-m4.md)):
+- **The store's order history,** read through the site as a user would (`/minha-conta/pedidos`), synced incrementally into SQLite. The first sync reads the last 5 orders. It starts with an M0-style look at those pages (T12).
+- **History per item, in code:** order lines matched to the search candidates by product id or normalized name.
+- **History in Jev's question,** measured in an eval on run 8 in three variants before going live. Jev is also told to prefer offers between equivalent products.
+- **Quantity:** the last quantity bought fills the step between the preference and the 1-unit default.
+- **Picker:** Jev's pick first, then offers, then by probability.
+- **The hand-written `preferencias.yaml` stays,** and wins over history.
 
-**Out:** recommendations ("you usually buy X, add it?"), substitutes for out-of-stock products.
+**Out:** our own runs' picks as a source (the store's history overrides them), user-set and implicit preferences, commodity vs personal-choice items (all M5), recommendations, substitutes for out-of-stock products.
 
-**Done when** the same kind of list as M3, run again, needs clearly fewer manual picks, and no product you wouldn't have chosen is accepted without asking. The target number is set after M3's report.
+**Done when** on a new real list run through the web app, Jev's pick is the final product for at least 95% of the items that have history. Items without history and the overall rate are reported, as is the picker count.
 
-**Johann has an idea for M4 and will write it up in a separate doc after M3.**
+## M5 — UX improvements and preferences ⬜
 
-**Open, for the M4 design:** how "the same item" is recognized across lists ("leite", "leite integral", "leite ninho"). Exact term, normalized term, or Jev deciding whether a past product fits today's item.
+**Goal:** the improvements Johann saw while using M2, and preferences beyond purchase history. **Johann will draft a doc with ideas.** He will add UX changes that partly fit with preferences (LLD-M4 §7, round 3).
 
-## M5 — UX improvements ⬜
+**Preferences beyond history** (from LLD-M4):
+- user-set preferences, apart from history ("Guaraná Antarctica over Dolly"), edited in the web app;
+- implicit preferences learned from the app's own runs;
+- commodity vs personal-choice items: an "open" item accepts a set of products, a "fixed" one a single product. Open sub-decisions: the rule inside an open set, and what a hit means for it.
 
-**Goal:** the improvements Johann saw while using M2. **Johann will draft a doc with ideas after M3.**
-
-Seen so far, as a starting list, not a commitment:
+**UX, seen so far** (a starting list, not a commitment):
 - the crossed-out line ("saco lixo pia e banheiro") is sometimes read anyway; the review could flag lines with a crossed-out look;
 - when Jev finds nothing that fits, no card is pre-selected, so Enter does nothing;
 - items with no results ("lanche infantil") could offer a new search term right there, instead of being skipped;
