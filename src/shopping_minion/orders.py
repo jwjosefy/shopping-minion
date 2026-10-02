@@ -43,7 +43,7 @@ class OrderLine(Contract):
     product_id: str  # the search's product id (T12)
     name: str
     quantity: float = Field(gt=0)
-    unit: Literal["un", "kg"]  # from selectedSaleUnit: "UN" -> un, "KG" -> kg
+    unit: Literal["un", "kg"]  # selectedSaleUnit, or saleUnit when it is null: "UN"/"KG"
     total_price: Decimal | None
 
 
@@ -99,9 +99,10 @@ def rows_from_list(body: dict) -> list[OrderRow]:
 def order_and_left_out(body: dict, row: OrderRow | None = None) -> tuple[Order, int]:
     """`data.customerViewer.order` and its `items`, plus how many lines were left out.
 
-    A line whose `selectedSaleUnit` isn't UN or KG, or whose `quantity` isn't > 0, is left
-    out. The order's date, status and total come from the details when they have them, and
-    from the list's row otherwise (T12 observed them on the list rows only; inference).
+    The unit is `selectedSaleUnit`, or `saleUnit` when that is null (older orders have it null;
+    seen 2026-10-02). A line whose unit isn't UN or KG, or whose `quantity` isn't > 0 (a product
+    not delivered shows 0), is left out. The order's date, status and total come from the
+    details (seen in T12), and from the list's row if the details lack them.
     """
     order = body["data"]["customerViewer"]["order"]
     order_id = str(order["id"])
@@ -113,7 +114,7 @@ def order_and_left_out(body: dict, row: OrderRow | None = None) -> tuple[Order, 
     total = _money(order["total"]) if "total" in order else (row.total if row else None)
     lines, left_out = [], 0
     for item in order.get("items") or []:
-        unit = _UNITS.get(item.get("selectedSaleUnit"))
+        unit = _UNITS.get(item.get("selectedSaleUnit") or item.get("saleUnit"))
         quantity = item.get("quantity")
         if unit is None or not isinstance(quantity, int | float) or not quantity > 0:
             left_out += 1

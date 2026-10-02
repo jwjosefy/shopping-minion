@@ -119,6 +119,14 @@ def test_order_header_falls_back_to_the_list_row():
         order_from_details(details_body())
 
 
+def test_a_null_selected_unit_falls_back_to_the_sale_unit():
+    # Older orders have selectedSaleUnit null (seen 2026-10-02).
+    legacy = item(product_id="9005", unit="UN") | {"selectedSaleUnit": None}
+    order, left_out = order_and_left_out(details_body(items=[legacy]), ROW)
+    assert [(line.product_id, line.unit) for line in order.lines] == [("9005", "un")]
+    assert left_out == 0
+
+
 def test_lines_with_another_unit_or_no_quantity_are_left_out_and_counted():
     body = details_body(
         items=[
