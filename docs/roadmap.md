@@ -21,8 +21,8 @@ A milestone isn't done because its code is merged. It's done when its *done when
 | M1 | CLI: three items into the real cart | ✅ 2026-10-01 | [lld.md](lld.md) §9 |
 | M2 | Web app | ✅ 2026-10-01 | [lld-m2.md](lld-m2.md) §11 |
 | M3 | Full list, photo to cart, measured | ✅ 2026-10-01 | [lld-m3.md](lld-m3.md) §5 |
-| M4 | Purchase history for Jev | 🟡 designing | [lld-m4.md](lld-m4.md) |
-| M5 | UX improvements and preferences | ⬜ | Johann to elaborate |
+| M4 | Purchase history for Jev | ✅ 2026-10-02 | [lld-m4.md](lld-m4.md) §16 |
+| M5 | UX improvements and preferences | 🟡 designing | [hld-m5.md](hld-m5.md) |
 | M6 | Julia-1 as a local decide backend | ⬜ | to design |
 | M7 | Cloud migration | ⬜ | design TBD |
 
@@ -56,7 +56,7 @@ A milestone isn't done because its code is merged. It's done when its *done when
 
 **Done on 2026-10-01** ([lld-m3.md](lld-m3.md) §5). Run 8, 32 items: 8 min from photo to checked cart (5 min 15 s of it Johann's time) against over 1 h by hand; 2 list lines edited; 5 products accepted by Jev, 25 sent to Johann (13 confirmed Jev's pick, 11 chose another, 1 skipped); 0 cart edits; 28 of 28 checked.
 
-## M4 — Purchase history for Jev 🟡
+## M4 — Purchase history for Jev ✅
 
 **Goal:** Jev picks right more often, using what Johann actually bought. In run 8 (M3), Jev's pick was the final product in 18 of 29 decided items, and in 13 of the 25 sent to the picker it was right but not sure.
 
@@ -72,9 +72,13 @@ A milestone isn't done because its code is merged. It's done when its *done when
 
 **Done when** on a new real list run through the web app, Jev's pick is the final product for at least 95% of the items that have history. Items without history and the overall rate are reported, as is the picker count.
 
-## M5 — UX improvements and preferences ⬜
+**Done on 2026-10-02** ([lld-m4.md](lld-m4.md) §16).
+- **What was measured:** three runs of Johann's real list, 88 items. Jev's pick was the final product for 63 of 74 items with history (85%; it was 62% without history). Jev accepted 48 items on its own with no wrong accept.
+- **The 95% target was not met.** Johann accepted M4 at 85%, and the target moves to M5. Most misses are brands he alternates between, which history alone can't tell apart.
 
-**Goal:** the improvements Johann saw while using M2, and preferences beyond purchase history. **Johann will draft a doc with ideas.** He will add UX changes that partly fit with preferences (LLD-M4 §7, round 3).
+## M5 — UX improvements and preferences 🟡
+
+**Goal:** the improvements Johann saw while using M2 and M4, and preferences beyond purchase history. Johann's notes: [ideas-m5.md](ideas-m5.md). Design: [hld-m5.md](hld-m5.md), in progress. M5 also takes over M4's 95% hit-rate target, and the cart failures left open in LLD-M4 §16.
 
 **Preferences beyond history** (from LLD-M4):
 - user-set preferences, apart from history ("Guaraná Antarctica over Dolly"), edited in the web app;
