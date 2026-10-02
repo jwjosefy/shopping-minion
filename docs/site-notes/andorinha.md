@@ -66,6 +66,10 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 - **Not observed yet:** the logged-in marker, and what a returning session's cart shows. That needs Johann to log in, in T4's `login` command.
 - A cookie banner ("Usamos cookies…") with **Recusar** / **Aceitar tudo** / **Escolher** shows on the first page of a fresh context. Clicking "Recusar" dismissed it.
 
+## Quantities above 1 kg, seen on 2026-10-02
+
+The stepper and the cart drawer write weights below 1 kg as grams (`900g`) and above 1 kg with a **dot** (`1.1kg`, `1.5kg`). In run 10, every kg product whose target passed 1 kg was reported as failed at the click that crossed 1 kg ("a quantidade não mudou"), and its drawer line was left out of the check. The cause was the stepper pattern accepting only a comma. The clicks themselves had gone through.
+
 ## Order history (M4 T12), seen on 2026-10-02
 
 Looked at with Johann's logged-in session, headed. The script only navigated, and clicked only "Ver mais produtos". No personal data is written here: no order numbers, addresses, dates or totals. The values in the examples are made up.

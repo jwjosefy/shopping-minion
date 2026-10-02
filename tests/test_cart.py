@@ -259,3 +259,14 @@ def test_add_all_stops_before_the_next_product(page):
     pairs = [(candidate(), CartTarget(product_id="1", clicks=1))] * 3
     results = add_all(page, pairs, should_stop=lambda: True, wait_sync=False)
     assert results == []
+
+
+def test_quantity_text_above_one_kg_uses_a_dot():
+    # Seen live on 2026-10-02: the stepper and the drawer show "1.5kg" above 1 kg. Not
+    # matching it made every click past 1 kg time out as "a quantidade não mudou".
+    from shopping_minion.cart import QUANTITY_TEXT
+
+    for text in ("1.1kg", "1.5kg", "1.2 kg", "900g", "1kg", "3", "1,5kg"):
+        assert QUANTITY_TEXT.match(text), text
+    for text in ("1 2", "Instruções Remover", "1.5.2kg"):
+        assert not QUANTITY_TEXT.match(text), text

@@ -29,8 +29,9 @@ BUY_BOX = ".product-renderer-info-box"
 # The Peso/Unidade switch also has two buttons (role=radio), so it is excluded.
 STEPPER = "xpath=.//div[count(./button)=2 and not(./button[@role='radio'])]"
 # While the number animates, the stepper briefly holds the old and new values ("1 2"); a
-# settled reading is one quantity token, unchanged for STABLE_MS (seen live).
-QUANTITY_TEXT = re.compile(r"^\d+(,\d+)?\s*(g|kg|un)?$", re.IGNORECASE)
+# settled reading is one quantity token, unchanged for STABLE_MS (seen live). Above 1 kg the
+# site writes a dot ("1.5kg"; seen 2026-10-02); a comma is kept for other renderings.
+QUANTITY_TEXT = re.compile(r"^\d+([.,]\d+)?\s*(g|kg|un)?$", re.IGNORECASE)
 STABLE_MS = 300
 UNIT_SWITCH_NAME = "Seletor de unidade de venda"
 
