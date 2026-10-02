@@ -4,11 +4,13 @@ import json
 import sqlite3
 from collections.abc import Sequence
 from datetime import UTC, datetime
+from decimal import Decimal
 from pathlib import Path
 
 from pydantic import BaseModel
 
 from shopping_minion.items import CartResult, Decision, Item
+from shopping_minion.orders import Order, OrderLine
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -44,7 +46,29 @@ CREATE TABLE IF NOT EXISTS run_log (
     data   TEXT    NOT NULL,      -- JSON
     PRIMARY KEY (run_id, seq)
 );
+CREATE TABLE IF NOT EXISTS orders (
+    order_id  TEXT PRIMARY KEY,
+    placed_at TEXT NOT NULL,     -- UTC, ISO 8601
+    status    TEXT NOT NULL,
+    total     TEXT,              -- Decimal as text
+    synced_at TEXT NOT NULL      -- UTC, ISO 8601
+);
+CREATE TABLE IF NOT EXISTS order_lines (
+    order_id    TEXT    NOT NULL REFERENCES orders(order_id),
+    line        INTEGER NOT NULL,
+    product_id  TEXT    NOT NULL,
+    name        TEXT    NOT NULL,
+    quantity    REAL    NOT NULL,
+    unit        TEXT    NOT NULL,   -- un | kg
+    total_price TEXT,
+    PRIMARY KEY (order_id, line)
+);
 """
+
+
+def _utc_text(moment: datetime) -> str:
+    """UTC, always with microseconds, so the text sorts the way the moments do."""
+    return moment.astimezone(UTC).isoformat(timespec="microseconds")
 
 
 def _dump(model: BaseModel | None) -> str | None:
@@ -160,6 +184,65 @@ class Storage:
             "SELECT result_json FROM cart WHERE run_id = ? ORDER BY idx", (run_id,)
         ).fetchall()
         return [CartResult.model_validate_json(r["result_json"]) for r in rows]
+
+    def known_order_ids(self) -> set[str]:
+        return {row["order_id"] for row in self._conn.execute("SELECT order_id FROM orders")}
+
+    def save_order(self, order: Order) -> None:
+        """One transaction. An order already stored is an error (sync saves only new ones)."""
+        with self._conn:
+            self._conn.execute(
+                "INSERT INTO orders (order_id, placed_at, status, total, synced_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (
+                    order.order_id,
+                    _utc_text(order.placed_at),
+                    order.status,
+                    None if order.total is None else str(order.total),
+                    _utc_text(datetime.now(UTC)),
+                ),
+            )
+            self._conn.executemany(
+                "INSERT INTO order_lines "
+                "(order_id, line, product_id, name, quantity, unit, total_price) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [
+                    (
+                        order.order_id,
+                        number,
+                        line.product_id,
+                        line.name,
+                        line.quantity,
+                        line.unit,
+                        None if line.total_price is None else str(line.total_price),
+                    )
+                    for number, line in enumerate(order.lines)
+                ],
+            )
+
+    def order_lines(self, before: datetime | None = None) -> list[OrderLine]:
+        """Every stored line, newest order first; with `before`, only orders placed before it."""
+        sql = (
+            "SELECT l.order_id, o.placed_at, l.product_id, l.name, l.quantity, l.unit, "
+            "l.total_price FROM order_lines l JOIN orders o ON o.order_id = l.order_id"
+        )
+        params: tuple = ()
+        if before is not None:
+            sql += " WHERE o.placed_at < ?"
+            params = (_utc_text(before),)
+        rows = self._conn.execute(sql + " ORDER BY o.placed_at DESC, l.order_id, l.line", params)
+        return [
+            OrderLine(
+                order_id=row["order_id"],
+                placed_at=datetime.fromisoformat(row["placed_at"]),
+                product_id=row["product_id"],
+                name=row["name"],
+                quantity=row["quantity"],
+                unit=row["unit"],
+                total_price=None if row["total_price"] is None else Decimal(row["total_price"]),
+            )
+            for row in rows
+        ]
 
     def _replace(self, table: str, column: str, run_id: int, models: Sequence[BaseModel]) -> None:
         rows = [(run_id, idx, model.model_dump_json()) for idx, model in enumerate(models)]

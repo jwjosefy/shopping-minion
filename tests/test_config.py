@@ -46,3 +46,19 @@ def test_unknown_key_is_rejected(tmp_path):
     path.write_text("model: x\nbatch_size: 1\naccept_at: 0.8\nask_below: 0.5\nextra: 1\n")
     with pytest.raises(ValidationError):
         load_decide_config(path)
+
+
+def test_repo_history_config_loads():
+    from shopping_minion.config import load_history_config
+
+    config = load_history_config(REPO_CONFIG.with_name("history.yaml"))
+    assert config.first_sync_orders == 10
+    assert config.related_lines == 10
+
+
+@pytest.mark.parametrize("first", [0, 11])
+def test_history_first_sync_orders_is_1_to_10(first):
+    from shopping_minion.config import HistoryConfig
+
+    with pytest.raises(ValidationError):
+        HistoryConfig(first_sync_orders=first, related_lines=10)
