@@ -140,7 +140,8 @@ The key to `.env` is never shared: it opens every secret in it, including in old
 - [x] M2: web app (FastAPI and Vue, dark blue theme): upload from the phone, review, progress, one-item-at-a-time picking, cart check
 - [x] M3: full list from photo to cart, time and number of corrections measured
 - [x] Merge duplicate list lines that point to the same product
-- [ ] Preferences built from purchase history, to cut manual picks (32 out of 34 on the first run)
+- [x] M4: purchase history for Jev. On a real 88-item list, Jev decided 48 items alone with no wrong pick, and its pick was the final product for 85% of the items bought before (62% without history)
+- [ ] M5: UX and preferences learned from your picks
 - [ ] Julia-1 as a local alternative to Jev
 
 ## License

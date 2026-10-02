@@ -1,6 +1,6 @@
 # Shopping Minion — M4: preferences from purchase history
 
-- **Status:** Approved by Johann on 2026-10-02: Part 1 (design) and Part 2 (LLD, §8–§15), with the first sync at 10 orders.
+- **Status:** Approved by Johann on 2026-10-02: Part 1 (design) and Part 2 (LLD, §8–§15), with the first sync at 10 orders. **M4 accepted on 2026-10-02 (§16).**
 - **Date:** 2026-10-02
 - **Sources:** [ideas-m4.md](ideas-m4.md) (Johann), [roadmap.md](roadmap.md) §M4, [journal 0008](journal/2026-09-30-0008-purchase-history-is-the-fastest-preferences.md), the M3 report ([lld-m3.md](lld-m3.md) §5).
 - **Why the design is in this file:** M4 adds a data source, the store's order history, so the HLD has to change (CLAUDE.md). Johann asked for that design here, in the same doc as the LLD. Once it's approved, [hld.md](hld.md) gets a short section that points here.
@@ -631,3 +631,45 @@ Each wave is reviewed by Johann before merge.
 
 - **[hld.md](hld.md):** a short section, "M4: purchase history", that points here. It is added with this LLD.
 - **[README](../README.md):** `just history-sync` and the eval command, after T17.
+
+## 16. Acceptance (T18)
+
+**Accepted by Johann on 2026-10-02** ("concordo, fecha o M4"), after three live runs of his real shopping list of that day, one page each (runs 9, 10 and 11), through the web app with `history: options` and the offer sentence.
+
+| | Run 9 | Run 10 | Run 11 | Total |
+|---|---|---|---|---|
+| Items on the page | 43 | 30 | 15 | 88 |
+| Hits, items with history | 33/39 | 20/25 | 10/10 | **63/74 (85%)** |
+| Hits, overall | 35/41 | 22/27 | 10/10 | 67/78 (86%) |
+| Accepted by Jev alone / wrong | 21 / 0 | 17 / 0 | 10 / 0 | **48 / 0** |
+| Sent to the picker | 20 | 10 | 0 | 30 |
+| Johann's time | 8 min 32 s | 22 min 34 s | 1 min 58 s | |
+
+For comparison, run 8 (M3, no history) had 18/29 hits (62%) and 5 accepts.
+
+**Confidence, 80 Jev answers** (`evals/confidence_report.py --runs 9,10,11`):
+
+| | n | P10 | P25 | P50 | P75 | P90 |
+|---|---|---|---|---|---|---|
+| Hits | 67 | 0.60 | 0.77 | 0.90 | 0.97 | 0.99 |
+| Misses | 11 | 0.32 | 0.49 | 0.55 | 0.64 | 0.73 |
+
+All 48 answers at ≥ 0.8 were hits, and no miss was above 0.73. With these answers, `accept_at` 0.75 would have accepted 53 with 1 miss, and 0.70 would have accepted 58 with 2 misses.
+
+**Against the done-when:**
+- **95% on items with history: not met.** The result is 85%, and Johann accepted M4 without it.
+- **Why the gap stays:** most of the 11 misses are brands he alternates between, and both were in his orders: Bauducco or Nutrella, Limpol or Ypê, Litoral or Apolo. History alone can't tell those apart.
+- **What M4 did:** raised hits and Jev's own decisions with no wrong accept.
+- **Where the 95% target goes:** to M5, with preferences learned from his picks.
+
+**Found and fixed during the runs:**
+- **Quantities above 1 kg:** the site writes them with a dot (`1.5kg`), and the code didn't read that format (run 10). Fixed in `a476aa5`.
+- **Peso/Unidade switches:** produce pages show 4 of them, and only 1 is in the buy box (run 11). Fixed in `5f9e000`.
+- **What wasn't recorded:** the app didn't save what each search returned, which check lines failed, or the server's errors. The web app now writes `data/logs/serve-<date>.log`, a `search` row per item and the check's failing lines (`ca7ced5`).
+
+**Left open, for M5:**
+- the add button that didn't start a stepper (água sanitária, alface; cause unknown);
+- four searches that came back empty once (goiaba, uva, mamão, cebola) and returned results later;
+- search terms for meat and produce ("carne de panela acém", "salsinha");
+- the UX notes in [ideas-m5.md](ideas-m5.md).
+
