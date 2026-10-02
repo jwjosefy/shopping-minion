@@ -14,6 +14,7 @@ from playwright.sync_api import Page
 from shopping_minion.cart import add_all, read_cart_drawer
 from shopping_minion.config import DecideConfig
 from shopping_minion.decide import decide
+from shopping_minion.history import ItemHistory
 from shopping_minion.items import (
     Candidate,
     CartDraft,
@@ -71,9 +72,11 @@ def decide_list(
     prefs: dict[str, dict],
     config: DecideConfig,
     client: Any,
+    histories: list[ItemHistory] | None = None,
 ) -> list[Decision]:
-    """Jev's decision per item, in the order of `items`."""
-    return decide(list(zip(items, candidates, strict=True)), prefs, config, client)
+    """Jev's decision per item, in the order of `items`. `histories`, if given, has one entry
+    per item, in the same order."""
+    return decide(list(zip(items, candidates, strict=True)), prefs, config, client, histories)
 
 
 # --- the cart draft -------------------------------------------------------------------------
@@ -86,19 +89,34 @@ def _total(lines: list[DraftLine]) -> Decimal | None:
     return sum(prices, Decimal(0))
 
 
-def draft_cart(decisions: list[Decision], prefs: dict[str, dict]) -> CartDraft:
-    """Targets and clicks for each decided item, duplicates merged (LLD-M2 section 6)."""
+def draft_cart(
+    decisions: list[Decision],
+    prefs: dict[str, dict],
+    histories: list[ItemHistory] | None = None,
+) -> CartDraft:
+    """Targets and clicks for each decided item, duplicates merged (LLD-M2 section 6).
+    `histories`, if given, has one entry per decision, in the same order; the chosen product's
+    last quantity is the fallback before the 1 un default."""
     singles: list[DraftLine] = []
     skipped: list[Decision] = []
     warnings: list[str] = []
-    for decision in decisions:
+    for index, decision in enumerate(decisions):
         if decision.status not in ("accepted", "user_chosen") or decision.choice is None:
             skipped.append(decision)
             continue
         candidate = next(c for c in decision.candidates if c.product_id == decision.choice)
-        quantity, assumed = target_quantity(decision.item, find_preference(prefs, decision.item))
+        history = histories[index].products.get(decision.choice) if histories else None
+        quantity, flags = target_quantity(
+            decision.item, find_preference(prefs, decision.item), history, candidate.unit_of_sale
+        )
         try:
-            line = build_line(candidate, [decision.item], quantity, bool(assumed))
+            line = build_line(
+                candidate,
+                [decision.item],
+                quantity,
+                assumed="QUANTITY_ASSUMED" in flags,
+                from_history="QUANTITY_FROM_HISTORY" in flags,
+            )
         except ValueError as exc:  # a kg product with no stepper increment
             warnings.append(f"{decision.item.name}: {exc}; item pulado.")
             skipped.append(decision)
