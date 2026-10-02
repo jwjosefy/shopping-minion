@@ -1,6 +1,6 @@
 # Shopping Minion — M4: preferences from purchase history
 
-- **Status:** Part 1 (design) approved by Johann on 2026-10-02. Part 2 (LLD, §8–§15) is a draft for his review.
+- **Status:** Approved by Johann on 2026-10-02: Part 1 (design) and Part 2 (LLD, §8–§15), with the first sync at 10 orders.
 - **Date:** 2026-10-02
 - **Sources:** [ideas-m4.md](ideas-m4.md) (Johann), [roadmap.md](roadmap.md) §M4, [journal 0008](journal/2026-09-30-0008-purchase-history-is-the-fastest-preferences.md), the M3 report ([lld-m3.md](lld-m3.md) §5).
 - **Why the design is in this file:** M4 adds a data source, the store's order history, so the HLD has to change (CLAUDE.md). Johann asked for that design here, in the same doc as the LLD. Once it's approved, [hld.md](hld.md) gets a short section that points here.
@@ -77,7 +77,7 @@ Two steps are new: **history sync** and **hist(item)**. The decide question, the
 
 - **Read-only, through the site, as a user would.** It opens `/minha-conta/pedidos` and reads the `CustomerOrdersListPaginated` response the page receives: order ids, dates and status. Then, for each order not stored yet, it opens `/minha-conta/pedidos/<id>` and reads the `OrderDetailsQuery` response: the lines with `productId`, name, quantity, unit and price. **It clicks nothing:** "Ver mais produtos" isn't needed, because the response already has every line (T12).
 - **"Adicionar todos os itens ao carrinho"** is on every order page, and it writes to the cart. A guard test forbids that text in `src/`, the same way "Finalizar pedido" is forbidden.
-- **Incremental and automatic:** at the start of each run, before the search, it reads only orders it hasn't stored yet. The list is newest first, so it stops at the first order id already in the database. The first sync reads the last **N orders**, with N in `config/history.yaml` and 5 to start, per ideas-m4.md. All 5 fit on the list's first page (10 per page). There is also a command: `shopping-minion history sync`, and `just history-sync` (R1 Q9).
+- **Incremental and automatic:** at the start of each run, before the search, it reads only orders it hasn't stored yet. The list is newest first, so it stops at the first order id already in the database. The first sync reads the last **N orders**, with N in `config/history.yaml`: **10** (Johann, 2026-10-02, at Part 2's approval; ideas-m4.md had started at 5). All 10 fit on the list's first page. There is also a command: `shopping-minion history sync`, and `just history-sync` (R1 Q9).
 - **Only finished orders** (`status: FINISHED`, the only status seen) are stored. Others are skipped until a later sync sees them finished.
 - **The browser:** in the web app, the same worker thread that owns the browser for search and cart. One browser, one owner.
 
@@ -340,7 +340,7 @@ _Drafted by Claude from Johann's chat, for his review._
 
 # Part 2 — LLD
 
-_Status: Draft for Johann's review. Part 1 was approved on 2026-10-02 (§7, round 4)._
+_Approved by Johann on 2026-10-02._
 
 ## 8. Contracts
 
@@ -434,7 +434,7 @@ sync_orders(page, storage, first_n, progress=None) -> SyncResult(new, skipped, s
 - **Config:** `config/history.yaml`:
 
   ```yaml
-  first_sync_orders: 5
+  first_sync_orders: 10     # Johann, 2026-10-02
   related_lines: 10
   ```
 
