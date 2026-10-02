@@ -1,6 +1,7 @@
 """Loads config/decide.yaml (LLD section 3.4)."""
 
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import Field, model_validator
@@ -13,6 +14,7 @@ class DecideConfig(Contract):
     batch_size: int = Field(ge=1)
     accept_at: float = Field(ge=0, le=1)
     ask_below: float = Field(ge=0, le=1)
+    history: Literal["none", "options", "list"] = "none"  # LLD-M4 section 11.2
 
     @model_validator(mode="after")
     def _thresholds_ordered(self) -> "DecideConfig":

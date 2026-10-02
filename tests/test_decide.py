@@ -1,4 +1,5 @@
 import threading
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -11,9 +12,14 @@ from shopping_minion.decide import (
     build_questions,
     decide,
     describe_candidate,
+    format_date,
+    format_quantity,
+    format_times,
     nothing_fit,
 )
-from shopping_minion.items import Candidate, Item
+from shopping_minion.history import ItemHistory, ProductHistory
+from shopping_minion.items import Candidate, Item, Quantity
+from shopping_minion.orders import OrderLine
 
 
 def cand(
@@ -42,9 +48,13 @@ def item(name="atum", **kw):
     return Item(source_line=kw.pop("source_line", name), name=name, search_term=name, **kw)
 
 
-def config(batch_size=5, accept_at=0.8, ask_below=0.5):
+def config(batch_size=5, accept_at=0.8, ask_below=0.5, history="none"):
     return DecideConfig(
-        model="jev-1.13", batch_size=batch_size, accept_at=accept_at, ask_below=ask_below
+        model="jev-1.13",
+        batch_size=batch_size,
+        accept_at=accept_at,
+        ask_below=ask_below,
+        history=history,
     )
 
 
@@ -157,6 +167,175 @@ def test_wire_form_has_no_unset_fields():
     wire = q.model_dump()
     assert wire["type"] == "choice"
     assert set(wire) == {"type", "instructions", "criteria"}
+
+
+# --- history in the question (LLD-M4 section 11.2) -------------------------------------------
+
+BASE_QUESTION = (
+    "Qual produto da loja corresponde ao `item` da lista de compras? "
+    "Respeite as restrições de `item`. "
+    "Entre produtos equivalentes, prefira o que está em oferta. "
+    "Se nenhum produto corresponde, escolha `nenhum`."
+)
+A_SENTENCE = "Entre os produtos que correspondem, prefira o que já foi comprado antes."
+B_SENTENCE = (
+    "Considere o `historico` de compras: entre os produtos que correspondem, "
+    "prefira um que já foi comprado antes."
+)
+
+
+def product_history(pid="1", orders=3, day=20, value=2.045, unit="kg"):
+    return ProductHistory(
+        product_id=pid,
+        orders=orders,
+        last_at=date(2026, 9, day),
+        last_quantity=Quantity(value=value, unit=unit),
+    )
+
+
+def order_line(pid, name, quantity=1.0, unit="un", day=5):
+    return OrderLine(
+        order_id="o9",
+        placed_at=datetime(2026, 9, day, 12, 0, tzinfo=UTC),
+        product_id=pid,
+        name=name,
+        quantity=quantity,
+        unit=unit,
+        total_price=None,
+    )
+
+
+LARANJA = [
+    cand("1", name="Laranja Pêra Rio Kg", brand=None, price="5.98", unit="kg", list_price="6.49"),
+    cand("2", name="Laranja Bahia Kg", brand=None, price="8.99", unit="kg"),
+]
+
+
+def test_none_and_missing_histories_leave_the_question_as_it_was():
+    pairs = [(item("laranja"), LARANJA)]
+    history = [ItemHistory(products={"1": product_history()}, related=[order_line("9", "x")])]
+    plain = build_questions(pairs, {})["item_0"]
+    assert plain.instructions == {
+        "question": BASE_QUESTION,
+        "item": {"name": "laranja", "source_line": "laranja"},
+    }
+    assert plain.criteria["p1"] == (
+        "Laranja Pêra Rio Kg, em oferta, de R$ 6,49 por R$ 5,98, vendido por kg"
+    )
+    assert build_questions(pairs, {}, history, "none")["item_0"] == plain
+    assert build_questions(pairs, {}, None, "options")["item_0"] == plain
+    assert build_questions(pairs, {}, None, "list")["item_0"] == plain
+
+
+def test_variant_a_annotates_only_the_options_with_history():
+    pairs = [(item("laranja"), LARANJA)]
+    history = [ItemHistory(products={"1": product_history()}, related=[])]
+    q = build_questions(pairs, {}, history, "options")["item_0"]
+    assert q.criteria["p1"] == (
+        "Laranja Pêra Rio Kg, em oferta, de R$ 6,49 por R$ 5,98, vendido por kg; "
+        "comprado antes: 3 vezes, a última em 20/09/2026, 2,045 kg"
+    )
+    assert q.criteria["p2"] == "Laranja Bahia Kg, R$ 8,99, vendido por kg"
+    assert q.instructions["question"] == BASE_QUESTION.replace(
+        "Entre produtos", f"{A_SENTENCE} Entre produtos"
+    )
+    assert "historico" not in q.instructions
+
+
+def test_variant_a_with_a_preference_and_a_single_purchase_in_units():
+    prefs = {"atum": {"marca": "Gomes"}}
+    history = [
+        ItemHistory(products={"1": product_history(orders=1, value=3, unit="un")}, related=[])
+    ]
+    q = build_questions([(item("atum"), [cand("1", brand=None)])], prefs, history, "options")
+    q = q["item_0"]
+    assert q.criteria["p1"].endswith("; comprado antes: 1 vez, a última em 20/09/2026, 3 un")
+    text = q.instructions["question"]
+    assert A_SENTENCE in text
+    assert "`preferencia`" in text
+    assert text.index(A_SENTENCE) < text.index("em oferta") < text.index("nenhum")
+
+
+def test_variant_a_does_nothing_for_an_item_without_products():
+    related_only = ItemHistory(products={}, related=[order_line("9", "Suco Laranja 1L")])
+    for history in (ItemHistory(products={}, related=[]), related_only):
+        q = build_questions([(item("laranja"), LARANJA)], {}, [history], "options")["item_0"]
+        assert q.instructions["question"] == BASE_QUESTION
+        assert q.criteria["p1"] == describe_candidate(LARANJA[0])
+
+
+def test_variant_b_lists_the_products_then_the_related_lines():
+    history = [
+        ItemHistory(
+            products={"2": product_history("2", orders=1, day=3, value=0.5)},
+            related=[order_line("9", "Suco Xando Laranja 1L", 2, "un", day=5)],
+        )
+    ]
+    q = build_questions([(item("laranja"), LARANJA)], {}, history, "list")["item_0"]
+    assert q.instructions["historico"] == [
+        "Laranja Bahia Kg | 0,5 kg | 03/09/2026",
+        "Suco Xando Laranja 1L | 2 un | 05/09/2026",
+    ]
+    assert q.instructions["question"] == BASE_QUESTION.replace(
+        "Entre produtos", f"{B_SENTENCE} Entre produtos"
+    )
+    assert q.criteria["p1"] == describe_candidate(LARANJA[0])  # the options stay as today
+
+
+def test_variant_b_needs_products_or_related_lines():
+    q = build_questions(
+        [(item("laranja"), LARANJA)], {}, [ItemHistory(products={}, related=[])], "list"
+    )
+    q = q["item_0"]
+    assert q.instructions == {
+        "question": BASE_QUESTION,
+        "item": {"name": "laranja", "source_line": "laranja"},
+    }
+    only_related = ItemHistory(products={}, related=[order_line("9", "Leite Ninho 1L")])
+    q = build_questions([(item("leite"), [cand("1")])], {}, [only_related], "list")["item_0"]
+    assert q.instructions["historico"] == ["Leite Ninho 1L | 1 un | 05/09/2026"]
+
+
+def test_histories_line_up_with_the_items_even_with_empty_ones_between():
+    pairs = [(item("laranja"), LARANJA), (item("vazio"), []), (item("atum"), [cand("7")])]
+    histories = [
+        ItemHistory(products={"1": product_history()}, related=[]),
+        ItemHistory(products={}, related=[]),
+        ItemHistory(products={"7": product_history("7", orders=2, value=2, unit="un")}, related=[]),
+    ]
+    client = FakeClient({"laranja": ("p1", 0.9, {"p1": 0.9}), "atum": ("p7", 0.9, {"p7": 0.9})})
+    decide(pairs, {}, config(history="options"), client, histories)
+    (call,) = client.calls
+    assert "3 vezes" in call["questions"]["item_0"].criteria["p1"]
+    assert "2 vezes" in call["questions"]["item_1"].criteria["p7"]
+
+
+def test_decide_without_histories_sends_the_wave_one_questions():
+    client = FakeClient({"laranja": ("p1", 0.9, {"p1": 0.9})})
+    decide([(item("laranja"), LARANJA)], {}, config(history="options"), client)
+    assert client.calls[0]["questions"]["item_0"].instructions["question"] == BASE_QUESTION
+
+
+def test_decide_rejects_histories_of_the_wrong_length():
+    with pytest.raises(ValueError):
+        decide([(item("laranja"), LARANJA)], {}, config(), FakeClient({}), [])
+
+
+def test_the_default_history_mode_is_none():
+    cfg = DecideConfig(model="m", batch_size=1, accept_at=0.8, ask_below=0.5)
+    assert cfg.history == "none"
+
+
+def test_formatting_helpers():
+    assert format_times(1) == "1 vez"
+    assert format_times(3) == "3 vezes"
+    assert format_date(date(2026, 9, 5)) == "05/09/2026"
+    assert format_quantity(Quantity(value=2.045, unit="kg")) == "2,045 kg"
+    assert format_quantity(Quantity(value=0.5, unit="kg")) == "0,5 kg"
+    assert format_quantity(Quantity(value=3, unit="un")) == "3 un"
+    assert format_quantity(Quantity(value=3.0, unit="kg")) == "3 kg"
+    assert format_quantity(Quantity(value=10.0, unit="un")) == "10 un"
+    assert format_quantity(Quantity(value=12, unit="kg")) == "12 kg"
 
 
 # --- decide ----------------------------------------------------------------------------------
