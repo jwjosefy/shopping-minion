@@ -69,6 +69,7 @@ just jev                          # asks for your TYPESAFE_API_KEY (hidden), sav
 just login                        # log in to the store by hand once; the session goes to .auth/
 just up                           # the web app; prints a URL + QR for the phone
 just report                       # time and corrections for the latest run (`just report 7` for another)
+just history-sync                 # read your last orders from the store (also runs at the start of every run)
 ```
 
 [`scripts/bootstrap.sh`](scripts/bootstrap.sh) installs [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and [dotenvx](https://dotenvx.com) into `~/.local/bin` when missing (no sudo), clones the repo, and installs the Python deps and Playwright's Chromium. It's safe to run again, also from inside a clone. `just up` uses `.env.local` if it exists and the project's `.env` otherwise, and stops if a secret doesn't decrypt.
@@ -96,6 +97,8 @@ uv run shopping-minion report                                 # time and correct
 ```bash
 uv run python evals/intake_eval.py --photo <list photo> --model sonnet       # OCR vs evals/fixtures/list-001.yaml
 dotenvx run -- uv run python evals/decide_eval.py --preferences <file>        # Jev on the 7 recorded cases
+uv run python evals/confidence_report.py                                     # Jev's confidence percentiles over every saved run
+uv run python evals/history_eval.py --run <n> --live-only                    # hit rate of a run, with and without history
 ```
 
 On 2026-10-01, one run each:
