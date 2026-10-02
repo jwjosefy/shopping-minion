@@ -1,6 +1,6 @@
 # Shopping Minion — M4: preferences from purchase history
 
-- **Status:** Draft, Part 1 (design). Rounds 1–3 answered by Johann on 2026-10-02 (§7) and folded in. T12 done on 2026-10-02. Part 2 (LLD and tasks) is written after Part 1 is approved.
+- **Status:** Part 1 (design) approved by Johann on 2026-10-02. Part 2 (LLD, §8–§15) is a draft for his review.
 - **Date:** 2026-10-02
 - **Sources:** [ideas-m4.md](ideas-m4.md) (Johann), [roadmap.md](roadmap.md) §M4, [journal 0008](journal/2026-09-30-0008-purchase-history-is-the-fastest-preferences.md), the M3 report ([lld-m3.md](lld-m3.md) §5).
 - **Why the design is in this file:** M4 adds a data source, the store's order history, so the HLD has to change (CLAUDE.md). Johann asked for that design here, in the same doc as the LLD. Once it's approved, [hld.md](hld.md) gets a short section that points here.
@@ -312,9 +312,10 @@ Answer inline with `>` under each one. _The answers below were given by Johann i
 ### Round 4 (after T12)
 
 1. **Ordered vs weighed amount.** The order's lines have what was weighed (3.68 kg). What was ordered (4 kg) is only in a text message: "O item X teve sua quantidade alterada de 4kg. para 3.68kg." Proposal: use the weighed amount, rounded to the nearest step (R1 Q5), and don't parse the message. Parsing store text breaks the day the wording changes, and rounding already lands on what was ordered for most lines (0.965 → 1 kg, 1.975 → 2 kg). OK?
+>ok 
 
 2. **Part 1 approval.** With T12 done and rounds 1–3 folded in, is Part 1 approved, so I can write Part 2 (contracts, tables, sync, eval, tasks in waves)?
-
+> approved
 ## Design note: where the problem is, and where retrieval fits (chat of 2026-10-02)
 
 _Drafted by Claude from Johann's chat, for his review._
@@ -339,4 +340,218 @@ _Drafted by Claude from Johann's chat, for his review._
 
 # Part 2 — LLD
 
-Written after Part 1 is approved and the order pages are observed (T12): contracts, the `orders` tables, the sync module, the eval, the question text, and the task breakdown in waves.
+_Status: Draft for Johann's review. Part 1 was approved on 2026-10-02 (§7, round 4)._
+
+## 8. Contracts
+
+New pydantic contracts. `orders.py` holds what comes from the store, and `history.py` holds what code computes from it.
+
+```python
+# orders.py
+class OrderLine(Contract):
+    order_id: str
+    placed_at: datetime          # the order's createdAt, UTC
+    product_id: str              # the search's product id (T12)
+    name: str
+    quantity: float = Field(gt=0)
+    unit: Literal["un", "kg"]    # from selectedSaleUnit: "UN" -> un, "KG" -> kg
+    total_price: Decimal | None
+
+class Order(Contract):
+    order_id: str
+    placed_at: datetime
+    status: str                  # only FINISHED orders are stored
+    total: Decimal | None
+    lines: list[OrderLine]
+
+# history.py
+class ProductHistory(Contract):
+    product_id: str
+    orders: int                  # distinct orders with this product
+    last_at: date                # the newest of them, local date
+    last_quantity: Quantity      # unit "un" or "kg", from that order
+
+class ItemHistory(Contract):
+    products: dict[str, ProductHistory]   # step 1: only candidates with history, by product_id
+    related: list[OrderLine]              # step 2: about the item, outside the candidates;
+                                          # newest first, one per product, at most k
+```
+
+**Flags:**
+- `QUANTITY_FROM_HISTORY` joins `QUANTITY_ASSUMED` and `QUANTITY_INEXACT`, in `quantity.Flag`, `CartTarget.flags` and `DraftLine.flags`.
+- `Decision` doesn't change. The history an item had is recomputed from SQLite when needed, and isn't stored on the decision.
+
+## 9. Storage (`storage.py`)
+
+```sql
+CREATE TABLE IF NOT EXISTS orders (
+    order_id  TEXT PRIMARY KEY,
+    placed_at TEXT NOT NULL,     -- UTC, ISO 8601
+    status    TEXT NOT NULL,
+    total     TEXT,              -- Decimal as text
+    synced_at TEXT NOT NULL      -- UTC, ISO 8601
+);
+CREATE TABLE IF NOT EXISTS order_lines (
+    order_id    TEXT    NOT NULL REFERENCES orders(order_id),
+    line        INTEGER NOT NULL,
+    product_id  TEXT    NOT NULL,
+    name        TEXT    NOT NULL,
+    quantity    REAL    NOT NULL,
+    unit        TEXT    NOT NULL,   -- un | kg
+    total_price TEXT,
+    PRIMARY KEY (order_id, line)
+);
+```
+
+**Methods:**
+- `known_order_ids() -> set[str]`.
+- `save_order(order: Order)`: one transaction. An order already stored is an error, because sync only saves orders it didn't know.
+- `order_lines(before: datetime | None = None) -> list[OrderLine]`: newest order first. With `before`, only orders placed before it; the eval uses this for run 8 (§12).
+
+## 10. History sync (`orders.py`)
+
+**Parsers.** These are pure functions over the JSON the pages receive, with the shapes in [site-notes](site-notes/andorinha.md#order-history-m4-t12-seen-on-2026-10-02):
+- `rows_from_list(body) -> list[OrderRow]`: reads `data.customerViewer.ordersList.rows`. An `OrderRow` holds `id`, `createdAt`, `status` and `total`, in page order, newest first.
+- `order_from_details(body) -> Order`: reads `data.customerViewer.order` and its `items`.
+  - A line whose `selectedSaleUnit` isn't `UN` or `KG`, or whose `quantity` is not > 0, is left out and counted.
+  - Nothing else in that response is read: no address, payment or status history.
+
+**The pages' own responses.** A response is the one we want when its request's `operationName` is `CustomerOrdersListPaginated` or `OrderDetailsQuery`. For the details, the order `id` in the body must also be the one opened. This is the same pattern as the search (`search.py`): the code listens and reads, and never builds a request.
+
+```
+sync_orders(page, storage, first_n, progress=None) -> SyncResult(new, skipped, stored)
+  open /minha-conta/pedidos, wait for CustomerOrdersListPaginated (20 s)
+  known = storage.known_order_ids()
+  rows  = first_n rows               if known is empty
+          rows before the first known otherwise          (the list is newest first)
+  for each row:  skip unless status == "FINISHED"   (counted in `skipped`)
+                 open /minha-conta/pedidos/<id>, wait for its OrderDetailsQuery (20 s)
+                 storage.save_order(order_from_details(body)); settle(page)
+```
+
+- **No clicks.** "Ver mais produtos" isn't needed (T12).
+- **One page of the list only:** 10 orders, which was observed. `first_n > 10` raises a `ValueError` saying the next page wasn't observed. If more than 10 orders are new since the last sync, only the newest 10 are read, and the result says so.
+- **Config:** `config/history.yaml`:
+
+  ```yaml
+  first_sync_orders: 5
+  related_lines: 10
+  ```
+
+  `related_lines` is `k` for step 2.
+- **CLI and just:** `shopping-minion history sync` opens the browser, checks the login and syncs. It prints `N pedidos novos, M ignorados, T guardados`. The `justfile` gets `history-sync`.
+- **Guard:** `tests/test_guards.py` adds `Adicionar todos os itens ao carrinho` to the patterns forbidden in `src/` and in the web files.
+
+## 11. Matching, the question and the quantity
+
+### 11.1 `history.py`
+
+- `norm(text)` and `words(text)` work as in §4.3.
+- `product_histories(lines) -> dict[str, ProductHistory]`: one pass over the lines (newest first), grouped by `product_id`.
+- `lines_for_item(item, candidates, lines, k) -> ItemHistory`: the steps of §4.3. Step 2 needs a non-empty `words(item.search_term)` that is a subset of `words(line.name)`.
+- `near_misses(history, candidates, threshold=0.6)`: Jaccard over `words`, for the eval only.
+
+### 11.2 `decide.py`
+
+**New baseline: offers.** `describe_candidate` adds `em oferta, de R$ X por R$ Y` when `list_price > price`. Every question also gets the sentence *"Entre produtos equivalentes, prefira o que está em oferta."*
+
+**History, by `history:` in `config/decide.yaml`:**
+
+| Value | Change to the question | Only when |
+|---|---|---|
+| `none` | none | (always) |
+| `options` (A) | Each candidate in `products` gets `; comprado antes: 3 vezes, a última em 20/09/2026, 2,045 kg` (or `1 vez`, or `3 un`). The question gets *"Entre os produtos que correspondem, prefira o que já foi comprado antes."* | the item has `products` |
+| `list` (B) | `instructions["historico"]` is a list of `"<name> \| <quantity> \| <dd/mm/aaaa>"`: one per product in `products` (its last purchase), then `related`. The question gets *"Considere o `historico` de compras: entre os produtos que correspondem, prefira um que já foi comprado antes."* | `products` or `related` is not empty |
+
+- **Defaults:** `history: none` until the eval picks a variant (§12). So merging the code doesn't change a live run.
+- `decide(..., histories: list[ItemHistory] | None = None)` takes one history per item, in the same order. `None` behaves like `none`.
+- **Code formats every number and date** (pt-BR: `2,045 kg`, `20/09/2026`). Jev never computes them.
+
+### 11.3 `quantity.py` and `merge.py`
+
+**`target_quantity(item, pref_entry, history: ProductHistory | None = None)`** follows the rule of §4.5:
+- list, then preference, then history, then 1 un;
+- history is used only when `history.last_quantity.unit` matches the product's unit of sale (`kg` with `kg`, `un` with `un`);
+- it returns the `QUANTITY_FROM_HISTORY` flag.
+
+**`to_clicks(target, unit_of_sale, step_kg, rounding="up")`:**
+- `rounding="nearest"` rounds half up to the nearest step, with at least 1 click;
+- a nearest result that isn't exact is *not* flagged `QUANTITY_INEXACT`, because rounding history is expected.
+
+**`build_line`:**
+- uses `nearest` when the quantity came from history, `up` otherwise;
+- a merged line uses `nearest` only if every source line came from history.
+
+**`draft_cart(decisions, prefs, histories=None)`** passes the chosen product's `ProductHistory`, `histories[i].products.get(choice)`.
+
+### 11.4 The picker's order (`run._ordered_candidates`)
+
+The picker shows Jev's pick first, then the candidates on offer, then the rest. Within each group, cards go by Jev's probability, highest first, with the search order breaking ties.
+- The web page already receives the candidates in this order, so `app.js` only keeps its "Jev's pick first" code.
+- The CLI uses the same function.
+
+## 12. The eval (`evals/history_eval.py`)
+
+```
+dotenvx run -- uv run python evals/history_eval.py --run 8 [--variants none,options,list] [--alpha 0.5,1,2]
+```
+
+1. **Ground truth from SQLite, per item of the run:**
+   - the items and their candidates, from `decisions`;
+   - the final product: `choice` for `accepted` and `user_chosen`, unless a `cart_edit` row removed its line;
+   - `skipped` items without a final product are left out of the hit rate.
+2. **History:** `order_lines(before=<the run's created_at>)`, then `lines_for_item` per item.
+3. **Jev runs once per variant,** on the current `decide.yaml` thresholds, with the run's preferences (`data/preferencias.yaml`).
+4. **Variant C** is computed from the `none` run's `probabilities`: `p' ∝ p × (1 + α × min(orders, 3))`, for each α. No extra call.
+5. **Report per variant:**
+   - hit rate on items with history, items without, and overall (§1);
+   - accepted (and how many are misses);
+   - sent to the picker;
+   - a misses table (item, Jev's pick, the final product);
+   - the near misses.
+
+   It is saved as JSON in `data/evals/`, which is personal and never committed. The summary, counts only, goes in this LLD.
+6. **Paid:** 3 Jev runs of about 30 questions. Claude says so before running it, and runs one job at a time.
+
+**Johann picks the variant from that report.** It goes in `config/decide.yaml`, and the choice is recorded in §14.
+
+## 13. Wiring (web app and CLI)
+
+- **Web, at the start of the worker** (`statemachine._work`, after the login check): a new state `syncing_history` runs `sync_orders`.
+  - It emits an SSE event `history {new, skipped, stored}`.
+  - **A sync failure doesn't fail the run.** It emits `history {error}`, logs it, and the run goes on with what SQLite already has.
+  - Then `searching` as today.
+- **After the search:** `lines_for_item` per item, with `order_lines()` read once. The result is kept on the run (`run.histories`) and passed to `decide_list` and `draft_cart`.
+- **Report:** `report.py` gets the label `"syncing_history": "lendo os pedidos"`, counted as the machine's time.
+- **The CLI (`run.py`)** uses the stored history and doesn't sync. `shopping-minion history sync` (`just history-sync`) is the command for that. M4 is measured on the web app.
+- **Cart review:** the badge `"quantidade da última compra"` for `QUANTITY_FROM_HISTORY`, next to the two existing ones (`index.html`).
+
+## 14. Tasks
+
+| Task | What | Who | Wave |
+|---|---|---|---|
+| **T13** | Sync: `orders.py` (contracts, parsers, `sync_orders`), the two tables and the storage methods, `config/history.yaml`, `shopping-minion history sync`, `just history-sync`, the guard pattern. Tests: parsers on made-up fixtures with T12's shape; incremental selection (empty DB, known ids, unfinished rows, `first_n > 10`); storage round trip. One `live` test that syncs into a temporary database. | Sonnet | 1 |
+| **T15** | The picker's order (§11.4) and the "em oferta" text and question sentence (§11.2, baseline part). Tests on the ordering and the option text. | Sonnet | 1 |
+| — | **Checkpoint:** Johann runs `just history-sync` live. Claude checks the counts in SQLite without printing personal data. | Johann + Claude | after 1 |
+| **T14** | `history.py` (§11.1), the A and B variants in `decide.py` (§11.2), quantity from history with nearest rounding (§11.3), the new flag. Tests: every step of §4.3 with made-up lines (the laranja case, unit mismatch, step 2's noise, near misses), both variants' question text, rounding (3.68 → 3.5 with 0.5; 0.965 → 1.0 with 0.1; never 0), merge rounding. | Sonnet | 2 |
+| **T16** | `evals/history_eval.py` (§12), with offline tests on a fake client. Claude runs it once (paid), writes the summary here, and Johann picks the variant. | Sonnet builds, Claude runs | 3 |
+| **T17** | Wiring (§13): the `syncing_history` state, `run.histories`, `draft_cart`, the report label, the cart badge, the chosen variant in `decide.yaml`. Tests: the state machine with a fake sync (ok, failure, cancel), a draft with history quantities. | Sonnet | 4 |
+| **T18** | **Acceptance:** Johann runs a new real list through the web app. Claude runs `report` and the hit rate (`history_eval.py --run <n> --live-only`, from the run's own picks with no new Jev call) and records both here and in the roadmap. | Johann + Claude | 5 |
+
+**Waves:**
+- T13 and T15 touch different files, so they run in parallel.
+- T14 needs T13's `OrderLine`.
+- T16 needs T14.
+- T17 needs the variant from T16.
+
+Each wave is reviewed by Johann before merge.
+
+**What T18's `--live-only` means:**
+- The hit rate of a live run is read from its own `decisions` and `run_log`: Jev's choice against the final product, split by whether the item had history.
+- No replay, so no cost.
+- T16 builds that mode too.
+
+## 15. What this changes elsewhere
+
+- **[hld.md](hld.md):** a short section, "M4: purchase history", that points here. It is added with this LLD.
+- **[README](../README.md):** `just history-sync` and the eval command, after T17.

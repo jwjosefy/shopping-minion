@@ -149,7 +149,7 @@ The LLD comes after this HLD is approved. It is planned by Opus and run by Sonne
 ## 7. Decided for later
 
 - **Automated login** with `STORE_EMAIL` / `STORE_PASSWORD` (interview, Q5).
-- **Preferences from purchase history**, using the SQLite history and the store's past orders (journal 0008).
+- **Preferences from purchase history**, using the SQLite history and the store's past orders (journal 0008). Now M4, see §9.
 - **Julia-1** as an alternative backend for decide.
 
 ## 8. Questions resolved in review
@@ -164,3 +164,14 @@ The LLD comes after this HLD is approved. It is planned by Opus and run by Sonne
 | — | Policy thresholds | In a YAML config file (`config/decide.yaml`). |
 | — | add_cart | Never runs in parallel. |
 | — | Theme | Dark blue. |
+
+## 9. M4: purchase history (2026-10-02)
+
+M4 adds a data source: the store's order history.
+- **Approved design:** [lld-m4.md](lld-m4.md) Part 1, approved by Johann on 2026-10-02.
+- **What changes in the flow:**
+  - **Sync step:** a read-only history sync runs before the search. It reads the JSON the order pages receive and stores the orders in SQLite.
+  - **Matching:** code matches each item's candidates to the orders by product id.
+  - **The question to Jev:** history goes into it, in a variant chosen by an eval.
+  - **Quantity rule:** the last quantity bought becomes a step between the preference and the 1-unit default.
+- **Unchanged:** no model touches the browser or the cart, and nothing on the order pages is clicked.
