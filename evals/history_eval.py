@@ -143,6 +143,8 @@ def rate(hits: int, decided: int) -> dict:
 
 
 def product_name(row: Row, product_id: str | None) -> str:
+    if product_id is None and row.outcome == "removed":
+        return "(removido na revisão do carrinho)"
     if product_id is None:
         return NONE_KEY
     for candidate in row.candidates:
@@ -152,15 +154,16 @@ def product_name(row: Row, product_id: str | None) -> str:
 
 
 def score(rows: list[Row], picks: dict[int, Pick]) -> dict:
-    """The metrics of one variant. Only items with a final product and a Jev choice count;
-    the accepted and picker counts are over those same items."""
+    """The metrics of one variant. Items with a final product and a Jev choice count, and so
+    do items whose line was removed in the cart review: those are misses (LLD-M4 section 1).
+    The accepted and picker counts are over those same items."""
     hits = {True: 0, False: 0}  # by has_history
     decided = {True: 0, False: 0}
     accepted = accepted_misses = to_picker = 0
     misses = []
     for row in rows:
         pick = picks.get(row.index)
-        if row.final is None or pick is None:
+        if pick is None or (row.final is None and row.outcome != "removed"):
             continue
         hit = pick.choice == row.final
         decided[row.has_history] += 1

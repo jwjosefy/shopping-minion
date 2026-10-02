@@ -193,12 +193,14 @@ def test_live_only_reads_the_pick_rows(db):
     assert 5 not in picks  # pimenta: no candidates, no pick
     m = history_eval.score(rows, picks)
     assert m["with_history"] == {"hits": 1, "decided": 2, "rate": 0.5}
-    assert m["without_history"] == {"hits": 1, "decided": 2, "rate": 0.5}
-    assert m["overall"]["hits"] == 2 and m["overall"]["decided"] == 4
-    assert (m["accepted"], m["accepted_misses"], m["picker"]) == (1, 0, 3)
-    assert [(x["item"], x["jev_pick"], x["final"]) for x in m["misses"]] == [
-        ("arroz", "Arroz Tipo 1", "Arroz Integral"),
-        ("laranja", "Laranja Bahia Kg", "Laranja Pera Kg"),
+    # cafe: Jev's accepted pick was removed in the cart review, so it is a miss (LLD-M4 §1)
+    assert m["without_history"] == {"hits": 1, "decided": 3, "rate": 1 / 3}
+    assert m["overall"]["hits"] == 2 and m["overall"]["decided"] == 5
+    assert (m["accepted"], m["accepted_misses"], m["picker"]) == (2, 1, 3)
+    assert [(x["item"], x["final"]) for x in m["misses"]] == [
+        ("arroz", "Arroz Integral"),
+        ("cafe", "(removido na revisão do carrinho)"),
+        ("laranja", "Laranja Pera Kg"),
     ]
 
 
@@ -254,11 +256,11 @@ def test_replay_variants_and_variant_c(db):
 
     none = history_eval.score(rows, by_variant["none"])
     assert none["with_history"] == {"hits": 1, "decided": 2, "rate": 0.5}
-    assert (none["accepted"], none["accepted_misses"], none["picker"]) == (2, 1, 2)
+    assert (none["accepted"], none["accepted_misses"], none["picker"]) == (3, 2, 2)  # + cafe
 
     options = history_eval.score(rows, by_variant["options"])
     assert options["with_history"]["hits"] == 2
-    assert (options["accepted"], options["accepted_misses"]) == (3, 1)
+    assert (options["accepted"], options["accepted_misses"]) == (4, 2)
 
     # arroz: p3 was bought once, weight 1 + a. At 0.5: 0.4 x 1.5 = 0.6 beats p2 at 0.5
     prior = by_variant["prior a=0.5"][1]
@@ -314,7 +316,7 @@ def test_main_replay_writes_json(db, tmp_path, capsys):
     saved = json.loads(out.read_text(encoding="utf-8"))
     assert saved["mode"] == "replay"
     assert list(saved["variants"]) == ["none", "options", "list", "prior a=1"]
-    assert saved["variants"]["none"]["overall"]["decided"] == 4
+    assert saved["variants"]["none"]["overall"]["decided"] == 5  # 4 decided + 1 removed
 
 
 def test_main_live_only_makes_no_client(db, tmp_path):
