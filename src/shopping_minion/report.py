@@ -11,6 +11,7 @@ from shopping_minion.storage import Storage
 # state -> label; the machine's states and then yours
 MACHINE = {
     "reading_list": "lendo a lista (OCR)",
+    "syncing_history": "lendo os pedidos",
     "searching": "buscando",
     "deciding": "decidindo (Jev)",
     "filling_cart": "adicionando ao carrinho",
@@ -23,6 +24,7 @@ YOU = {
 ORDER = [
     "reading_list",
     "reviewing_list",
+    "syncing_history",
     "searching",
     "deciding",
     "picking",

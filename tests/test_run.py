@@ -3,6 +3,7 @@
 import json
 import sqlite3
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -14,6 +15,7 @@ from shopping_minion import workflow as workflow_module
 from shopping_minion.browser import NotLoggedInError
 from shopping_minion.cli import build_parser
 from shopping_minion.items import Candidate, CartResult, Decision, Item
+from shopping_minion.orders import Order, OrderLine
 from shopping_minion.storage import Storage
 
 
@@ -108,6 +110,8 @@ class World:
         self.config.write_text(
             "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\n", encoding="utf-8"
         )
+        self.history_config = tmp_path / "history.yaml"
+        self.history_config.write_text("first_sync_orders: 10\nrelated_lines: 10\n")
         self.list_path = tmp_path / "lista.yaml"
         self.list_path.write_text(yaml.safe_dump(LIST, allow_unicode=True), encoding="utf-8")
         self.answers = answers or {
@@ -179,6 +183,7 @@ class World:
             open_browser_fn=self.open_browser_fn,
             client_factory=lambda: FakeClient(self.answers),
             config_path=self.config,
+            history_config_path=self.history_config,
             **kwargs,
         )
 
@@ -479,6 +484,67 @@ def test_storage_rows_are_written_for_every_stage(world):
     assert states == ["searching", "deciding", "picking", "reviewing_cart", "filling_cart", "done"]
     (pick,) = [r for r in log if "jev_choice" in r]
     assert pick["item"] == "papel higiênico" and pick["chosen"] == "10"
+
+
+def test_the_decide_config_is_logged_and_empty_order_tables_are_fine(world):
+    world.config.write_text(
+        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\nhistory: options\n",
+        encoding="utf-8",
+    )
+    assert world.run(Script("1", "s", "")) == 0
+    storage = Storage(world.db)
+    rows = storage.read_log(1)
+    storage.close()
+    (decide,) = [r["data"] for r in rows if r["kind"] == "decide"]
+    assert decide == {
+        "model": "jev-latest",
+        "history": "options",
+        "accept_at": 0.8,
+        "ask_below": 0.5,
+        "batch_size": 5,
+    }
+    kinds = [r["kind"] for r in rows]
+    assert kinds.index("decide") > kinds.index("state")  # after `searching`, before the picks
+    assert not any(r["kind"] == "history" for r in rows)  # the CLI doesn't sync
+
+
+def test_stored_orders_feed_decide_and_the_draft_quantity(world, monkeypatch):
+    storage = Storage(world.db)
+    storage.save_order(
+        Order(
+            order_id="o1",
+            placed_at=datetime(2026, 9, 1, tzinfo=UTC),
+            status="FINISHED",
+            total=Decimal("30"),
+            lines=[
+                OrderLine(
+                    order_id="o1",
+                    placed_at=datetime(2026, 9, 1, tzinfo=UTC),
+                    product_id="1",
+                    name="Atum Gomes 170g",
+                    quantity=3,
+                    unit="un",
+                    total_price=Decimal("28.50"),
+                )
+            ],
+        )
+    )
+    storage.close()
+    seen = []
+    real = run_module.decide_list
+
+    def spy(*args, **kwargs):
+        seen.append(kwargs["histories"])
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(run_module, "decide_list", spy)
+    assert world.run(Script("1", "s", "")) == 0
+    (histories,) = seen
+    assert [bool(h.products) for h in histories] == [True, False, False]
+    assert histories[0].products["1"].last_quantity.value == 3
+    (targets,) = world.cart_calls
+    atum = next(t for c, t in targets if c.product_id == "1")
+    assert atum.clicks == 3 and atum.flags == ["QUANTITY_FROM_HISTORY"]
 
 
 # --- quantity ---------------------------------------------------------------------------------

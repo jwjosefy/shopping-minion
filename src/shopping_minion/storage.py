@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS run_log (
     run_id INTEGER NOT NULL REFERENCES runs(id),
     seq    INTEGER NOT NULL,
     at     TEXT    NOT NULL,      -- UTC, ISO 8601 with milliseconds
-    kind   TEXT    NOT NULL,      -- state | pick | cart_edit | check
+    kind   TEXT    NOT NULL,      -- state | pick | cart_edit | check | decide | history
     data   TEXT    NOT NULL,      -- JSON
     PRIMARY KEY (run_id, seq)
 );
