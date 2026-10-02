@@ -55,7 +55,7 @@ class Decision(Contract):
 class CartTarget(Contract):
     product_id: str
     clicks: int = Field(ge=1)  # adds/+ clicks
-    flags: list[Literal["QUANTITY_ASSUMED", "QUANTITY_INEXACT"]] = []
+    flags: list[Literal["QUANTITY_ASSUMED", "QUANTITY_INEXACT", "QUANTITY_FROM_HISTORY"]] = []
 
 
 class CartResult(Contract):
@@ -73,7 +73,9 @@ class DraftLine(Contract):
     items: list[Item]  # several after a merge of duplicates
     quantity: Quantity  # the target (the sum, after a merge)
     target: CartTarget
-    flags: list[Literal["QUANTITY_ASSUMED", "QUANTITY_INEXACT"]] = []  # same as target.flags
+    flags: list[
+        Literal["QUANTITY_ASSUMED", "QUANTITY_INEXACT", "QUANTITY_FROM_HISTORY"]
+    ] = []  # same as target.flags
     estimated_price: Decimal | None = None  # price x amount, in code; None without a price
 
 

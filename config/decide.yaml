@@ -2,3 +2,4 @@ model: jev-latest
 batch_size: 5
 accept_at: 0.8           # placeholder, calibrate on the 7 cases
 ask_below: 0.5           # placeholder
+history: none            # none | options (A) | list (B); the eval picks one (LLD-M4 section 12)

@@ -1,5 +1,6 @@
 """The workflow steps with fakes: no browser, no Jev, no terminal."""
 
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,6 +9,7 @@ import pytest
 
 from shopping_minion import workflow
 from shopping_minion.config import DecideConfig
+from shopping_minion.history import ItemHistory, ProductHistory
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
 from shopping_minion.workflow import (
     DraftEdit,
@@ -135,6 +137,60 @@ def test_draft_cart_uses_preferences_for_the_quantity():
     (line,) = draft_cart([decision(item("atum"), [ATUM], "1")], prefs).lines
     assert line.target.clicks == 3 and line.flags == []
     assert line.estimated_price == Decimal("41.94")
+
+
+def past(pid, value, unit):
+    return ProductHistory(
+        product_id=pid,
+        orders=2,
+        last_at=date(2026, 9, 20),
+        last_quantity=Quantity(value=value, unit=unit),
+    )
+
+
+def test_draft_cart_uses_the_chosen_products_history_for_the_quantity():
+    other = cand("4", "Filé de Frango Congelado kg", unit="kg", step_kg=0.1, price="20.00")
+    decisions = [
+        decision(item("frango"), [FRANGO, other], "3"),
+        decision(item("atum"), [ATUM], "1"),
+    ]
+    histories = [
+        ItemHistory(products={"3": past("3", 0.965, "kg"), "4": past("4", 5, "kg")}, related=[]),
+        ItemHistory(products={}, related=[]),
+    ]
+    frango, atum = draft_cart(decisions, {}, histories).lines
+    assert frango.quantity == Quantity(value=0.965, unit="kg")
+    assert frango.target.clicks == 10
+    assert frango.flags == ["QUANTITY_FROM_HISTORY"]
+    assert atum.flags == ["QUANTITY_ASSUMED"]  # no history for it: the default
+
+
+def test_draft_cart_ignores_history_in_another_unit_and_prefers_the_list_quantity():
+    decisions = [
+        decision(item("frango"), [FRANGO], "3"),
+        decision(item("atum", Quantity(value=2, unit="un")), [ATUM], "1"),
+    ]
+    histories = [
+        ItemHistory(products={"3": past("3", 2, "un")}, related=[]),
+        ItemHistory(products={"1": past("1", 6, "un")}, related=[]),
+    ]
+    frango, atum = draft_cart(decisions, {}, histories).lines
+    assert frango.flags == ["QUANTITY_ASSUMED", "QUANTITY_INEXACT"]  # 1 un on a kg product
+    assert atum.target.clicks == 2
+    assert atum.flags == []
+
+
+def test_decide_list_passes_the_histories_to_decide(monkeypatch):
+    seen = {}
+
+    def fake_decide(pairs, prefs, config, client, histories):
+        seen["histories"] = histories
+        return []
+
+    monkeypatch.setattr(workflow, "decide", fake_decide)
+    histories = [ItemHistory(products={}, related=[])]
+    decide_list([item("atum")], [[ATUM]], {}, CONFIG, object(), histories)
+    assert seen["histories"] is histories
 
 
 def test_draft_cart_skips_unresolved_and_skipped_decisions():

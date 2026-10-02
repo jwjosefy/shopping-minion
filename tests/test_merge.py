@@ -139,3 +139,41 @@ def test_merge_keeps_the_order_of_first_appearance():
 def test_estimated_price_is_none_without_a_price():
     no_price = cand("4", "Sem preço").model_copy(update={"price": None})
     assert single(no_price, "x").estimated_price is None
+
+
+# --- history quantities ---
+
+
+def from_history(candidate, name, quantity):
+    return build_line(candidate, [item(name)], quantity, from_history=True)
+
+
+def test_build_line_rounds_to_the_nearest_step_when_the_quantity_is_from_history():
+    line = from_history(FRANGO, "frango", q(0.965, "kg"))
+    assert line.target.clicks == 10
+    assert line.flags == line.target.flags == ["QUANTITY_FROM_HISTORY"]
+    nearby = from_history(cand("3", unit="kg", step_kg=0.5), "x", q(3.68, "kg"))
+    assert nearby.target.clicks == 7  # 3.5 kg
+    assert nearby.estimated_price == Decimal("35.00")
+
+
+def test_build_line_rounds_up_without_history():
+    line = build_line(cand("3", unit="kg", step_kg=0.5), [item("x")], q(3.68, "kg"))
+    assert line.target.clicks == 8
+    assert line.flags == ["QUANTITY_INEXACT"]
+
+
+def test_a_merged_line_of_history_lines_rounds_to_the_nearest_step():
+    # 0.12 + 0.12 = 0.24 kg on a 0.1 step: 2.4 steps
+    lines = [from_history(FRANGO, "a", q(0.12, "kg")), from_history(FRANGO, "b", q(0.12, "kg"))]
+    (line,) = merge_lines(lines)
+    assert line.quantity == q(0.24, "kg")
+    assert line.target.clicks == 2  # nearest; up would give 3
+    assert line.flags == ["QUANTITY_FROM_HISTORY"]
+
+
+def test_a_merged_line_rounds_up_if_any_source_is_not_from_history():
+    lines = [from_history(FRANGO, "a", q(0.12, "kg")), single(FRANGO, "b", q(120, "g"))]
+    (line,) = merge_lines(lines)
+    assert line.target.clicks == 3  # 0.24 kg rounded up on a 0.1 step
+    assert line.flags == ["QUANTITY_FROM_HISTORY", "QUANTITY_INEXACT"]

@@ -1,12 +1,15 @@
 """decide pass: one Jev Choice per item, then the confidence policy (LLD section 3.4)."""
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from decimal import Decimal
+from typing import Literal
 
 from typesafe_sdk import Choice, TypeSafeClient
 
 from shopping_minion.config import DecideConfig
-from shopping_minion.items import Candidate, Decision, Item
+from shopping_minion.history import ItemHistory, ProductHistory, local_date
+from shopping_minion.items import Candidate, Decision, Item, Quantity
 from shopping_minion.preferences import find_preference
 
 NONE_KEY = "nenhum"
@@ -14,6 +17,13 @@ STATE = "Lista de compras de supermercado."
 MAX_WORKERS = 8  # batch_size=1 runs this many calls at once
 
 OFFER_RULE = "Entre produtos equivalentes, prefira o que está em oferta."
+HISTORY_OPTIONS_RULE = (
+    "Entre os produtos que correspondem, prefira o que já foi comprado antes."  # variant A
+)
+HISTORY_LIST_RULE = (
+    "Considere o `historico` de compras: entre os produtos que correspondem, "
+    "prefira um que já foi comprado antes."  # variant B
+)
 QUESTION = (
     "Qual produto da loja corresponde ao `item` da lista de compras? "
     "Respeite as restrições de `item`. "
@@ -67,6 +77,50 @@ def describe_candidate(candidate: Candidate) -> str:
     return ", ".join(parts)
 
 
+def _number(value: float) -> str:
+    """pt-BR decimal comma, no trailing zeros: 2.045 -> `2,045`, 0.5 -> `0,5`, 3.0 -> `3`."""
+    return format(Decimal(str(value)).normalize(), "f").replace(".", ",")
+
+
+def format_quantity(quantity: Quantity) -> str:
+    return f"{_number(quantity.value)} {quantity.unit}"
+
+
+def format_times(count: int) -> str:
+    return "1 vez" if count == 1 else f"{count} vezes"
+
+
+def format_date(day: date) -> str:
+    return day.strftime("%d/%m/%Y")
+
+
+def describe_history(history: ProductHistory) -> str:
+    """Variant A: the text that follows the option's description."""
+    return (
+        f"comprado antes: {format_times(history.orders)}, "
+        f"a última em {format_date(history.last_at)}, {format_quantity(history.last_quantity)}"
+    )
+
+
+def history_list(candidates: list[Candidate], history: ItemHistory) -> list[str]:
+    """Variant B: `<name> | <quantity> | <dd/mm/aaaa>`, the candidates' last purchases first,
+    then the related lines."""
+    entries = []
+    for candidate in candidates:
+        product = history.products.get(candidate.product_id)
+        if product is not None:
+            entries.append(
+                f"{candidate.name} | {format_quantity(product.last_quantity)} | "
+                f"{format_date(product.last_at)}"
+            )
+    for line in history.related:
+        quantity = Quantity(value=line.quantity, unit=line.unit)
+        entries.append(
+            f"{line.name} | {format_quantity(quantity)} | {format_date(local_date(line))}"
+        )
+    return entries
+
+
 def _item_fields(item: Item) -> dict:
     fields: dict = {"name": item.name}
     if item.constraints:
@@ -77,20 +131,45 @@ def _item_fields(item: Item) -> dict:
     return fields
 
 
+def _with_rule(question: str, rule: str) -> str:
+    """The history sentence goes right before the offer sentence."""
+    return question.replace(OFFER_RULE, f"{rule} {OFFER_RULE}", 1)
+
+
 def build_questions(
-    items_with_candidates: list[ItemWithCandidates], prefs: dict[str, dict]
+    items_with_candidates: list[ItemWithCandidates],
+    prefs: dict[str, dict],
+    histories: list[ItemHistory] | None = None,
+    mode: Literal["none", "options", "list"] = "none",
 ) -> dict[str, Choice]:
-    """One Choice per item, keyed `item_<n>` (n is the position in the list, from 0)."""
+    """One Choice per item, keyed `item_<n>` (n is the position in the list, from 0).
+
+    `histories` has one entry per item, in the same order; with None, or mode `none`, the
+    questions have no history (LLD-M4 section 11.2)."""
     questions = {}
     for n, (item, candidates) in enumerate(items_with_candidates):
         preference = find_preference(prefs, item)
-        instructions: dict = {
-            "question": QUESTION_WITH_PREFERENCE if preference else QUESTION,
-            "item": _item_fields(item),
-        }
+        history = histories[n] if histories is not None and mode != "none" else None
+        question = QUESTION_WITH_PREFERENCE if preference else QUESTION
+        as_options = mode == "options" and history is not None and bool(history.products)
+        as_list = (
+            mode == "list" and history is not None and bool(history.products or history.related)
+        )
+        if as_options:
+            question = _with_rule(question, HISTORY_OPTIONS_RULE)
+        elif as_list:
+            question = _with_rule(question, HISTORY_LIST_RULE)
+        instructions: dict = {"question": question, "item": _item_fields(item)}
         if preference:
             instructions["preferencia"] = preference
-        criteria: dict = {f"p{c.product_id}": describe_candidate(c) for c in candidates}
+        if as_list:
+            instructions["historico"] = history_list(candidates, history)
+        criteria: dict = {}
+        for c in candidates:
+            text = describe_candidate(c)
+            if as_options and c.product_id in history.products:
+                text += f"; {describe_history(history.products[c.product_id])}"
+            criteria[f"p{c.product_id}"] = text
         criteria[NONE_KEY] = NONE_DESCRIPTION
         questions[f"item_{n}"] = Choice(instructions=instructions, criteria=criteria)
     return questions
@@ -121,8 +200,9 @@ def _decide_batch(
     prefs: dict[str, dict],
     config: DecideConfig,
     client: TypeSafeClient,
+    histories: list[ItemHistory] | None = None,
 ) -> list[Decision]:
-    questions = build_questions(batch, prefs)
+    questions = build_questions(batch, prefs, histories, config.history)
     response = client.system_one(state=STATE, questions=questions, model=config.model)
     decisions = []
     for n, (item, candidates) in enumerate(batch):
@@ -150,8 +230,12 @@ def decide(
     prefs: dict[str, dict],
     config: DecideConfig,
     client: TypeSafeClient,
+    histories: list[ItemHistory] | None = None,
 ) -> list[Decision]:
-    """Decisions in the order of the input. Items without candidates never reach Jev."""
+    """Decisions in the order of the input. Items without candidates never reach Jev.
+    `histories` has one entry per item, in the same order; None is the same as `history: none`."""
+    if histories is not None and len(histories) != len(items_with_candidates):
+        raise ValueError("histories must have one entry per item")
     decisions: dict[int, Decision] = {}
     to_ask: list[tuple[int, ItemWithCandidates]] = []
     for index, (item, candidates) in enumerate(items_with_candidates):
@@ -166,7 +250,8 @@ def decide(
     batches = [to_ask[i : i + size] for i in range(0, len(to_ask), size)]
 
     def run(batch: list[tuple[int, ItemWithCandidates]]) -> list[Decision]:
-        return _decide_batch([pair for _, pair in batch], prefs, config, client)
+        batch_histories = None if histories is None else [histories[i] for i, _ in batch]
+        return _decide_batch([pair for _, pair in batch], prefs, config, client, batch_histories)
 
     if size == 1 and len(batches) > 1:
         with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(batches))) as pool:
