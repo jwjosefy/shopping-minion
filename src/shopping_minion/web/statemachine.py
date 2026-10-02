@@ -12,8 +12,11 @@ tests run the whole flow with fakes.
 """
 
 import contextlib
+import json
+import logging
 import queue
 import re
+import sys
 import threading
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -43,6 +46,8 @@ from shopping_minion.workflow import (
     fill_cart,
     search_list,
 )
+
+log = logging.getLogger(__name__)
 
 LOGIN_MESSAGE = "faça login: `shopping-minion login`"
 JOIN_SECONDS = 60  # how long DELETE waits for the worker to close the browser
@@ -382,9 +387,13 @@ class RunStateMachine:
             self._events.append(
                 {"seq": self._seq, "state": self._state, "kind": kind, "data": data}
             )
+            log.info(
+                "run %s %s %s", run.id, kind, json.dumps(data, ensure_ascii=False, default=str)
+            )
 
     def _set_state(self, state: str) -> None:
         self._state = state
+        log.info("run %s state %s", self._run.id if self._run else None, state)
         if self._run is not None:
             with self._db() as db:
                 db.log(self._run.id, "state", {"state": state})
@@ -410,6 +419,8 @@ class RunStateMachine:
             if self._run is not run or self._state not in WORKING + WAITING:
                 return  # cancelled or gone meanwhile
             run.message = message
+            # Called from `except` blocks: the traceback goes to the log file too.
+            log.error("run %s failed: %s", run.id, message, exc_info=sys.exc_info()[0] is not None)
             self._emit(run, "error", {"message": message})
             self._set_status(run, status)
             self._set_state("failed")
@@ -500,9 +511,10 @@ class RunStateMachine:
         def progress(i: int, n: int, item: Item, candidates: list[Candidate]) -> None:
             if run.cancel.is_set():
                 raise _Cancelled
-            self._emit(
-                run, "search", {"i": i, "n": n, "term": item.search_term, "found": len(candidates)}
-            )
+            found = {"i": i, "n": n, "term": item.search_term, "found": len(candidates)}
+            self._emit(run, "search", found)
+            with self._db() as db:  # so an empty search shows in the run's history
+                db.log(run.id, "search", found)
 
         try:
             candidates = self._search_fn(page, run.items, progress)
@@ -592,6 +604,16 @@ class RunStateMachine:
                             "ok_count": sum(c.ok for c in outcome.checks),
                             "total": len(outcome.checks),
                             "extras": len(outcome.extras),
+                            "not_ok": [  # which lines, so a failed check can be looked at
+                                {
+                                    "product": c.product_name,
+                                    "expected": c.expected,
+                                    "found": c.found,
+                                    "verdict": c.verdict,
+                                }
+                                for c in outcome.checks
+                                if not c.ok
+                            ],
                         },
                     )
             if outcome.stopped:

@@ -95,6 +95,22 @@ def _cmd_report(args: argparse.Namespace) -> int:
     return report(args.db, args.run_id)
 
 
+def _log_to_file() -> Path:
+    """The app's own log (runs, events, failures with tracebacks) in data/logs/, one file a day.
+    Personal: it holds list items and products, so it lives under data/ and is never committed."""
+    import logging
+    from datetime import date
+
+    path = Path("data/logs") / f"serve-{date.today():%Y-%m-%d}.log"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.FileHandler(path, encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    app_log = logging.getLogger("shopping_minion")
+    app_log.setLevel(logging.INFO)
+    app_log.addHandler(handler)
+    return path
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
@@ -114,6 +130,8 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         print(f"Open on the phone (same Wi-Fi): {access.url}")
         print_qr(access.url)
         print(f"On this machine: http://127.0.0.1:{args.port}/")
+    log_file = _log_to_file()
+    print(f"Log: {log_file}")
     # One worker: the run lives in this process's memory, and so does the browser.
     uvicorn.run(app, host=host, port=args.port, workers=1, proxy_headers=False)
     return 0

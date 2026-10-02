@@ -447,8 +447,11 @@ def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, mo
     kinds = [r["kind"] for r in log]
     assert kinds.index("check") < len(kinds) - 1  # the check comes before the final state row
     assert [r["data"] for r in log if r["kind"] == "check"] == [
-        {"ok_count": 2, "total": 2, "extras": 1}
+        {"ok_count": 2, "total": 2, "extras": 1, "not_ok": []}
     ]
+    # one search row per item, so an empty search can be told apart afterwards
+    searches = [r["data"] for r in log if r["kind"] == "search"]
+    assert searches and all("found" in s and "term" in s for s in searches)
 
 
 def test_nothing_to_pick_goes_straight_to_reviewing_cart(client, monkeypatch):
