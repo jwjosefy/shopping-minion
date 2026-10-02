@@ -95,7 +95,7 @@ DRAFT = [
         _candidate("p-leite", "Leite integral 1L", "4.50"),
         ["leite integral"],
         {"value": 1, "unit": "un"},
-        [],
+        ["QUANTITY_FROM_HISTORY"],
     ),
     (
         "p-tomate",
@@ -148,7 +148,7 @@ OUTCOME = {
     "total": 3,
 }
 
-WORKING = {"reading_list", "searching", "deciding", "filling_cart"}
+WORKING = {"reading_list", "syncing_history", "searching", "deciding", "filling_cart"}
 WAITING = {"reviewing_list", "picking", "reviewing_cart"}
 
 
@@ -231,6 +231,11 @@ class Stub:
                 fn()
 
     def confirm_list(self):
+        self.go("syncing_history")
+        self.gate("syncing_history", lambda: self._if("syncing_history", self._search))
+
+    def _search(self):
+        self.emit("history", {"new": 2, "skipped": 0, "stored": 5})
         self.go("searching")
         for n, item in enumerate(self.items, start=1):
             self.emit(

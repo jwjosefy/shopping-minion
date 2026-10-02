@@ -65,7 +65,7 @@ def screen(page, name):
 
 @pytest.mark.parametrize("size", VIEWPORTS.values(), ids=VIEWPORTS.keys())
 def test_whole_flow(browser, size):
-    hold = {"reading_list", "searching", "deciding", "filling_cart"}
+    hold = {"reading_list", "syncing_history", "searching", "deciding", "filling_cart"}
     with StubServer(hold=hold) as server:
         stub = server.stub
         context, page = open_page(browser, server, size)
@@ -117,7 +117,11 @@ def test_whole_flow(browser, size):
             expect(rows).to_have_count(3)
             page.locator("[data-test=confirm-list]").click()
 
-            # 4. Buscando, then Jev
+            # 4. Lendo os pedidos, Buscando, then Jev
+            screen(page, "searching")
+            expect(page.locator("[data-test=syncing-history]")).to_have_text("Lendo seus pedidos…")
+            assert_fits(page, "syncing_history")
+            stub.release("syncing_history")
             searching = screen(page, "searching")
             expect(page.locator("[data-test=search-count]")).to_have_text("3/3")
             expect(searching).to_contain_text("requeijão cremoso")
@@ -169,6 +173,7 @@ def test_whole_flow(browser, size):
             expect(lines).to_have_count(3)
             expect(cart).to_contain_text("quantidade assumida")
             expect(cart).to_contain_text("aproximada")
+            expect(cart).to_contain_text("quantidade da última compra")
             expect(cart).to_contain_text("2 linhas da lista")
             expect(page.locator("[data-test=skipped]")).to_contain_text("requeijão")
             expect(page.locator("[data-test=total]")).to_contain_text("R$")

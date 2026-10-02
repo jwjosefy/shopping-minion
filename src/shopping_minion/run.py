@@ -11,8 +11,9 @@ from typing import Any
 import yaml
 
 from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
-from shopping_minion.config import DecideConfig, load_decide_config
+from shopping_minion.config import DecideConfig, load_decide_config, load_history_config
 from shopping_minion.decide import describe_candidate, nothing_fit, on_offer
+from shopping_minion.history import ItemHistory, lines_for_item
 from shopping_minion.items import Candidate, CartDraft, Decision, Item
 from shopping_minion.merge import line_label
 from shopping_minion.preferences import load_preferences
@@ -174,6 +175,7 @@ def run(
     open_browser_fn: Callable[[], Any] = open_browser,
     client_factory: Callable[[], Any] | None = None,
     config_path: str | Path = "config/decide.yaml",
+    history_config_path: str | Path = "config/history.yaml",
 ) -> int:
     """Run the three passes over the list in `path`. Returns the exit code."""
     try:
@@ -186,6 +188,7 @@ def run(
         return 1
 
     config = load_decide_config(config_path)
+    history_config = load_history_config(history_config_path)
     prefs = load_preferences(prefs_path)
     storage = Storage(db_path)
     run_id = storage.new_run(photo=str(path))
@@ -197,6 +200,7 @@ def run(
             storage,
             items,
             config,
+            history_config,
             prefs,
             yes,
             input_fn,
@@ -215,6 +219,28 @@ def run(
         raise
     finally:
         storage.close()
+
+
+def decide_config_row(config: DecideConfig) -> dict:
+    """What the `decide` log row records: the config this run decided with."""
+    return {
+        "model": config.model,
+        "history": config.history,
+        "accept_at": config.accept_at,
+        "ask_below": config.ask_below,
+        "batch_size": config.batch_size,
+    }
+
+
+def histories_for(
+    storage: Storage, items: list[Item], candidates: list[list[Candidate]], k: int
+) -> list[ItemHistory]:
+    """The stored orders' lines for each item; the table is read once."""
+    lines = storage.order_lines()
+    return [
+        lines_for_item(item, found, lines, k=k)
+        for item, found in zip(items, candidates, strict=True)
+    ]
 
 
 def _state(storage: Storage, run_id: int, state: str) -> None:
@@ -239,7 +265,17 @@ def _log_picks(storage: Storage, run_id: int, before: list[Decision], after: lis
 
 
 def _run_stages(
-    run_id, storage, items, config, prefs, yes, input_fn, print_fn, open_browser_fn, client_factory
+    run_id,
+    storage,
+    items,
+    config,
+    history_config,
+    prefs,
+    yes,
+    input_fn,
+    print_fn,
+    open_browser_fn,
+    client_factory,
 ) -> int:
     if client_factory is None:
         from typesafe_sdk import TypeSafeClient
@@ -268,7 +304,11 @@ def _run_stages(
         # 2. decide
         _state(storage, run_id, "deciding")
         print_fn("decidindo com o Jev...")
-        decisions = decide_list(items, candidates_per_item, prefs, config, client_factory())
+        histories = histories_for(storage, items, candidates_per_item, history_config.related_lines)
+        storage.log(run_id, "decide", decide_config_row(config))
+        decisions = decide_list(
+            items, candidates_per_item, prefs, config, client_factory(), histories=histories
+        )
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "decided")
 
@@ -283,7 +323,7 @@ def _run_stages(
 
         # 4. quantity, duplicates merged, and the final table
         _state(storage, run_id, "reviewing_cart")
-        draft = draft_cart(decisions, prefs)
+        draft = draft_cart(decisions, prefs, histories)
         print_table(draft, print_fn)
         if not draft.lines:
             storage.set_status(run_id, "nothing_to_add")
