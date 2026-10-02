@@ -66,6 +66,40 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 - **Not observed yet:** the logged-in marker, and what a returning session's cart shows. That needs Johann to log in, in T4's `login` command.
 - A cookie banner ("Usamos cookies…") with **Recusar** / **Aceitar tudo** / **Escolher** shows on the first page of a fresh context. Clicking "Recusar" dismissed it.
 
+## Order history (M4 T12), seen on 2026-10-02
+
+Looked at with Johann's logged-in session, headed. The script only navigated, and clicked only "Ver mais produtos". No personal data is written here: no order numbers, addresses, dates or totals. The values in the examples are made up.
+
+**The order list, `/minha-conta/pedidos`**
+- The page receives its own GraphQL response, `operationName: "CustomerOrdersListPaginated"`, from `api.andorinhaonline.com.br/storefront/graphql`. It has 10 orders per page, newest first, with `pageInfo.hasNextPage` and an `endCursor`.
+- Each row has:
+  - `id` (the number in `/minha-conta/pedidos/<id>`);
+  - `createdAt` (UTC, ISO 8601), `deliveryDate`;
+  - `status` (`FINISHED` on every order seen);
+  - `total`;
+  - `items[]` with `productId` and `name`, **without quantity**.
+- The links to each order are plain `<a href="/minha-conta/pedidos/<id>">` on the page.
+
+**One order, `/minha-conta/pedidos/<id>`**
+- The page receives `operationName: "OrderDetailsQuery"`. **Its `items[]` already has every product.** "Ver mais produtos" only expands the list on the page: clicking it sent no request. So reading an order doesn't need the click.
+- Each item has:
+  - `productId` and `slug`;
+  - `name`, `category`;
+  - `quantity` (a number), `saleUnit` (`UN` or `KG`);
+  - `selectedSaleUnit`, `sellByWeightAndUnit`;
+  - `totalPrice`;
+  - `productType` (`PRODUCT` or `VARIABLE`; weighed products were `VARIABLE`).
+- **`productId` is the same id the search uses** (the search hit's `id`, our `Candidate.product_id`). Checked against run 8: of the 316 distinct products its search returned, 62 appear by id in the last 10 orders, and so do 14 of the 28 distinct products Johann ended up with.
+- **Weighed products show what was weighed, not what was ordered.** For example, `quantity: 3.68` for a product ordered as 4 kg. What was ordered appears only as text, in `changedItemsHistory[]` with `type: "CHANGED"`, like "O item X teve sua quantidade alterada de 4kg. para 3.68kg."
+- The same response also has the delivery address, the payment method and the status history. None of it is needed.
+
+**Buttons on the order page.** Besides "Ver mais produtos" / "Ver menos produtos", the page shows:
+- "Avaliar pedido" and "Avaliar";
+- "Mais detalhes";
+- **"Adicionar todos os itens ao carrinho"**, which writes to the cart. Code must never click it, and a guard test forbids that text in `src/`, like "Finalizar pedido".
+
+**Also seen on the home page:** `PublicLastBoughtProductsQuery`, a list of recently bought products with full product data (pricing, stock, `fraction`). M4 doesn't need it; noted for later.
+
 ## What this changes in the LLD
 
 See LLD §7 (M0 changes, for review).

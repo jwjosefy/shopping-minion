@@ -1,6 +1,6 @@
 # Shopping Minion — M4: preferences from purchase history
 
-- **Status:** Draft, Part 1 (design). Rounds 1–3 answered by Johann on 2026-10-02 (§7) and folded in. T12 started at Johann's request. Part 2 (LLD and tasks) is written after Part 1 is approved.
+- **Status:** Draft, Part 1 (design). Rounds 1–3 answered by Johann on 2026-10-02 (§7) and folded in. T12 done on 2026-10-02. Part 2 (LLD and tasks) is written after Part 1 is approved.
 - **Date:** 2026-10-02
 - **Sources:** [ideas-m4.md](ideas-m4.md) (Johann), [roadmap.md](roadmap.md) §M4, [journal 0008](journal/2026-09-30-0008-purchase-history-is-the-fastest-preferences.md), the M3 report ([lld-m3.md](lld-m3.md) §5).
 - **Why the design is in this file:** M4 adds a data source, the store's order history, so the HLD has to change (CLAUDE.md). Johann asked for that design here, in the same doc as the LLD. Once it's approved, [hld.md](hld.md) gets a short section that points here.
@@ -40,11 +40,12 @@ These are facts read from the code and the history, not plans.
   - the cart result.
 
   It does **not** have what was actually bought. Checkout is manual and happens outside the app.
-- **The store's order pages:** not observed yet. What Johann described in ideas-m4.md:
-  - the list is at `/minha-conta/pedidos`;
-  - each order is at `/minha-conta/pedidos/<n>`;
-  - the order page shows part of the products, and **"Ver mais produtos"** expands the full list;
-  - one example line: `laranja pêra rio kg | 2,045kg | R$ 6,11`.
+- **The store's order pages:** observed in T12 on 2026-10-02 ([site-notes](site-notes/andorinha.md#order-history-m4-t12-seen-on-2026-10-02)). In short:
+  - the list page and each order page receive their own GraphQL JSON (`CustomerOrdersListPaginated`, `OrderDetailsQuery`);
+  - the order's JSON already has every product, so "Ver mais produtos" doesn't need a click;
+  - **each line carries `productId`, the same id the search uses;**
+  - weighed products show the weighed amount (3.68 kg for 4 kg ordered).
+- **How much history can help, measured on run 8:** the final product of **14 of its 29 decided items** appears in the last orders. That is the same with the last 5 orders and with the last 10. So the 95% target (§1) applies to about half of a list like run 8's.
 
 ## 3. Flow
 
@@ -74,25 +75,20 @@ Two steps are new: **history sync** and **hist(item)**. The decide question, the
 
 ### 4.1 History sync (new)
 
-- **Read-only, through the site, as a user would.** It opens `/minha-conta/pedidos`, then each order, clicks "Ver mais produtos" and reads the lines. It clicks nothing else.
-  - Order pages may have buttons such as "comprar novamente". That's an inference, to be confirmed. Those buttons would write to the cart, so a guard test forbids them in the code, the same way it forbids checkout.
-- **Where the data comes from:** like the search, from the JSON the page itself receives if there is one, and from the DOM otherwise. This is decided by an observation session first (task T12, an M0-style session with Johann on his account), written down in `site-notes/andorinha.md` without personal data.
-- **What the session has to answer:**
-  1. Does an order line carry the product id, the same one the search uses? This decides how simple §4.3 can be.
-  2. For weighed products, does it show what was ordered (2 kg) or what was weighed (2,045 kg)?
-  3. How do the order list and "Ver mais produtos" load (pages, a JSON response)?
-  4. What does each line show: name, quantity, unit, price, and order date?
-- **Incremental and automatic:** at the start of each run, before the search, it reads only orders it hasn't stored yet. It stops at the first order id already in the database. The first sync reads the last **N orders**, with N in `config/history.yaml` and 5 to start, per ideas-m4.md. There is also a command: `shopping-minion history sync`, and `just history-sync` (R1 Q9).
+- **Read-only, through the site, as a user would.** It opens `/minha-conta/pedidos` and reads the `CustomerOrdersListPaginated` response the page receives: order ids, dates and status. Then, for each order not stored yet, it opens `/minha-conta/pedidos/<id>` and reads the `OrderDetailsQuery` response: the lines with `productId`, name, quantity, unit and price. **It clicks nothing:** "Ver mais produtos" isn't needed, because the response already has every line (T12).
+- **"Adicionar todos os itens ao carrinho"** is on every order page, and it writes to the cart. A guard test forbids that text in `src/`, the same way "Finalizar pedido" is forbidden.
+- **Incremental and automatic:** at the start of each run, before the search, it reads only orders it hasn't stored yet. The list is newest first, so it stops at the first order id already in the database. The first sync reads the last **N orders**, with N in `config/history.yaml` and 5 to start, per ideas-m4.md. All 5 fit on the list's first page (10 per page). There is also a command: `shopping-minion history sync`, and `just history-sync` (R1 Q9).
+- **Only finished orders** (`status: FINISHED`, the only status seen) are stored. Others are skipped until a later sync sees them finished.
 - **The browser:** in the web app, the same worker thread that owns the browser for search and cart. One browser, one owner.
 
 ### 4.2 Storage (new tables)
 
 ```
 orders       order_id, placed_at, total, synced_at
-order_lines  order_id, line, product_id (if the page has it), name, quantity, unit, price
+order_lines  order_id, line, product_id, name, quantity, unit (un | kg), total_price
 ```
 
-These tables hold personal data. They stay in `data/shopping-minion.sqlite`, never committed. Test fixtures are made up.
+These tables hold personal data. They stay in `data/shopping-minion.sqlite`, never committed. Test fixtures are made up. The delivery address, payment and status history in the same response are not stored.
 
 ### 4.3 hist(item): the history lines for an item
 
@@ -105,8 +101,7 @@ Johann's idea: `hist(item) = AI(filter hist to the lines related to [item] or [b
 - `words(text)`: the words of `norm(text)`, without `de`, `da`, `do`, `das`, `dos`, `com`, `e`. Numbers and units stay: `2l` and `600ml` are different products.
 
 **Step 1: history per candidate.** For each candidate `c`, the lines that are the same product:
-- **by id**, when order lines carry the product id (T12 tells): `line.product_id == c.product_id`;
-- **by name** otherwise: `norm(line.name) == norm(c.name)`. This is exact equality after normalization, not a fuzzy match.
+- **by id:** `line.product_id == c.product_id`. T12 confirmed order lines carry the search's product id, so this match is exact, and no name match is needed for step 1.
 
 From those lines, code computes:
 - in how many orders `c` appears;
@@ -179,10 +174,11 @@ New step between preference and the default (ideas-m4.md: "the quantity bought b
 3. **the last quantity bought of the chosen product**, flagged `QUANTITY_FROM_HISTORY` so the cart review shows where it came from;
 4. 1 unit, flagged `QUANTITY_ASSUMED`.
 
-**Weighed products** (R1 Q5): the history amount is rounded to the **nearest step of the chosen product's own stepper**, not to a fixed 0,5 kg, because products use different steps.
+**Weighed products** (R1 Q5): the history has the weighed amount, not the ordered one (T12), and the history amount is rounded to the **nearest step of the chosen product's own stepper**, not to a fixed 0,5 kg, because products use different steps.
 - *Examples:* 2,045 kg with a 0,5 kg step gives 4 clicks (2 kg). With a 0,1 kg step it gives 20 clicks (2 kg).
 - **At least 1 click.** Today's `to_clicks` rounds up, which is right for an amount written on the list. History uses "nearest", so `to_clicks` gets a rounding mode.
 - **History in units and a product sold by kg,** or the reverse: the history isn't used, and step 4 applies.
+- **Weighed vs ordered:** a weighed 3.68 kg rounds to 3.5 kg with a 0,5 kg step, while 4 kg was ordered. The ordered amount is only in a text message (`changedItemsHistory`). Whether to read it is round 4, Q1.
 
 ### 4.6 Edge cases (from ideas-m4.md)
 
@@ -228,9 +224,8 @@ Offers sit at the top for quick reading, since Johann reviews every pick (R2 Q4)
 
 ## 6. Risks and unknowns
 
-- **Not observed:** everything about the order pages (§4.1). T12 comes first, and the LLD (Part 2) is written after it, not before.
 - **Step 2 noise** (§4.3): "laranja" also matches suco and Fanta lines. Only variant B and the Q6 case use step 2, and the eval shows what it costs.
-- **Name match without product ids** can miss when the store renames a product. The eval counts misses.
+- **History covers about half of a list** (14 of 29 items in run 8). The rest depends on M5's preferences.
 - **History can pull Jev the wrong way:** a product bought once by mistake would be preferred. "3 vezes" vs "1 vez" in the criteria gives Jev the signal, and the cart review is the last check. The eval measures wrong accepts.
 - **Personal data:** orders hold names, addresses and prices. Only product lines are stored, never the delivery address or the payment.
 
@@ -314,6 +309,12 @@ Answer inline with `>` under each one. _The answers below were given by Johann i
 
 > Preferences go with M5. Johann will elaborate other UX changes there that partly fit with this preferences question. _(Answered by Johann in the Claude chat on 2026-10-02 and transcribed by Claude.)_
 
+### Round 4 (after T12)
+
+1. **Ordered vs weighed amount.** The order's lines have what was weighed (3.68 kg). What was ordered (4 kg) is only in a text message: "O item X teve sua quantidade alterada de 4kg. para 3.68kg." Proposal: use the weighed amount, rounded to the nearest step (R1 Q5), and don't parse the message. Parsing store text breaks the day the wording changes, and rounding already lands on what was ordered for most lines (0.965 → 1 kg, 1.975 → 2 kg). OK?
+
+2. **Part 1 approval.** With T12 done and rounds 1–3 folded in, is Part 1 approved, so I can write Part 2 (contracts, tables, sync, eval, tasks in waves)?
+
 ## Design note: where the problem is, and where retrieval fits (chat of 2026-10-02)
 
 _Drafted by Claude from Johann's chat, for his review._
@@ -328,13 +329,13 @@ _Drafted by Claude from Johann's chat, for his review._
 **Where BM25 and RRF fit**
 - Variant A needs neither. It joins history to candidates by product id or exact normalized name.
 - Variant B has a real retrieval problem: choosing which history lines go into the instructions, within a budget, because Jev gets worse with irrelevant context. BM25 ranks the lines by relevance to the item. RRF fuses that rank with recency and frequency, with no weights to tune (the problem of variant C's α). This only matters if B survives the eval.
-- If the eval shows many renamed products (near misses), the same pair is the upgrade for the name match in step 1.
+- If the eval shows many renamed products (near misses), the same pair is the upgrade for step 2. (Step 1 matches by product id since T12.)
 - Limit: at M4's scale (a few orders, short item names) BM25 behaves almost like "all words match". The gain is ordering, and it is small.
 - Vector search only helps where words don't overlap ("carne moída" ↔ "patinho moído"). That is the M5 commodity problem, and where BM25 + vectors fused by RRF would be the natural design.
 
 **Architecture hook.** Keep the match behind one function with a stable signature, for example `lines_for_item(item, candidates, lines, k)`. It runs in pure Python over lines loaded from SQLite, not inside the database. That lets exact match, then BM25, then BM25 + vectors with RRF replace each other without touching `decide.py`, and it keeps the code portable if the app moves to the cloud.
 
-**Next:** T12, the observation session on the order pages. Part 2 is written after it.
+**Next:** T12 is done (§2, §4.1). Part 2 is written after round 4.
 
 # Part 2 — LLD
 
