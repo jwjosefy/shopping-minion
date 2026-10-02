@@ -13,7 +13,7 @@ from shopping_minion import run as run_module
 from shopping_minion import workflow as workflow_module
 from shopping_minion.browser import NotLoggedInError
 from shopping_minion.cli import build_parser
-from shopping_minion.items import Candidate, CartResult
+from shopping_minion.items import Candidate, CartResult, Decision, Item
 from shopping_minion.storage import Storage
 
 
@@ -206,6 +206,51 @@ def world(tmp_path, monkeypatch):
 
 
 # --- the happy paths --------------------------------------------------------------------------
+
+
+def test_ordered_candidates_pick_then_offers_then_rest_by_probability():
+    def c(pid, list_price=None):
+        return cand(pid, f"P{pid}").model_copy(
+            update={"list_price": Decimal(list_price) if list_price else None}
+        )
+
+    decision = Decision(
+        item=Item(source_line="x", name="x", search_term="x"),
+        candidates=[
+            c("1"),
+            c("2", "12"),
+            c("3"),
+            c("4", "12"),
+            c("5", "9.50"),
+            c("6"),
+            c("7", "12"),
+        ],
+        choice="3",
+        confidence=0.6,
+        probabilities={"1": 0.1, "2": 0.1, "3": 0.5, "4": 0.2, "5": 0.1, "6": 0.1},
+        status="ask",
+    )
+    # 3 is the pick; offers 4 (0.2), 2 (0.1), 7 (missing = 0); then 1, 5 (list_price == price, so
+    # no offer), 6 at 0.1 in search order
+    assert [x.product_id for x in run_module._ordered_candidates(decision)] == [
+        "3",
+        "4",
+        "2",
+        "7",
+        "1",
+        "5",
+        "6",
+    ]
+    no_pick = decision.model_copy(update={"choice": None, "probabilities": {}})
+    assert [x.product_id for x in run_module._ordered_candidates(no_pick)] == [
+        "2",
+        "4",
+        "7",
+        "1",
+        "3",
+        "5",
+        "6",
+    ]
 
 
 def test_ask_then_user_picks_then_confirms_and_cart_gets_the_right_clicks(world):

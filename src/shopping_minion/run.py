@@ -12,7 +12,7 @@ import yaml
 
 from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
 from shopping_minion.config import DecideConfig, load_decide_config
-from shopping_minion.decide import describe_candidate, nothing_fit
+from shopping_minion.decide import describe_candidate, nothing_fit, on_offer
 from shopping_minion.items import Candidate, CartDraft, Decision, Item
 from shopping_minion.merge import line_label
 from shopping_minion.preferences import load_preferences
@@ -42,10 +42,20 @@ def load_items(path: str | Path) -> list[Item]:
 
 
 def _ordered_candidates(decision: Decision) -> list[Candidate]:
-    """Jev's pick first, then the rest in search order."""
+    """Jev's pick first, then the candidates on offer, then the rest.
+
+    Inside each group: Jev's probability, highest first (missing counts as 0); ties keep the
+    search order.
+    """
     picked = [c for c in decision.candidates if c.product_id == decision.choice]
     rest = [c for c in decision.candidates if c.product_id != decision.choice]
-    return picked + rest
+
+    def by_probability(candidates: list[Candidate]) -> list[Candidate]:
+        return sorted(candidates, key=lambda c: -decision.probabilities.get(c.product_id, 0.0))
+
+    offers = by_probability([c for c in rest if on_offer(c)])
+    others = by_probability([c for c in rest if not on_offer(c)])
+    return picked + offers + others
 
 
 def resolve_in_terminal(
