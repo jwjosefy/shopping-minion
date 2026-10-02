@@ -13,14 +13,18 @@ NONE_KEY = "nenhum"
 STATE = "Lista de compras de supermercado."
 MAX_WORKERS = 8  # batch_size=1 runs this many calls at once
 
+OFFER_RULE = "Entre produtos equivalentes, prefira o que está em oferta."
 QUESTION = (
     "Qual produto da loja corresponde ao `item` da lista de compras? "
-    "Respeite as restrições de `item`; se nenhum produto corresponde, escolha `nenhum`."
+    "Respeite as restrições de `item`. "
+    f"{OFFER_RULE} "
+    "Se nenhum produto corresponde, escolha `nenhum`."
 )
 QUESTION_WITH_PREFERENCE = (
     "Qual produto da loja corresponde ao `item` da lista de compras? "
-    "Respeite as restrições de `item` e a `preferencia`; "
-    "se nenhum produto corresponde, escolha `nenhum`."
+    "Respeite as restrições de `item` e a `preferencia`. "
+    f"{OFFER_RULE} "
+    "Se nenhum produto corresponde, escolha `nenhum`."
 )
 NONE_DESCRIPTION = (
     "Nenhum dos produtos listados corresponde ao `item`: todos são de outro tipo de produto "
@@ -39,11 +43,24 @@ def _reais(price: Decimal) -> str:
     return "R$ " + text.replace(",", "_").replace(".", ",").replace("_", ".")
 
 
+def on_offer(candidate: Candidate) -> bool:
+    return (
+        candidate.price is not None
+        and candidate.list_price is not None
+        and candidate.list_price > candidate.price
+    )
+
+
 def describe_candidate(candidate: Candidate) -> str:
     parts = [candidate.name]
     if candidate.brand:
         parts.append(f"marca {candidate.brand}")
-    parts.append(_reais(candidate.price) if candidate.price is not None else "sem preço")
+    if candidate.price is None:
+        parts.append("sem preço")
+    elif on_offer(candidate):
+        parts.append(f"em oferta, de {_reais(candidate.list_price)} por {_reais(candidate.price)}")
+    else:
+        parts.append(_reais(candidate.price))
     parts.append("vendido por kg" if candidate.unit_of_sale == "kg" else "vendido por unidade")
     if not candidate.available:
         parts.append("indisponível")
