@@ -92,7 +92,7 @@ Looked at with Johann's logged-in session, headed. The script only navigated, an
 - **`productId` is the same id the search uses** (the search hit's `id`, our `Candidate.product_id`). Checked against run 8: of the 316 distinct products its search returned, 62 appear by id in the last 10 orders, and so do 14 of the 28 distinct products Johann ended up with.
 - **Weighed products show what was weighed, not what was ordered.** For example, `quantity: 3.68` for a product ordered as 4 kg. What was ordered appears only as text, in `changedItemsHistory[]` with `type: "CHANGED"`, like "O item X teve sua quantidade alterada de 4kg. para 3.68kg."
 - The same response also has the delivery address, the payment method and the status history. None of it is needed.
-- **Older orders, seen on 2026-10-02 in the first sync:** `selectedSaleUnit` and `sellByWeightAndUnit` are `null` on some lines, with `saleUnit` set and a valid `quantity`. The sync falls back to `saleUnit`. A product that wasn't delivered shows `quantity: 0` and `totalPrice: 0`, and is left out.
+- **Older orders, seen on 2026-10-02 in the first sync:** `selectedSaleUnit` and `sellByWeightAndUnit` are `null` on some lines, with `saleUnit` set and a valid `quantity`. The sync falls back to `saleUnit`, which was lowercase `un` on 2 lines, so the unit is read in any case. A product that wasn't delivered shows `quantity: 0` and `totalPrice: 0`, and is left out.
 
 **Buttons on the order page.** Besides "Ver mais produtos" / "Ver menos produtos", the page shows:
 - "Avaliar pedido" and "Avaliar";

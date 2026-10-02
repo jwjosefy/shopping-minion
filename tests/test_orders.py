@@ -127,6 +127,14 @@ def test_a_null_selected_unit_falls_back_to_the_sale_unit():
     assert left_out == 0
 
 
+def test_the_unit_is_read_in_any_case():
+    # Some older lines have saleUnit "un" (seen 2026-10-02).
+    lower = item(product_id="9006", unit="UN") | {"selectedSaleUnit": None, "saleUnit": "un"}
+    order, left_out = order_and_left_out(details_body(items=[lower]), ROW)
+    assert [(line.product_id, line.unit) for line in order.lines] == [("9006", "un")]
+    assert left_out == 0
+
+
 def test_lines_with_another_unit_or_no_quantity_are_left_out_and_counted():
     body = details_body(
         items=[

@@ -100,9 +100,10 @@ def order_and_left_out(body: dict, row: OrderRow | None = None) -> tuple[Order, 
     """`data.customerViewer.order` and its `items`, plus how many lines were left out.
 
     The unit is `selectedSaleUnit`, or `saleUnit` when that is null (older orders have it null;
-    seen 2026-10-02). A line whose unit isn't UN or KG, or whose `quantity` isn't > 0 (a product
-    not delivered shows 0), is left out. The order's date, status and total come from the
-    details (seen in T12), and from the list's row if the details lack them.
+    seen 2026-10-02), read in any case (`un` seen too). A line whose unit isn't UN or KG, or
+    whose `quantity` isn't > 0 (a product not delivered shows 0), is left out. The order's
+    date, status and total come from the details (seen in T12), and from the list's row if
+    the details lack them.
     """
     order = body["data"]["customerViewer"]["order"]
     order_id = str(order["id"])
@@ -114,7 +115,7 @@ def order_and_left_out(body: dict, row: OrderRow | None = None) -> tuple[Order, 
     total = _money(order["total"]) if "total" in order else (row.total if row else None)
     lines, left_out = [], 0
     for item in order.get("items") or []:
-        unit = _UNITS.get(item.get("selectedSaleUnit") or item.get("saleUnit"))
+        unit = _UNITS.get(str(item.get("selectedSaleUnit") or item.get("saleUnit")).upper())
         quantity = item.get("quantity")
         if unit is None or not isinstance(quantity, int | float) or not quantity > 0:
             left_out += 1
