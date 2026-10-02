@@ -20,8 +20,8 @@ A milestone isn't done because its code is merged. It's done when its *done when
 | M0 | Look at the site | ✅ 2026-10-01 | [lld.md](lld.md) §1–§7 |
 | M1 | CLI: three items into the real cart | ✅ 2026-10-01 | [lld.md](lld.md) §9 |
 | M2 | Web app | ✅ 2026-10-01 | [lld-m2.md](lld-m2.md) §11 |
-| M3 | Full list, photo to cart, measured | 🟡 closing | §M3 below |
-| M4 | Preferences learned from history | ⬜ next | to design |
+| M3 | Full list, photo to cart, measured | ✅ 2026-10-01 | [lld-m3.md](lld-m3.md) §5 |
+| M4 | Preferences learned from history | ⬜ next | Johann to write up |
 | M5 | UX improvements | ⬜ | Johann to elaborate |
 | M6 | Julia-1 as a local decide backend | ⬜ | to design |
 | M7 | Cloud migration | ⬜ | design TBD |
@@ -38,7 +38,7 @@ A milestone isn't done because its code is merged. It's done when its *done when
 
 **Done when** the whole flow ran in the browser, from the desktop and from the phone over the LAN, on a real list. Done on 2026-10-01 ([lld-m2.md](lld-m2.md) §11).
 
-## M3 — Full list, photo to cart, measured 🟡
+## M3 — Full list, photo to cart, measured ✅
 
 **Goal:** prove the point of the project on a real long list: less time than building the cart by hand.
 
@@ -53,6 +53,8 @@ A milestone isn't done because its code is merged. It's done when its *done when
 - **A baseline:** Johann's estimate, not measured. By hand, building an online cart of 30–50+ items takes over 1 h, and larger lists 2–3 h. Shopping in person takes 2 h or more, plus checkout and loading and unloading the car.
 
 **Done when** one real list of 30+ items goes from photo to checked cart through the web app, and a short report states: time per step, total time against the baseline, and the three correction counts. The report is the starting line M4 has to beat.
+
+**Done on 2026-10-01** ([lld-m3.md](lld-m3.md) §5). Run 8, 32 items: 8 min from photo to checked cart (5 min 15 s of it Johann's time) against over 1 h by hand; 2 list lines edited; 5 products accepted by Jev, 25 sent to Johann (13 confirmed Jev's pick, 11 chose another, 1 skipped); 0 cart edits; 28 of 28 checked.
 
 ## M4 — Preferences learned from history ⬜
 
@@ -81,7 +83,8 @@ Seen so far, as a starting list, not a commitment:
 - when Jev finds nothing that fits, no card is pre-selected, so Enter does nothing;
 - items with no results ("lanche infantil") could offer a new search term right there, instead of being skipped;
 - the CLI's empty Enter doesn't accept Jev's pick.
-- show M3's time and corrections report on the web app's done screen, not only in the terminal (LLD-M3 Q1).
+- show M3's time and corrections report on the web app's done screen, not only in the terminal (LLD-M3 Q1);
+- align the "você" column in the report (LLD-M3 §5).
 
 ## M6 — Julia-1 as a local decide backend ⬜
 

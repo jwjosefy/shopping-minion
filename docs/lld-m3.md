@@ -96,7 +96,42 @@ One task, so no waves. Paid calls: T11 only (Jev, a fraction of a cent).
 
 ## 4. Questions resolved in review
 
-| # | Question | Answer (Johann, 2026-10-01) |
-|---|---|---|
-| 1 | Report in the terminal only, or also on the done screen? | Terminal only for now. Showing it in the app goes to M5 (noted in the roadmap). |
-| 2 | Which list for T11? | A new, real list. Johann will scan it. |
+| #   | Question                                                 | Answer (Johann, 2026-10-01)                                                     |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1   | Report in the terminal only, or also on the done screen? | Terminal only for now. Showing it in the app goes to M5 (noted in the roadmap). |
+| 2   | Which list for T11?                                      | A new, real list. Johann will scan it.                                          |
+
+## 5. Acceptance (T11)
+
+Accepted by Johann on 2026-10-01: "testei o app agora no M3 - funciona bem, vamos fechar esse milestone." Further improvements go to M4 and M5.
+
+Run 8, a new real list, through the web app. `shopping-minion report`:
+
+```
+Rodada 8 — 2026-10-01 22:41 — 32 itens na lista, 28 no carrinho
+
+Tempo                                    máquina        você
+  lendo a lista (OCR)                       20 s
+  revisando a lista                               2 min 06 s
+  buscando                                  53 s
+  decidindo (Jev)                            2 s
+  escolhendo produtos                             2 min 19 s
+  revisando o carrinho                                  49 s
+  adicionando ao carrinho             1 min 31 s
+  total                               2 min 45 s  5 min 15 s   = 8 min 00 s
+  referência (estimativa do Johann): mais de 1 h à mão
+
+Correções
+  lista: 2 linhas editadas, 0 apagadas, 0 adicionadas (de 32 lidas pelo OCR)
+  produtos: 5 aceitos pelo Jev sozinho; dos 25 que vieram para você:
+            13 você confirmou a escolha do Jev, 11 escolheu outro, 1 pulou
+  carrinho: 0 quantidades mudadas, 0 removidos
+
+Conferência: 28 de 28 itens conferem; 29 produtos no carrinho não são desta lista
+```
+
+- **Against the baseline:** 8 min from photo to checked cart, 5 min 15 s of it Johann's time, against over 1 h by hand (his estimate).
+- **The starting line for M4:** 25 of 32 items needed a manual pick, and in 11 of them Johann chose a different product from Jev's.
+- **Decisions saved for the run:** 5 accepted, 24 chosen by Johann, 3 skipped (1 skipped in the picker, per the report).
+- **The 29 extra products:** the check flagged them and didn't touch them. Where they came from wasn't checked. Inference, not verified: left in the cart by earlier runs.
+- **Seen in the report:** the "você" column of "revisando o carrinho" is misaligned. Cosmetic, left for M5.
