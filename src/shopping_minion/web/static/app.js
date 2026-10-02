@@ -4,7 +4,7 @@ const { createApp, ref, reactive, computed, onMounted, onBeforeUnmount } = Vue;
 
 const UNITS = ["un", "g", "kg", "ml", "l", "pct", "cx", "lata", "dz"];
 const CANCELLABLE = [
-  "reading_list", "reviewing_list", "searching", "deciding",
+  "reading_list", "reviewing_list", "syncing_history", "searching", "deciding",
   "picking", "reviewing_cart", "filling_cart",
 ];
 

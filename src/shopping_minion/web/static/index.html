@@ -135,11 +135,15 @@
       </div>
     </section>
 
-    <!-- 4. searching / deciding: Buscando -->
-    <section v-else-if="state === 'searching' || state === 'deciding'" data-screen="searching"
-             class="card">
+    <!-- 4. syncing_history / searching / deciding: Buscando -->
+    <section v-else-if="state === 'syncing_history' || state === 'searching' || state === 'deciding'"
+             data-screen="searching" class="card">
       <h2>Buscando</h2>
-      <template v-if="state === 'searching'">
+      <template v-if="state === 'syncing_history'">
+        <div class="spinner" aria-hidden="true"></div>
+        <p data-test="syncing-history">Lendo seus pedidos…</p>
+      </template>
+      <template v-else-if="state === 'searching'">
         <div class="progress" role="progressbar" :aria-valuenow="searchDone" aria-valuemin="0"
              :aria-valuemax="searchTotal">
           <div class="fill" :style="{ width: pct(searchDone, searchTotal) }"></div>
@@ -231,6 +235,7 @@
                     <p class="flags">
                       <span v-if="l.flags && l.flags.includes('QUANTITY_ASSUMED')" class="badge amber">quantidade assumida</span>
                       <span v-if="l.flags && l.flags.includes('QUANTITY_INEXACT')" class="badge amber">aproximada</span>
+                      <span v-if="l.flags && l.flags.includes('QUANTITY_FROM_HISTORY')" class="badge amber">quantidade da última compra</span>
                       <span v-if="lineItems(l).length > 1" class="badge blue">{{ lineItems(l).length }} linhas da lista</span>
                     </p>
                   </div>

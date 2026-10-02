@@ -13,8 +13,10 @@ from fastapi.testclient import TestClient
 
 from shopping_minion import cli
 from shopping_minion.browser import NotLoggedInError
+from shopping_minion.history import ItemHistory
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
 from shopping_minion.merge import line_label
+from shopping_minion.orders import SyncResult
 from shopping_minion.reconcile import expected_amount, format_amount, reconcile
 from shopping_minion.storage import Storage
 from shopping_minion.web.app import (
@@ -85,6 +87,11 @@ class World:
         self.fill_gate_at = 1  # ... after this one (1-based)
         self.fill_started = threading.Event()
         self.cart_before = [("Leite UHT", "1")]
+        self.synced = []  # first_n of each sync
+        self.sync_result = SyncResult(new=2, skipped=1, stored=5)
+        self.histories_seen = None  # what decide and draft got
+        self.draft_histories = None
+        self.config_seen = None
 
     # injected functions
     def transcribe(self, photo):
@@ -116,8 +123,15 @@ class World:
             progress(i, len(items), it, found)
         return out
 
-    def decide(self, items, candidates, prefs, config, client):
+    def sync(self, page, storage, first_n, progress=None):
+        assert page == "page"
+        self.synced.append(first_n)
+        return self.sync_result
+
+    def decide(self, items, candidates, prefs, config, client, histories=None):
         assert client == "jev-client"
+        self.histories_seen = histories
+        self.config_seen = config
         decisions = []
         for it, found in zip(items, candidates, strict=True):
             choice, confidence, status = DECISIONS[it.name]
@@ -164,8 +178,9 @@ class World:
 @pytest.fixture
 def world(tmp_path):
     (tmp_path / "decide.yaml").write_text(
-        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\n"
+        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\nhistory: options\n"
     )
+    (tmp_path / "history.yaml").write_text("first_sync_orders: 7\nrelated_lines: 4\n")
     return World(tmp_path)
 
 
@@ -174,14 +189,16 @@ def make_machine(world):
         db_path=world.tmp_path / "db" / "t.sqlite",
         prefs_path=world.tmp_path / "preferencias.yaml",  # absent: no preferences
         config_path=world.tmp_path / "decide.yaml",
+        history_config_path=world.tmp_path / "history.yaml",
         uploads_dir=world.tmp_path / "uploads",
         # lambdas, so a test can swap one of the world's methods after the machine exists
         transcribe_fn=lambda photo: world.transcribe(photo),
         open_browser_fn=lambda: world.open_browser(),
         ensure_logged_in_fn=lambda page: world.ensure_logged_in(page),
         search_fn=lambda *a: world.search(*a),
-        decide_fn=lambda *a: world.decide(*a),
+        decide_fn=lambda *a, **kw: world.decide(*a, **kw),
         fill_fn=lambda *a, **kw: world.fill(*a, **kw),
+        sync_fn=lambda *a, **kw: world.sync(*a, **kw),
         client_factory=lambda: "jev-client",
     )
 
@@ -325,6 +342,7 @@ def test_the_whole_flow_in_state_order(client, world):
     assert [e["data"]["state"] for e in log if e["kind"] == "state"] == [
         "reading_list",
         "reviewing_list",
+        "syncing_history",
         "searching",
         "deciding",
         "picking",
@@ -390,12 +408,25 @@ def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, mo
     assert [r["data"]["state"] for r in log if r["kind"] == "state"] == [
         "reading_list",
         "reviewing_list",
+        "syncing_history",
         "searching",
         "deciding",
         "picking",
         "reviewing_cart",
         "filling_cart",
         "done",
+    ]
+    assert [r["data"] for r in log if r["kind"] == "history"] == [
+        {"new": 2, "skipped": 1, "stored": 5}
+    ]
+    assert [r["data"] for r in log if r["kind"] == "decide"] == [
+        {
+            "model": "jev-latest",
+            "history": "options",
+            "accept_at": 0.8,
+            "ask_below": 0.5,
+            "batch_size": 5,
+        }
     ]
     assert [r["at"] for r in log] == sorted(r["at"] for r in log)
     assert [r["data"] for r in log if r["kind"] == "pick"] == [
@@ -574,7 +605,7 @@ def test_a_search_error_fails_the_run(client, world, monkeypatch):
 
 
 def test_a_jev_error_fails_the_run(client, world, monkeypatch):
-    def boom(*args):
+    def boom(*args, **kwargs):
         raise RuntimeError("sem chave")
 
     monkeypatch.setattr(world, "decide", boom)
@@ -877,3 +908,106 @@ def test_the_stream_follows_new_events_and_sends_keepalives(machine, world):
 def test_the_index_page_is_served(client):
     response = client.get("/")
     assert response.status_code == 200 and "<html" in response.text
+
+
+# --- the order history (LLD-M4 section 13) ----------------------------------------------------
+
+
+def state_and_kind_sequence(client):
+    return [(e["kind"], e["data"].get("state")) for e in events(client) if e["kind"] != "search"]
+
+
+def test_the_sync_runs_before_the_search_and_emits_history(client, world):
+    to_picking(client)
+    assert world.synced == [7]  # first_sync_orders from config/history.yaml
+    sequence = state_and_kind_sequence(client)
+    assert sequence.index(("state", "syncing_history")) < sequence.index(("history", None))
+    assert sequence.index(("history", None)) < sequence.index(("state", "searching"))
+    (history,) = [e for e in events(client) if e["kind"] == "history"]
+    assert history["state"] == "syncing_history"
+    assert history["data"] == {"new": 2, "skipped": 1, "stored": 5}
+
+
+def test_a_sync_failure_emits_the_error_and_the_run_goes_on(client, world, monkeypatch):
+    def boom(page, storage, first_n, progress=None):
+        raise RuntimeError("a página mudou")
+
+    monkeypatch.setattr(world, "sync", boom)
+    to_picking(client)
+    (history,) = [e for e in events(client) if e["kind"] == "history"]
+    assert history["data"] == {"error": "a página mudou"}
+    assert world.searched == 1
+    db = Storage(world.tmp_path / "db" / "t.sqlite")
+    log = db.read_log(1)
+    db.close()
+    assert [r["data"] for r in log if r["kind"] == "history"] == [{"error": "a página mudou"}]
+    assert [r["data"]["state"] for r in log if r["kind"] == "state"][2:5] == [
+        "syncing_history",
+        "searching",
+        "deciding",
+    ]
+
+
+def test_cancel_during_the_sync_ends_the_run_and_closes_the_browser(client, world, monkeypatch):
+    release = threading.Event()
+    inside = threading.Event()
+
+    def slow_sync(page, storage, first_n, progress=None):
+        inside.set()
+        assert release.wait(5)
+        progress(1, 1, None)  # raises once cancelled
+        return world.sync_result
+
+    monkeypatch.setattr(world, "sync", slow_sync)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    assert inside.wait(5)
+    assert client.get("/api/run").json()["state"] == "syncing_history"
+    assert client.post("/api/run/cancel").status_code == 200
+    release.set()
+    deadline = time.monotonic() + 5
+    while world.closed == 0 and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert world.closed == 1 and world.searched == 0
+    assert client.get("/api/run").json()["state"] == "cancelled"
+    assert not [e for e in events(client) if e["kind"] == "history"]
+
+
+def test_cancel_after_the_sync_returned_still_skips_the_search(client, world, monkeypatch):
+    release = threading.Event()
+    inside = threading.Event()
+
+    def slow_sync(page, storage, first_n, progress=None):
+        inside.set()
+        assert release.wait(5)
+        return world.sync_result  # never calls progress
+
+    monkeypatch.setattr(world, "sync", slow_sync)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    assert inside.wait(5)
+    client.post("/api/run/cancel")
+    release.set()
+    deadline = time.monotonic() + 5
+    while world.closed == 0 and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert world.closed == 1 and world.searched == 0
+
+
+def test_histories_reach_decide_and_the_draft(client, world, monkeypatch):
+    from shopping_minion.web import statemachine
+
+    drafted = []
+    real = statemachine.draft_cart
+
+    def spy(decisions, prefs, histories=None):
+        drafted.append(histories)
+        return real(decisions, prefs, histories)
+
+    monkeypatch.setattr(statemachine, "draft_cart", spy)
+    to_reviewing_cart(client)
+    assert world.config_seen.history == "options"
+    assert len(world.histories_seen) == len(LIST)  # one per item, empty tables
+    assert all(isinstance(h, ItemHistory) for h in world.histories_seen)
+    assert all(h.products == {} and h.related == [] for h in world.histories_seen)
+    assert drafted == [world.histories_seen]  # the same objects, built once

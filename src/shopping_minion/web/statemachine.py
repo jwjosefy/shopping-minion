@@ -2,10 +2,10 @@
 
 One run at a time. The photo is read in a plain thread (OCR, no browser). A worker thread
 owns the Playwright browser for the whole run, because the sync API must stay on the thread
-that created it: it opens the browser at `searching`, runs the search and the decide pass,
-then waits on a queue for the cart pass and for the "close" job. The web layer only calls the
-public methods below; every one takes the lock, checks the state and returns or raises
-`WrongState` (the app turns it into `409 {state}`).
+that created it: it opens the browser at `syncing_history` (login check, then the order
+sync), runs the search and the decide pass, then waits on a queue for the cart pass and for the
+"close" job. The web layer only calls the public methods below; every one takes the lock,
+checks the state and returns or raises `WrongState` (the app turns it into `409 {state}`).
 
 Everything that touches a browser, the network, the model or the disk is injected, so the
 tests run the whole flow with fakes.
@@ -21,11 +21,18 @@ from pathlib import Path
 from typing import Any
 
 from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
-from shopping_minion.config import DecideConfig, load_decide_config
+from shopping_minion.config import (
+    DecideConfig,
+    HistoryConfig,
+    load_decide_config,
+    load_history_config,
+)
 from shopping_minion.decide import nothing_fit
+from shopping_minion.history import ItemHistory
 from shopping_minion.items import Candidate, CartDraft, Decision, Item
+from shopping_minion.orders import sync_orders
 from shopping_minion.preferences import load_preferences
-from shopping_minion.run import _ordered_candidates
+from shopping_minion.run import _ordered_candidates, decide_config_row, histories_for
 from shopping_minion.storage import Storage
 from shopping_minion.workflow import (
     CartOutcome,
@@ -40,7 +47,7 @@ from shopping_minion.workflow import (
 LOGIN_MESSAGE = "faça login: `shopping-minion login`"
 JOIN_SECONDS = 60  # how long DELETE waits for the worker to close the browser
 
-WORKING = ("reading_list", "searching", "deciding", "filling_cart")
+WORKING = ("reading_list", "syncing_history", "searching", "deciding", "filling_cart")
 WAITING = ("reviewing_list", "picking", "reviewing_cart")
 FINISHED = ("done", "failed", "cancelled")
 
@@ -91,6 +98,8 @@ class _Run:
         self.ocr_items: list[Item] = []
         self.items: list[Item] | None = None
         self.config: DecideConfig | None = None
+        self.history_config: HistoryConfig | None = None
+        self.histories: list[ItemHistory] | None = None  # one per item, after the search
         self.prefs: dict[str, dict] = {}
         self.decisions: list[Decision] = []
         self.pending: list[int] = []  # indexes into `decisions` still to pick, in order
@@ -125,6 +134,7 @@ class RunStateMachine:
         db_path: str | Path = "data/shopping-minion.sqlite",
         prefs_path: str | Path = "data/preferencias.yaml",
         config_path: str | Path = "config/decide.yaml",
+        history_config_path: str | Path = "config/history.yaml",
         uploads_dir: str | Path = "data/uploads",
         transcribe_fn: Callable[[Path], list[Item]] | None = None,
         open_browser_fn: Callable[[], Any] = open_browser,
@@ -132,11 +142,13 @@ class RunStateMachine:
         search_fn: Callable[..., list[list[Candidate]]] = search_list,
         decide_fn: Callable[..., list[Decision]] = decide_list,
         fill_fn: Callable[..., CartOutcome] = fill_cart,
+        sync_fn: Callable[..., Any] = sync_orders,
         client_factory: Callable[[], Any] | None = None,
     ) -> None:
         self._db_path = Path(db_path)
         self._prefs_path = Path(prefs_path)
         self._config_path = Path(config_path)
+        self._history_config_path = Path(history_config_path)
         self._uploads_dir = Path(uploads_dir)
         self._transcribe_fn = transcribe_fn or _transcribe
         self._open_browser_fn = open_browser_fn
@@ -144,6 +156,7 @@ class RunStateMachine:
         self._search_fn = search_fn
         self._decide_fn = decide_fn
         self._fill_fn = fill_fn
+        self._sync_fn = sync_fn
         self._client_factory = client_factory or _jev_client
 
         self._lock = threading.RLock()
@@ -221,13 +234,14 @@ class RunStateMachine:
                 db.save_items(run.id, run.ocr_items, run.items)
 
     def confirm_list(self) -> None:
-        """reviewing_list -> searching: the worker opens the browser and searches."""
+        """reviewing_list -> syncing_history: the worker opens the browser, syncs the orders
+        and searches."""
         with self._lock:
             run = self._require("reviewing_list")
             if not run.items:
                 raise BadRequest("a lista não tem itens")
             self._set_status(run, "items_saved")
-            self._set_state("searching")
+            self._set_state("syncing_history")
             run.worker = threading.Thread(target=self._work, args=(run,), daemon=True)
             run.worker.start()
 
@@ -402,7 +416,7 @@ class RunStateMachine:
 
     def _enter_cart_review(self, run: _Run) -> None:
         with self._lock:
-            run.draft = draft_cart(run.decisions, run.prefs)
+            run.draft = draft_cart(run.decisions, run.prefs, run.histories)
             self._set_status(run, "resolved")
             self._set_state("reviewing_cart")
 
@@ -430,6 +444,7 @@ class RunStateMachine:
         try:
             run.config = load_decide_config(self._config_path)
             run.prefs = load_preferences(self._prefs_path)
+            run.history_config = load_history_config(self._history_config_path)
         except Exception as exc:
             self._fail(run, f"configuração inválida: {_describe(exc)}")
             return
@@ -441,6 +456,8 @@ class RunStateMachine:
                 except NotLoggedInError:
                     self._fail(run, LOGIN_MESSAGE, status="not_logged_in")
                     return
+                if not self._sync_history(run, page):
+                    return
                 if not self._search_and_decide(run, page):
                     return  # the browser closes: there is nothing to look at in it
                 while True:  # waiting: the cart pass, or the end of the run
@@ -451,6 +468,31 @@ class RunStateMachine:
                         self._fill(run, page, job[1])
         except Exception as exc:  # the browser failed to open, or the page died
             self._fail(run, _describe(exc))
+
+    def _sync_history(self, run: _Run, page: Any) -> bool:
+        """Read the orders not stored yet (LLD-M4 section 13). A failure doesn't fail the run: it
+        goes on with what SQLite has. False when the run was cancelled or is gone."""
+
+        def progress(i: int, n: int, row: Any) -> None:
+            if run.cancel.is_set():
+                raise _Cancelled
+
+        try:
+            with self._db() as db:
+                result = self._sync_fn(page, db, run.history_config.first_sync_orders, progress)
+            data = {"new": result.new, "skipped": result.skipped, "stored": result.stored}
+        except _Cancelled:
+            return False
+        except Exception as exc:
+            data = {"error": _describe(exc)}
+        with self._lock:
+            if self._run is not run or self._state != "syncing_history":
+                return False  # cancelled meanwhile
+            self._emit(run, "history", data)
+            with self._db() as db:
+                db.log(run.id, "history", data)
+            self._set_state("searching")
+        return True
 
     def _search_and_decide(self, run: _Run, page: Any) -> bool:
         """True when the run reached a waiting state; False when it ended or was cancelled."""
@@ -474,8 +516,18 @@ class RunStateMachine:
         self._set_status(run, "searched")
         self._emit(run, "decide", {"phase": "start", "accepted": None, "to_pick": None})
         try:
+            with self._db() as db:
+                run.histories = histories_for(
+                    db, run.items, candidates, run.history_config.related_lines
+                )
+                db.log(run.id, "decide", decide_config_row(run.config))
             decisions = self._decide_fn(
-                run.items, candidates, run.prefs, run.config, self._client_factory()
+                run.items,
+                candidates,
+                run.prefs,
+                run.config,
+                self._client_factory(),
+                histories=run.histories,
             )
         except Exception as exc:
             self._fail(run, f"o Jev falhou: {_describe(exc)}")
