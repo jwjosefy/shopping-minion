@@ -55,6 +55,34 @@ def _login() -> int:
         return 1
 
 
+def _cmd_history_sync(args: argparse.Namespace) -> int:
+    """Open the store, check the login and read the orders not stored yet."""
+    from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
+    from shopping_minion.config import load_history_config
+    from shopping_minion.orders import MAX_ORDERS, sync_orders
+    from shopping_minion.storage import Storage
+
+    config = load_history_config(args.config)
+    storage = Storage(args.db)
+    try:
+        with open_browser() as (_browser, context):
+            page = context.new_page()
+            try:
+                ensure_logged_in(page)
+            except NotLoggedInError:
+                print("Sem login na loja. Rode `shopping-minion login` primeiro.", file=sys.stderr)
+                return 1
+            result = sync_orders(page, storage, config.first_sync_orders)
+    finally:
+        storage.close()
+    print(f"{result.new} pedidos novos, {result.skipped} ignorados, {result.stored} guardados")
+    if result.capped:
+        print(f"Havia mais pedidos novos do que a lista mostra: li os {MAX_ORDERS} mais recentes.")
+    if result.left_out_lines:
+        print(f"{result.left_out_lines} linhas ficaram de fora (unidade ou quantidade inválida).")
+    return 0
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     from shopping_minion.run import run
 
@@ -105,6 +133,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     login = sub.add_parser("login", help="log in to the store by hand and save the session")
     login.set_defaults(func=lambda _args: _login())
+
+    history = sub.add_parser("history", help="the store's order history")
+    history_sub = history.add_subparsers(dest="history_command", required=True)
+    history_sync = history_sub.add_parser("sync", help="read the orders not stored yet")
+    history_sync.add_argument("--db", type=Path, default=Path("data/shopping-minion.sqlite"))
+    history_sync.add_argument("--config", type=Path, default=Path("config/history.yaml"))
+    history_sync.set_defaults(func=_cmd_history_sync)
 
     run = sub.add_parser("run", help="search, decide and add the items of a list to the cart")
     run.add_argument("list", type=Path, help="the YAML written by `ocr`")

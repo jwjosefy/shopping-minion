@@ -19,6 +19,10 @@ up *args:
 login:
     uv run shopping-minion login
 
+# Read the new orders from the store's history into the local database.
+history-sync:
+    uv run shopping-minion history sync
+
 # Time and corrections for a run: the latest by default, or `just report 7`.
 report *args:
     uv run shopping-minion report {{args}}

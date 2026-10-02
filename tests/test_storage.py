@@ -1,8 +1,12 @@
 import json
 import sqlite3
+from datetime import UTC, datetime
 from decimal import Decimal
 
+import pytest
+
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
+from shopping_minion.orders import Order, OrderLine
 from shopping_minion.storage import Storage
 
 
@@ -148,3 +152,70 @@ def test_run_log_table_is_added_to_an_existing_db(tmp_path):
     storage.log(1, "state", {"state": "done"})
     assert [r["kind"] for r in storage.read_log(1)] == ["state"]
     assert [r["id"] for r in storage.list_runs()] == [1]
+
+
+def make_order(order_id: str, placed: datetime, *lines: tuple[str, float, str]) -> Order:
+    return Order(
+        order_id=order_id,
+        placed_at=placed,
+        status="FINISHED",
+        total=Decimal("50.25"),
+        lines=[
+            OrderLine(
+                order_id=order_id,
+                placed_at=placed,
+                product_id=product_id,
+                name=f"Produto {product_id}",
+                quantity=quantity,
+                unit=unit,
+                total_price=Decimal("9.90"),
+            )
+            for product_id, quantity, unit in lines
+        ],
+    )
+
+
+SEPT = datetime(2026, 9, 10, 12, 0, tzinfo=UTC)
+OCT = datetime(2026, 10, 1, 8, 30, tzinfo=UTC)
+
+
+def test_order_round_trip(tmp_path):
+    storage = Storage(tmp_path / "t.sqlite")
+    order = make_order("7001", SEPT, ("p1", 2, "un"), ("p2", 1.34, "kg"))
+    storage.save_order(order)
+    assert storage.known_order_ids() == {"7001"}
+    assert storage.order_lines() == order.lines
+    assert storage.order_lines()[0].total_price == Decimal("9.90")
+
+
+def test_order_lines_are_newest_order_first_and_before_filters(tmp_path):
+    storage = Storage(tmp_path / "t.sqlite")
+    storage.save_order(make_order("7001", SEPT, ("p1", 1, "un"), ("p2", 1, "un")))
+    storage.save_order(make_order("7002", OCT, ("p3", 1, "un")))
+    assert [(line.order_id, line.product_id) for line in storage.order_lines()] == [
+        ("7002", "p3"),
+        ("7001", "p1"),
+        ("7001", "p2"),
+    ]
+    assert {line.order_id for line in storage.order_lines(before=OCT)} == {"7001"}
+    assert storage.order_lines(before=datetime(2026, 9, 1, tzinfo=UTC)) == []
+
+
+def test_saving_a_known_order_raises_and_changes_nothing(tmp_path):
+    storage = Storage(tmp_path / "t.sqlite")
+    storage.save_order(make_order("7001", SEPT, ("p1", 1, "un")))
+    with pytest.raises(sqlite3.IntegrityError):
+        storage.save_order(make_order("7001", SEPT, ("p1", 1, "un"), ("p9", 1, "un")))
+    assert len(storage.order_lines()) == 1
+
+
+def test_a_failing_line_rolls_the_whole_order_back(tmp_path):
+    storage = Storage(tmp_path / "t.sqlite")
+    order = make_order("7001", SEPT, ("p1", 1, "un"), ("p2", 1, "un"))
+    # a stray row takes line 1 of order 7001, so the second line of the save collides
+    storage._conn.execute("INSERT INTO orders VALUES ('x', 'x', 'FINISHED', NULL, 'x')")
+    storage._conn.execute("INSERT INTO order_lines VALUES ('7001', 1, 'p', 'n', 1, 'un', NULL)")
+    storage._conn.commit()
+    with pytest.raises(sqlite3.IntegrityError):
+        storage.save_order(order)  # its line 1 collides with the row above
+    assert storage.known_order_ids() == {"x"}  # the order row was rolled back too

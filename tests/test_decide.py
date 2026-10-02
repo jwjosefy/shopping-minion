@@ -16,14 +16,22 @@ from shopping_minion.decide import (
 from shopping_minion.items import Candidate, Item
 
 
-def cand(pid, name="Atum Gomes de Sá 170g", brand="Gomes", price="9.5", unit="un", available=True):
+def cand(
+    pid,
+    name="Atum Gomes de Sá 170g",
+    brand="Gomes",
+    price="9.5",
+    unit="un",
+    available=True,
+    list_price=None,
+):
     return Candidate(
         product_id=pid,
         slug="x",
         name=name,
         brand=brand,
         price=Decimal(price) if price is not None else None,
-        list_price=None,
+        list_price=Decimal(list_price) if list_price is not None else None,
         unit_of_sale=unit,
         step_kg=0.3 if unit == "kg" else None,
         available=available,
@@ -109,6 +117,34 @@ def test_candidate_descriptions():
     kg = cand("2", name="Frango Kg", brand=None, price="1234.5", unit="kg", available=False)
     assert describe_candidate(kg) == "Frango Kg, R$ 1.234,50, vendido por kg, indisponível"
     assert "sem preço" in describe_candidate(cand("3", price=None))
+
+
+def test_candidate_description_with_offer():
+    on_sale = cand("1", name="Laranja Pêra Rio Kg", brand=None, price="5.98", list_price="6.49")
+    assert describe_candidate(on_sale) == (
+        "Laranja Pêra Rio Kg, em oferta, de R$ 6,49 por R$ 5,98, vendido por unidade"
+    )
+    kg = cand("2", name="Laranja", brand=None, price="5.98", unit="kg", list_price="6.49")
+    assert describe_candidate(kg) == "Laranja, em oferta, de R$ 6,49 por R$ 5,98, vendido por kg"
+
+
+def test_no_offer_when_list_price_is_not_above_price():
+    same = cand("1", brand=None, price="9.5", list_price="9.5")
+    assert describe_candidate(same) == "Atum Gomes de Sá 170g, R$ 9,50, vendido por unidade"
+    below = cand("2", brand=None, price="9.5", list_price="8")
+    assert "em oferta" not in describe_candidate(below)
+
+
+def test_both_questions_prefer_the_offer_before_nenhum():
+    sentence = "Entre produtos equivalentes, prefira o que está em oferta."
+    plain = build_questions([(item("atum"), [cand("1")])], {})["item_0"]
+    with_pref = build_questions(
+        [(item("feijão"), [cand("1")])], {"feijão": {"variante": "carioca"}}
+    )["item_0"]
+    for q in (plain, with_pref):
+        text = q.instructions["question"]
+        assert sentence in text
+        assert text.index(sentence) < text.index("nenhum")
 
 
 def test_nenhum_criterion_says_when_it_is_right():
