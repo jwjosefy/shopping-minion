@@ -61,7 +61,7 @@ A milestone isn't done because its code is merged. It's done when its *done when
 **Goal:** Jev picks right more often, using what Johann actually bought. In run 8 (M3), Jev's pick was the final product in 18 of 29 decided items, and in 13 of the 25 sent to the picker it was right but not sure.
 
 **In** (design: [lld-m4.md](lld-m4.md), from Johann's [ideas-m4.md](ideas-m4.md)):
-- **The store's order history,** read through the site as a user would (`/minha-conta/pedidos`), synced incrementally into SQLite. The first sync reads the last 5 orders. It starts with an M0-style look at those pages (T12).
+- **The store's order history,** read through the site as a user would (`/minha-conta/pedidos`), synced incrementally into SQLite. The first sync reads the last 10 orders. It starts with an M0-style look at those pages (T12).
 - **History per item, in code:** order lines matched to the search candidates by product id or normalized name.
 - **History in Jev's question,** measured in an eval on run 8 in three variants before going live. Jev is also told to prefer offers between equivalent products.
 - **Quantity:** the last quantity bought fills the step between the preference and the 1-unit default.
