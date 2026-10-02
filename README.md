@@ -11,7 +11,7 @@ Turns a photo of a handwritten grocery list into a ready-to-review cart at [Ando
 
 You take a photo of the list on the fridge. Shopping Minion reads it, you fix what it misread, it searches the store for every item, picks a product for each one, and fills the cart. **It stops before checkout: a human always reviews and places the order.** The point is to save time on long lists (50+ items).
 
-> **Status (2026-10-01): works end to end, in a web app on the desktop or the phone.** The first real run took a 34-item list photo to 31 products in the real cart, each one checked against the reloaded cart.
+> **Status (2026-10-01): works end to end, in a web app on the desktop or the phone.** The first real run took a 34-item list photo to 31 products in the real cart, each one checked against the reloaded cart. A measured 32-item run took 8 minutes from photo to checked cart, against over an hour by hand ([M3](docs/lld-m3.md#5-acceptance-t11)).
 >
 > This is the second version. The first one grew too many layers to reach a working cart and is archived in [`alfa0/`](alfa0/). [Why it was reset](docs/project-reset.md) · [what carried over](docs/lessons-learned.md) · [the journey](docs/journal/).
 
@@ -58,7 +58,22 @@ flowchart TD
 
 ## Getting started
 
-Needs [uv](https://docs.astral.sh/uv/), [dotenvx](https://dotenvx.com), and [Claude Code](https://claude.com/claude-code) logged in (the OCR runs `claude -p` on your subscription). No Docker.
+Needs [Claude Code](https://claude.com/claude-code) logged in (the OCR runs `claude -p` on your subscription) and a [TypeSafe](https://docs.typesafe.ai/introduction) API key for Jev. No Docker.
+
+### Quickstart
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jwjosefy/shopping-minion/main/scripts/bootstrap.sh | bash
+cd shopping-minion
+just jev                          # asks for your TYPESAFE_API_KEY (hidden), saves it encrypted in .env.local
+just login                        # log in to the store by hand once; the session goes to .auth/
+just up                           # the web app; prints a URL + QR for the phone
+just report                       # time and corrections for the latest run (`just report 7` for another)
+```
+
+[`scripts/bootstrap.sh`](scripts/bootstrap.sh) installs [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and [dotenvx](https://dotenvx.com) into `~/.local/bin` when missing (no sudo), clones the repo, and installs the Python deps and Playwright's Chromium. It's safe to run again, also from inside a clone. `just up` uses `.env.local` if it exists and the project's `.env` otherwise, and stops if a secret doesn't decrypt.
+
+### By hand
 
 ```bash
 uv sync
@@ -66,13 +81,12 @@ uv run playwright install chromium   # Playwright's pinned Chromium, never the s
 uv run pytest                        # offline; add `-m live` for tests that open the real site
 ```
 
-Secrets live in the encrypted `.env` ([dotenvx](https://dotenvx.com)). `run` needs `TYPESAFE_API_KEY` for Jev.
-
 ```bash
 uv run shopping-minion login                                  # log in by hand once; the session goes to .auth/
-dotenvx run -- uv run shopping-minion serve                   # the web app; prints a URL + QR for the phone
+dotenvx run -- uv run shopping-minion serve                   # the web app (what `just up` runs)
 uv run shopping-minion ocr photo.jpg -o data/lista.yaml       # read the list; then edit the YAML
 dotenvx run -- uv run shopping-minion run data/lista.yaml     # search, decide, add, check
+uv run shopping-minion report                                 # time and corrections for the latest run
 ```
 
 `serve` listens on the LAN with a random token, and shows the same QR on the desktop page. Without the token, other machines get 401. `--local` keeps it on this machine. From the terminal, `run` does the same flow: it asks before touching the cart and leaves the browser open on it at the end. Preferences (brand, size, usual quantity) go in `data/preferencias.yaml`, with field names in Portuguese. See [`config/preferencias.exemplo.yaml`](config/preferencias.exemplo.yaml). Confidence thresholds and the Jev batch size are in [`config/decide.yaml`](config/decide.yaml).
@@ -108,13 +122,20 @@ data/                  local only, never committed: preferences, run history (SQ
 - `.env` is committed **encrypted**. The private key stays in the OS keyring and is never committed.
 - The browser session (`.auth/`), list photos (`inbox/`) and everything under `data/` stay local and are git-ignored.
 
+### Working on it with someone else
+
+The key to `.env` is never shared: it opens every secret in it, including in old commits. A collaborator brings their own:
+- **Own secrets:** `just jev` puts their `TYPESAFE_API_KEY` in `.env.local` (git-ignored), with the private key in their OS keyring. The code needs nothing else. Then `just up` works the same for both.
+- **Own store account:** `shopping-minion login` writes their session to their `.auth/`.
+- **Own Claude Code** for the OCR.
+
 ## Roadmap
 
 - [x] M0: look at the site
 - [x] M1: three items into the real cart from the terminal
 - [x] First end-to-end run: list photo → 31 products in the cart, checked
 - [x] M2: web app (FastAPI and Vue, dark blue theme): upload from the phone, review, progress, one-item-at-a-time picking, cart check
-- [ ] M3: full list from photo to cart, time and number of corrections measured
+- [x] M3: full list from photo to cart, time and number of corrections measured
 - [x] Merge duplicate list lines that point to the same product
 - [ ] Preferences built from purchase history, to cut manual picks (32 out of 34 on the first run)
 - [ ] Julia-1 as a local alternative to Jev

@@ -1,6 +1,7 @@
 # --- Secrets (dotenvx: .env is committed ENCRYPTED; keys never are) ---
 .env.keys
 .env.*.keys
+.env.local
 *.pem
 
 # --- Personal data: never leaves this machine ---
