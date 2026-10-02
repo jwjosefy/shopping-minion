@@ -333,6 +333,14 @@ Answer inline with `>` under each one. _The answers below were given by Johann i
 
 3. **The 95% target.** On run 8 the best variant is near 59%, and some misses aren't decidable from history. Proposal: keep 95% as the direction. Done-when becomes "at least as many hits as `none` and no more wrong accepts, measured on T18's live run plus run 8". The number is revisited once M5's preferences exist. OK?
 
+> **Johann, 2026-10-02 (chat, transcribed by Claude):** the earlier runs don't faithfully represent a purchase he would make himself. They were tests that the whole system stands up, which it does. So control runs on them don't help, and the real optimization starts now in M4, with everything discussed, aiming to **let Jev decide as much as possible**. He tests live in T18. Also: 0.8 is an arbitrary threshold. First, catalog every Jev answer and its confidence, and compute percentiles (P50, P75, P90) to learn how Jev behaves.
+>
+> **What follows from that:**
+> - The run-8 eval (§12.1) is recorded but doesn't decide anything.
+> - T17 wires the history with `history: options` (A, the main design), and keeps the offer text and sentence as Johann asked (R2 Q4).
+> - Every run logs the decide config it used, so later answers can be grouped by variant.
+> - The thresholds stay until the confidence catalog has live data.
+
 ## Design note: where the problem is, and where retrieval fits (chat of 2026-10-02)
 
 _Drafted by Claude from Johann's chat, for his review._
