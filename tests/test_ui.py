@@ -11,7 +11,7 @@ import urllib.request
 import pytest
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import expect, sync_playwright
-from ui_stub import GROUPED_ITEMS, LIST_ITEMS, NO_RESULTS_PICK, StubServer
+from ui_stub import GROUPED_ITEMS, LIST_ITEMS, MANY_PICK, NO_RESULTS_PICK, PICKS, StubServer
 
 pytestmark = pytest.mark.live
 
@@ -73,6 +73,10 @@ def send_photos(page, *photos):
 def assert_fits(page, screen):
     width, inner = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     assert width <= inner, f"{screen}: scrollWidth {width} > innerWidth {inner}"
+
+
+def is_cart_put(response):
+    return response.request.method == "PUT" and response.url.endswith("/api/run/cart-draft")
 
 
 def screen(page, name):
@@ -160,6 +164,7 @@ def test_whole_flow(browser, size):
             screen(page, "picking")
             expect(page.locator("[data-test=pick-item]")).to_have_text("tomate")
             expect(page.locator("[data-test=pick-count]")).to_have_text("item 1 de 2")
+            expect(page.locator("[data-test=pick-term]")).to_have_text("busca: “tomate italiano”")
             expect(page.locator("[data-test=jev-note]")).to_contain_text("0,56")
             cards = page.locator(".cand")
             expect(cards).to_have_count(3)
@@ -167,6 +172,12 @@ def test_whole_flow(browser, size):
             expect(cards.nth(0)).to_have_class(re.compile(r"\bselected\b"))
             expect(cards.nth(0)).to_contain_text("R$")
             expect(cards.nth(0).locator("s")).to_contain_text("9,00")
+            expect(cards.nth(0).locator("[data-test=badge-offer]")).to_have_text("oferta")
+            expect(page.locator("[data-test=badge-offer]")).to_have_count(1)
+            # the quantity sits under the selected card, from the list (1 kg), no badge
+            expect(page.locator("[data-test=pick-qty]")).to_have_count(1)
+            expect(cards.nth(0).locator("[data-test=pick-qty-value]")).to_have_value("1")
+            expect(cards.nth(0).locator("[data-test=pick-qty-unit]")).to_have_value("kg")
             expect(cards.nth(0)).to_contain_text("por kg")
             expect(cards.nth(1)).to_contain_text("por kg")
             expect(cards.nth(2)).to_contain_text("por unidade")
@@ -192,36 +203,65 @@ def test_whole_flow(browser, size):
             wait_for(lambda: len(stub.picks_posted) == 2, "the skip")
             assert stub.picks_posted[1] == {"index": 1, "product_id": None}
 
-            # 6. Revisar carrinho
+            # 6. Resumo: one collapsed line per item, then "Revisar tudo" for the full editor
             cart = screen(page, "reviewing_cart")
+            expect(cart.get_by_role("heading", name="Resumo")).to_be_visible()
+            summary = page.locator("[data-test=summary-line]")
+            expect(summary).to_have_count(5)  # leite, tomate, requeijão x2, and the skipped one
+            expect(summary.nth(0)).to_contain_text("leite integral")
+            expect(summary.nth(0)).to_contain_text("Leite integral 1L")
+            expect(summary.nth(0).locator("[data-test=summary-qty]")).to_have_text("1 un")
+            expect(summary.nth(0).locator("[data-test=badge-history]")).to_have_text(
+                "mesma quantidade da última vez que comprou este produto"
+            )
+            expect(summary.nth(0).locator("[data-test=badge-offer]")).to_have_text("oferta")
+            expect(summary.nth(1).locator("[data-test=badge-inexact]")).to_have_text("aproximada")
+            expect(summary.nth(2).locator("[data-test=badge-assumed]")).to_have_text(
+                "quantidade assumida"
+            )
+            expect(summary.nth(4)).to_contain_text("pulado")
+            expect(page.locator("[data-test=total]")).to_contain_text("R$")
+            expect(cart).to_contain_text("estimado")
+            expect(page.locator("[data-test=trocar]")).to_have_count(5)
+            expect(page.locator("[data-test=cart-line]")).to_have_count(0)  # collapsed: no editor
+            assert_fits(page, "reviewing_cart (summary)")
+            page.locator("[data-test=review-all]").click()
+            expect(cart.get_by_role("heading", name="Revisar tudo")).to_be_visible()
             lines = page.locator("[data-test=cart-line]")
             expect(lines).to_have_count(3)
             expect(cart).to_contain_text("quantidade assumida")
             expect(cart).to_contain_text("aproximada")
-            expect(cart).to_contain_text("quantidade da última compra")
+            expect(cart).to_contain_text("mesma quantidade da última vez que comprou este produto")
             expect(cart).to_contain_text("2 linhas da lista")
             expect(page.locator("[data-test=skipped]")).to_contain_text("requeijão")
             expect(page.locator("[data-test=total]")).to_contain_text("R$")
             expect(cart).to_contain_text("estimado")
-            assert_fits(page, "reviewing_cart")
+            assert_fits(page, "reviewing_cart (revisar tudo)")
             clicks = page.locator("[data-test=clicks-p-tomate]")
             expect(clicks).to_have_text("2")  # 1 kg in steps of 0.5 kg
             total_before = page.locator("[data-test=total]").inner_text()
             qty = page.locator("[data-test=qty-p-tomate]")
-            qty.fill("2")
-            qty.blur()
+            with page.expect_response(is_cart_put):  # the PUT's answer, then the assertions
+                qty.fill("2")
+                qty.blur()
             expect(clicks).to_have_text("4")
             assert stub.cart_puts[-1] == {
                 "lines": [
                     {"line_id": "p-tomate", "quantity": {"value": 2, "unit": "kg"}, "remove": False}
                 ]
             }
-            assert page.locator("[data-test=total]").inner_text() != total_before
-            page.locator("[data-test=remove-p-leite]").click()
+            expect(page.locator("[data-test=total]")).not_to_have_text(total_before)
+            with page.expect_response(is_cart_put):
+                page.locator("[data-test=remove-p-leite]").click()
             expect(lines).to_have_count(2)
             assert stub.cart_puts[-1]["lines"] == [
                 {"line_id": "p-leite", "quantity": None, "remove": True}
             ]
+            # back to the summary: it follows what the editor changed
+            page.locator("[data-test=back-to-summary]").click()
+            summary = page.locator("[data-test=summary-line]")
+            expect(summary.nth(0)).to_contain_text("removido do carrinho")
+            expect(summary.nth(1).locator("[data-test=summary-qty]")).to_have_text("2 kg")
             page.locator("[data-test=confirm-cart]").click()
 
             # 7. Adicionando
@@ -245,6 +285,22 @@ def test_whole_flow(browser, size):
             expect(page.locator("[data-test=extras]")).to_contain_text("Sabão em pó")
             expect(page.locator("[data-test=extras]")).to_contain_text("não são desta lista")
             assert page.locator("[data-test=oks]").get_attribute("open") is None  # collapsed
+            # the report: time per step, total and corrections, under the failures
+            report = page.locator("[data-test=report]")
+            expect(report.locator("[data-test=report-steps] li")).to_have_count(3)
+            expect(report.locator("[data-test=report-steps]")).to_contain_text("6 min 05 s")
+            expect(report.locator("[data-test=report-total]")).to_contain_text("total 10 min 59 s")
+            expect(report.locator("[data-test=report-corrections]")).to_contain_text(
+                "lista: 1 linha editada, 0 apagadas, 2 adicionadas (de 3 lidas pelo OCR)"
+            )
+            expect(report.locator("[data-test=report-corrections]")).to_contain_text(
+                "1 aceito pelo Jev sozinho"
+            )
+            expect(report.locator("[data-test=report-corrections]")).to_contain_text(
+                "1 quantidade mudada, 1 removido"
+            )
+            problems_box = page.locator("[data-test=problems]").bounding_box()
+            assert report.bounding_box()["y"] > problems_box["y"] + problems_box["height"]
             expect(page.locator("[data-test=open-note]")).to_have_text(
                 "o carrinho está aberto na janela do navegador; revise e finalize no site"
             )
@@ -312,7 +368,7 @@ def test_done_lists_every_failure_and_retries_them(browser, size):
             context.close()
 
 
-def test_an_item_with_no_results_offers_only_to_skip(browser):
+def test_an_item_with_no_results_can_be_skipped(browser):
     with StubServer(picks=[NO_RESULTS_PICK]) as server:
         stub = server.stub
         context, page = open_page(browser, server, VIEWPORTS["phone"])
@@ -498,5 +554,208 @@ def test_the_review_card_groups_a_line_read_as_several_items(browser):
             saved = stub.list_puts[-1]["items"]
             assert [i["name"] for i in saved][-1] == "saco de lixo (banheiro)"
             assert saved[0] == LIST_ITEMS[0]  # an untouched item goes back as it came
+        finally:
+            context.close()
+
+
+def to_picking(page):
+    screen(page, "idle")
+    send_photos(page, PHOTO)
+    screen(page, "reviewing_list")
+    page.locator("[data-test=confirm-list]").click()
+    screen(page, "picking")
+
+
+def test_the_no_results_card_searches_a_new_term(browser):
+    with StubServer(picks=[NO_RESULTS_PICK]) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            to_picking(page)
+            expect(page.locator("[data-test=no-results]")).to_be_visible()
+            search = page.locator("[data-test=search-again]")
+            expect(search).to_be_disabled()  # nothing typed yet
+            assert_fits(page, "picking (no results, search field)")
+            page.locator("[data-test=new-term]").fill("sal moído")
+            search.click()
+            wait_for(lambda: stub.searches == [{"index": 0, "term": "sal moído"}], "the search")
+
+            # the picker reloads the item with the new cards; the user picks
+            expect(page.locator(".cand")).to_have_count(2)
+            expect(page.locator("[data-test=pick-term]")).to_have_text("busca: “sal moído”")
+            expect(page.locator("[data-test=no-results]")).to_have_count(0)
+            expect(page.locator("[data-test=new-search]")).to_have_count(0)
+            expect(page.locator("[data-test=badge-offer]")).to_have_count(1)  # sg-2 is on offer
+            assert page.locator(".cand.selected").count() == 0  # no Jev pick: nothing preselected
+            assert stub.picks_posted == []
+            page.locator("[data-test=cand-sg-1]").click()
+            expect(page.locator("[data-test=pick-qty-value]")).to_have_value("1")
+            expect(page.locator("[data-test=badge-assumed]")).to_have_text("quantidade assumida")
+            assert_fits(page, "picking (after the new search)")
+            page.locator("[data-test=take]").click()
+            wait_for(lambda: stub.picks_posted == [{"index": 0, "product_id": "sg-1"}], "the pick")
+            screen(page, "reviewing_cart")
+        finally:
+            context.close()
+
+
+def test_the_picker_header_stays_on_top_and_the_quantity_follows_the_selection(browser):
+    with StubServer(picks=[MANY_PICK, PICKS[1]]) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            to_picking(page)
+            head = page.locator("[data-test=pick-head]")
+            expect(head).to_contain_text("arroz")
+            expect(head).to_contain_text("busca: “arroz agulhinha 5kg”")
+            assert_fits(page, "picking (many cards)")
+            page.locator("[data-test=cand-a-11]").scroll_into_view_if_needed()
+            assert page.evaluate("window.scrollY") > 400  # the cards scrolled
+            top = head.bounding_box()["y"]
+            assert 60 <= top <= 80, top  # the header stayed, right under the top bar
+            expect(head).to_be_in_viewport()
+
+            # the quantity is under the selected card only, and follows the selection
+            expect(page.locator("[data-test=pick-qty]")).to_have_count(1)
+            page.locator("[data-test=cand-a-11]").click()
+            expect(page.locator("[data-test=cand-a-11] [data-test=pick-qty]")).to_have_count(1)
+            expect(page.locator("[data-test=pick-qty]")).to_have_count(1)
+            assert stub.picks_posted == []  # selecting is not confirming
+            expect(page.locator("[data-test=badge-assumed]")).to_have_count(1)
+            # editing it drops the badge: the number is now the user's
+            value = page.locator("[data-test=pick-qty-value]")
+            value.fill("3")
+            expect(page.locator("[data-test=badge-assumed]")).to_have_count(0)
+            page.locator("[data-test=cand-a-10]").click()  # another card: the edit stays
+            expect(value).to_have_value("3")
+            page.locator("[data-test=take]").click()
+            wait_for(
+                lambda: (
+                    stub.picks_posted
+                    == [{"index": 0, "product_id": "a-10", "quantity": {"value": 3, "unit": "un"}}]
+                ),
+                "the pick with the quantity",
+            )
+
+            # the next item: each card has its own prefill; untouched, none is sent
+            expect(page.locator("[data-test=pick-item]")).to_have_text("requeijão")
+            page.locator("[data-test=cand-r-1]").click()
+            expect(page.locator("[data-test=pick-qty-value]")).to_have_value("2")
+            expect(page.locator("[data-test=badge-history]")).to_have_text(
+                "mesma quantidade da última vez que comprou este produto"
+            )
+            assert_fits(page, "picking (history badge)")
+            page.locator("[data-test=cand-r-2]").click()
+            expect(page.locator("[data-test=pick-qty-value]")).to_have_value("1")
+            expect(page.locator("[data-test=badge-assumed]")).to_have_count(1)
+            expect(page.locator("[data-test=badge-history]")).to_have_count(0)
+            page.locator("[data-test=cand-r-1]").click()
+            page.locator("[data-test=pick-qty-value]").press("Enter")  # Enter in the field confirms
+            wait_for(lambda: len(stub.picks_posted) == 2, "the second pick")
+            assert stub.picks_posted[1] == {"index": 1, "product_id": "r-1"}
+            screen(page, "reviewing_cart")
+        finally:
+            context.close()
+
+
+def test_trocar_goes_back_to_one_item_and_returns_to_the_summary(browser):
+    with StubServer() as server:
+        stub = server.stub
+        stub.go("reviewing_cart")
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "reviewing_cart")
+            summary = page.locator("[data-test=summary-line]")
+            expect(summary).to_have_count(4)
+            assert_fits(page, "summary")
+            expect(summary.nth(3)).to_contain_text("requeijão")
+            expect(summary.nth(2).locator("[data-test=badge-assumed]")).to_be_visible()
+            page.locator("[data-test=trocar]").nth(0).click()
+            wait_for(lambda: stub.reopens == [{"index": 0}], "the reopen")
+
+            # that one item, back on its cards, with the amount it had
+            screen(page, "picking")
+            expect(page.locator("[data-test=pick-item]")).to_have_text("leite integral")
+            expect(page.locator("[data-test=pick-count]")).to_have_text(
+                "trocando a escolha deste item"
+            )
+            expect(page.locator(".cand")).to_have_count(2)
+            expect(page.locator(".cand.selected")).to_have_attribute("data-test", "cand-p-leite")
+            expect(page.locator("[data-test=pick-qty-value]")).to_have_value("1")
+            expect(page.locator("[data-test=jev-note]")).to_have_count(0)
+            assert_fits(page, "picking (trocar)")
+            page.locator("[data-test=pick-qty-value]").fill("3")
+            page.locator("[data-test=take]").click()
+            wait_for(
+                lambda: (
+                    stub.picks_posted
+                    == [
+                        {
+                            "index": 0,
+                            "product_id": "p-leite",
+                            "quantity": {"value": 3, "unit": "un"},
+                        }
+                    ]
+                ),
+                "the new pick",
+            )
+
+            # after it is picked, the summary again, with the new amount (and no flag)
+            screen(page, "reviewing_cart")
+            expect(summary).to_have_count(4)
+            expect(summary.nth(0).locator("[data-test=summary-qty]")).to_have_text("3 un")
+            expect(summary.nth(0).locator("[data-test=badge-history]")).to_have_count(0)
+        finally:
+            context.close()
+
+
+def test_badges_use_one_color_per_meaning(browser):
+    with StubServer() as server:
+        stub = server.stub
+        stub.go("reviewing_cart")
+        context, page = open_page(browser, server, VIEWPORTS["desktop"])
+        try:
+            screen(page, "reviewing_cart")
+            colors = {}
+            for name, text in {
+                "assumed": "quantidade assumida",
+                "history": "mesma quantidade da última vez que comprou este produto",
+                "inexact": "aproximada",
+                "offer": "oferta",
+            }.items():
+                badge = page.locator(f"[data-test=badge-{name}]").first
+                expect(badge).to_have_text(text)
+                colors[name] = badge.evaluate(
+                    "(el, token) => [getComputedStyle(el).color,"
+                    " getComputedStyle(document.documentElement).getPropertyValue(token).trim()]",
+                    f"--badge-{name}",
+                )
+                rgb, token = colors[name]
+                assert token.startswith("#"), (name, token)  # defined once, as a token
+            assert len({rgb for rgb, _ in colors.values()}) == 4  # four meanings, four colors
+        finally:
+            context.close()
+
+
+def test_the_done_screen_shows_the_report_under_the_outcome(browser):
+    with StubServer() as server:
+        server.stub.go("done")
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "done")
+            report = page.locator("[data-test=report]")
+            expect(report).to_be_visible()
+            expect(report.locator("[data-test=report-steps] li")).to_have_count(3)
+            expect(report.locator("[data-test=report-steps] li").nth(1)).to_contain_text(
+                "escolhendo produtos"
+            )
+            expect(report.locator("[data-test=report-steps] li").nth(1)).to_contain_text("você")
+            expect(report.locator("[data-test=report-total]")).to_contain_text(
+                "máquina 4 min 54 s, você 6 min 05 s"
+            )
+            assert_fits(page, "done with the report")
+            page.locator("[data-test=new-list]").click()
+            screen(page, "idle")
+            expect(page.locator("[data-test=report]")).to_have_count(0)
         finally:
             context.close()

@@ -13,6 +13,16 @@
   --amber: #ffbe55;
   --amber-bg: #3a2d10;
   --ok: #62d696;
+  --topbar-h: 65px;
+  /* one color per meaning, on every screen that shows a badge (this theme is dark only) */
+  --badge-assumed: #ffbe55;
+  --badge-assumed-bg: #3a2d10;
+  --badge-history: #6cb4ff;
+  --badge-history-bg: #12305f;
+  --badge-inexact: #b8c0d0;
+  --badge-inexact-bg: #2a3347;
+  --badge-offer: #62d696;
+  --badge-offer-bg: #123a2a;
   --radius: 12px;
   --gap: 12px;
   color-scheme: dark;
@@ -52,6 +62,7 @@ p + p { margin-top: 4px; }
   position: sticky;
   top: 0;
   z-index: 5;
+  min-height: var(--topbar-h);
 }
 
 .screen { max-width: 1400px; margin: 0 auto; padding: 16px; }
@@ -142,9 +153,13 @@ select { width: auto; }
   font-family: inherit;
 }
 button.badge { cursor: pointer; }
-.badge.amber { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
+.badge { border-radius: 12px; overflow-wrap: anywhere; }
+.badge.amber { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); } /* "revisar" on the list review card */
+.badge.assumed { color: var(--badge-assumed); border-color: var(--badge-assumed); background: var(--badge-assumed-bg); }
+.badge.history { color: var(--badge-history); border-color: var(--badge-history); background: var(--badge-history-bg); }
+.badge.inexact { color: var(--badge-inexact); border-color: var(--badge-inexact); background: var(--badge-inexact-bg); }
+.badge.offer { color: var(--badge-offer); border-color: var(--badge-offer); background: var(--badge-offer-bg); }
 .badge.red, .pill.bad { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
-.badge.blue { color: var(--accent); border-color: var(--accent); }
 .pill.ok { color: var(--ok); border-color: var(--ok); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { color: var(--accent); border-color: var(--accent); }
@@ -258,6 +273,17 @@ td.prod .prodcell { display: flex; gap: 10px; align-items: flex-start; }
 }
 
 /* picking */
+.pickhead {
+  position: sticky; top: var(--topbar-h); z-index: 4;
+  padding: 8px 14px; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.pickhead h3 { margin: 0; overflow-wrap: anywhere; }
+.pickqty { display: grid; gap: 8px; margin-top: 10px; cursor: default; }
+.qtyrow { display: flex; gap: 6px; align-items: center; }
+.qtyrow input { width: 6.5rem; }
+.newsearch { margin-top: var(--gap); }
+.newsearch input { flex: 1; }
 .cands { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 640px) { .cands { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .cands { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -277,11 +303,27 @@ td.prod .prodcell { display: flex; gap: 10px; align-items: flex-start; }
 .hint { display: none; text-align: right; font-size: 0.85rem; }
 @media (hover: hover) and (pointer: fine) { .hint { display: block; } }
 
+/* summary */
+.sumlist { list-style: none; padding: 0; display: grid; gap: 8px; }
+.sumline {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.sumline.skipped, .sumline.removed { opacity: 0.75; border-style: dashed; }
+.sumbody { flex: 1; min-width: 0; }
+.sumhead { display: flex; gap: 8px; justify-content: space-between; align-items: baseline; }
+.sumqty { white-space: nowrap; }
+.sumline .btn { flex: 0 0 auto; }
+
 /* cart */
 .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.1rem; }
 .total em { color: var(--muted); font-style: normal; font-size: 0.9rem; }
 
 /* done */
+.report .steps { max-height: none; }
+.report h3 { margin-top: 12px; }
+.report h3:first-child { margin-top: 0; }
+.report li[data-who="you"] .mono { color: var(--accent); }
 .summary { font-size: 1.05rem; }
 .problems { border-color: var(--danger); }
 .problems h3 { color: var(--danger); }

@@ -6,8 +6,10 @@ model call in decide.py, the check in reconcile.py.
 """
 
 from collections.abc import Callable
+from collections.abc import Set as AbstractSet
+from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from playwright.sync_api import Page
 
@@ -117,26 +119,47 @@ def _total(lines: list[DraftLine]) -> Decimal | None:
     return sum(prices, Decimal(0))
 
 
-def draft_cart(
+@dataclass
+class ItemRow:
+    """One decided item as the draft sees it, before duplicates merge: its own line, or why it
+    has none (`skipped`: the item has no product; `removed`: taken out in the full editor)."""
+
+    index: int  # position of the item in the run's list
+    decision: Decision
+    line: DraftLine | None
+    state: Literal["in_cart", "skipped", "removed"]
+
+
+def item_rows(
     decisions: list[Decision],
     prefs: dict[str, dict],
     histories: list[ItemHistory] | None = None,
-) -> CartDraft:
-    """Targets and clicks for each decided item, duplicates merged (LLD-M2 section 6).
-    `histories`, if given, has one entry per decision, in the same order; the chosen product's
-    last quantity is the fallback before the 1 un default."""
-    singles: list[DraftLine] = []
-    skipped: list[Decision] = []
+    quantities: dict[int, Quantity] | None = None,
+    removed: AbstractSet[int] = frozenset(),
+) -> tuple[list[ItemRow], list[str]]:
+    """A row per decision, and the warnings. `quantities` (by index) are amounts the user set
+    when picking or editing: they replace the target and carry no flag."""
+    rows: list[ItemRow] = []
     warnings: list[str] = []
     for index, decision in enumerate(decisions):
         if decision.status not in ("accepted", "user_chosen") or decision.choice is None:
-            skipped.append(decision)
+            rows.append(ItemRow(index, decision, None, "skipped"))
+            continue
+        if index in removed:
+            rows.append(ItemRow(index, decision, None, "removed"))
             continue
         candidate = next(c for c in decision.candidates if c.product_id == decision.choice)
         history = histories[index].products.get(decision.choice) if histories else None
-        quantity, flags = target_quantity(
-            decision.item, find_preference(prefs, decision.item), history, candidate.unit_of_sale
-        )
+        target = (quantities or {}).get(index)
+        if target is not None:
+            quantity, flags = target, []
+        else:
+            quantity, flags = target_quantity(
+                decision.item,
+                find_preference(prefs, decision.item),
+                history,
+                candidate.unit_of_sale,
+            )
         try:
             line = build_line(
                 candidate,
@@ -147,10 +170,31 @@ def draft_cart(
             )
         except ValueError as exc:  # a kg product with no stepper increment
             warnings.append(f"{decision.item.name}: {exc}; item pulado.")
-            skipped.append(decision)
+            rows.append(ItemRow(index, decision, None, "skipped"))
             continue
-        singles.append(line)
-    lines = merge_lines(singles)
+        rows.append(ItemRow(index, decision, line, "in_cart"))
+    return rows, warnings
+
+
+def draft_cart(
+    decisions: list[Decision],
+    prefs: dict[str, dict],
+    histories: list[ItemHistory] | None = None,
+    quantities: dict[int, Quantity] | None = None,
+    removed: AbstractSet[int] = frozenset(),
+) -> CartDraft:
+    """Targets and clicks for each decided item, duplicates merged (LLD-M2 section 6).
+    `histories`, if given, has one entry per decision, in the same order; the chosen product's
+    last quantity is the fallback before the 1 un default."""
+    rows, warnings = item_rows(decisions, prefs, histories, quantities, removed)
+    lines = merge_lines([row.line for row in rows if row.line is not None])
+    skipped = [
+        row.decision
+        if row.state == "skipped"
+        else row.decision.model_copy(update={"choice": None, "status": "skipped"})
+        for row in rows
+        if row.line is None
+    ]
     return CartDraft(lines=lines, skipped=skipped, estimated_total=_total(lines), warnings=warnings)
 
 

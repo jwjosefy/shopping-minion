@@ -26,10 +26,16 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from shopping_minion.decide import describe_candidate
-from shopping_minion.items import Candidate, CartDraft, Item
+from shopping_minion.items import Candidate, CartDraft, Item, Quantity
 from shopping_minion.reconcile import expected_amount, format_amount, normalize
 from shopping_minion.web.statemachine import MAX_PHOTOS, BadRequest, RunStateMachine, WrongState
-from shopping_minion.workflow import CartOutcome, DraftEdit, problem_indexes, problem_message
+from shopping_minion.workflow import (
+    CartOutcome,
+    DraftEdit,
+    ItemRow,
+    problem_indexes,
+    problem_message,
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 COOKIE = "sm_token"
@@ -168,6 +174,28 @@ def cart_draft_json(draft: CartDraft) -> dict:
     }
 
 
+def summary_json(rows: list[ItemRow]) -> list[dict]:
+    """One entry per item, in list order: what it became (a product and an amount, or why it
+    has none) and whether it was summed with another item's line."""
+    count: dict[str, int] = {}
+    for row in rows:
+        if row.line is not None:
+            count[row.line.line_id] = count.get(row.line.line_id, 0) + 1
+    return [
+        {
+            "index": row.index,
+            "item": row.decision.item.name,
+            "state": row.state,
+            "product": None if row.line is None else candidate_json(row.line.candidate),
+            "quantity": None if row.line is None else row.line.quantity.model_dump(mode="json"),
+            "flags": [] if row.line is None else list(row.line.flags),
+            "estimated_price": None if row.line is None else _num(row.line.estimated_price),
+            "merged": row.line is not None and count[row.line.line_id] > 1,
+        }
+        for row in rows
+    ]
+
+
 def outcome_json(outcome: CartOutcome, draft: CartDraft | None) -> dict:
     """`checks[i]` is the check of `draft.lines[i]`, which is where the item names come from."""
     lines = draft.lines if draft is not None else []
@@ -241,6 +269,8 @@ def snapshot_json(machine: RunStateMachine) -> dict:
         data["picks_left"] = snap.picks_left
     if snap.draft is not None:
         data["cart_draft"] = cart_draft_json(snap.draft)
+    if snap.summary is not None:
+        data["summary"] = summary_json(snap.summary)
     if snap.outcome is not None:
         data["outcome"] = outcome_json(snap.outcome, snap.draft)
     return data
@@ -256,6 +286,16 @@ class ListBody(BaseModel):
 class PickBody(BaseModel):
     index: int
     product_id: str | None = None
+    quantity: Quantity | None = None  # set in the picker; replaces the item's target
+
+
+class SearchBody(BaseModel):
+    index: int
+    term: str
+
+
+class ReopenBody(BaseModel):
+    index: int
 
 
 class CartDraftBody(BaseModel):
@@ -415,11 +455,23 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
                 "nothing_fit": pick.nothing_fit,
             },
             "no_results": pick.no_results,
+            "quantities": pick.quantities,
+            "reopened": pick.reopened,
         }
 
     @app.post("/api/run/picks")
     def post_pick(body: PickBody):
-        machine.pick(body.index, body.product_id)
+        machine.pick(body.index, body.product_id, body.quantity)
+        return {"state": machine.state}
+
+    @app.post("/api/run/picks/search")
+    def post_pick_search(body: SearchBody):
+        found = machine.search_pick(body.index, body.term)
+        return {"found": len(found)}  # the picker reloads the item for the cards
+
+    @app.post("/api/run/picks/reopen")
+    def post_pick_reopen(body: ReopenBody):
+        machine.reopen(body.index)
         return {"state": machine.state}
 
     @app.put("/api/run/cart-draft")
@@ -430,6 +482,10 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
     def post_cart_confirm():
         machine.confirm_cart()
         return {"state": machine.state}
+
+    @app.get("/api/run/report")
+    def get_report():
+        return machine.report()
 
     @app.post("/api/run/retry", status_code=202)
     def post_retry():
