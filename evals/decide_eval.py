@@ -20,7 +20,7 @@ import yaml
 from shopping_minion.config import DecideConfig, load_decide_config
 from shopping_minion.decide import decide, nothing_fit
 from shopping_minion.items import Candidate, Decision, Item, Quantity
-from shopping_minion.preferences import load_preferences
+from shopping_minion.preferences import read_yaml_preferences
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     base = load_decide_config(Path(__file__).parent.parent / "config" / "decide.yaml")
     cases = load_cases(max_candidates=args.max_candidates)
     sizes = [args.batch_size] if args.batch_size else [5, 1]
-    prefs = load_preferences(args.preferences) if args.preferences else {}
+    prefs = read_yaml_preferences(args.preferences) if args.preferences else {}
     with TypeSafeClient(model=base.model) as client:
         for size in sizes:
             config = base.model_copy(update={"batch_size": size})

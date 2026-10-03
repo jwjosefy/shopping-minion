@@ -234,3 +234,35 @@ def test_photo_is_a_json_list_and_old_single_paths_still_read(tmp_path):
     assert storage.photos(old) == ["uploads/3.jpg"]
     assert storage.photos(999) == []
     assert photo_list("[not json") == ["[not json"]
+
+
+def test_preferences_crud(tmp_path):
+    db = Storage(tmp_path / "t.sqlite")
+    assert db.read_preferences() == {}
+    entry = {
+        "marca": "Antarctica",
+        "apelidos": ["refri"],
+        "quantidade": {"valor": 2, "unidade": "l"},
+    }
+    db.set_preference("guarana", entry)
+    assert db.read_preferences() == {"guarana": entry}
+    db.set_preference("guarana", {"marca": "Kuat"})  # replaces
+    assert db.read_preferences() == {"guarana": {"marca": "Kuat"}}
+    assert db.delete_preference("guarana") is True
+    assert db.delete_preference("guarana") is False
+    assert db.read_preferences() == {}
+
+
+def test_set_preference_rejects_a_bad_quantity(tmp_path):
+    db = Storage(tmp_path / "t.sqlite")
+    for bad in ({"valor": 0, "unidade": "un"}, {"valor": 1, "unidade": "xx"}, {"valor": 1}):
+        with pytest.raises(ValueError, match="quantidade"):
+            db.set_preference("atum", {"quantidade": bad})
+    assert db.read_preferences() == {}
+
+
+def test_preferences_keep_the_pt_br_text(tmp_path):
+    db = Storage(tmp_path / "t.sqlite")
+    db.set_preference("feijao", {"nome": "feijão", "excluir": ["preto"]})
+    db.close()
+    assert Storage(tmp_path / "t.sqlite").read_preferences()["feijao"]["nome"] == "feijão"

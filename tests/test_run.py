@@ -622,4 +622,4 @@ def test_cli_wires_the_run_command():
     assert args.func.__name__ == "_cmd_run"
     assert args.yes is True
     assert str(args.db) == "x.sqlite"
-    assert str(args.preferences) == "data/preferencias.yaml"
+    assert args.preferences is None  # the table; a file wins when given
