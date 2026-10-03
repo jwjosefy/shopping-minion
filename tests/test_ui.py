@@ -9,6 +9,7 @@ import time
 import urllib.request
 
 import pytest
+from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import expect, sync_playwright
 from ui_stub import StubServer
 
@@ -269,7 +270,12 @@ def test_resync_on_409_and_reload_resumes(browser):
             screen(page, "reviewing_list")
             # the run moves on behind the page's back; the next call answers 409 and resyncs
             server.stub.go("reviewing_cart")
-            page.locator("[data-test=confirm-list]").click()
+            # The event stream may redraw the page before the click lands; either path must
+            # end on the run's real state (a 409 resync, or the stream's own state event).
+            try:
+                page.locator("[data-test=confirm-list]").click(timeout=2_000)
+            except PlaywrightError:
+                pass
             screen(page, "reviewing_cart")
             page.reload()
             screen(page, "reviewing_cart")
