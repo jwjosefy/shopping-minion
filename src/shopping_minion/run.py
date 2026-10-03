@@ -13,8 +13,9 @@ import yaml
 from shopping_minion.browser import NotLoggedInError, ensure_logged_in, open_browser
 from shopping_minion.config import DecideConfig, load_decide_config, load_history_config
 from shopping_minion.decide import describe_candidate, nothing_fit, on_offer
-from shopping_minion.history import ItemHistory, lines_for_item
+from shopping_minion.history import ItemHistory, lines_for_item, norm
 from shopping_minion.items import Candidate, CartDraft, Decision, Item
+from shopping_minion.learned import LearnedPreference, learned_preferences
 from shopping_minion.merge import line_label
 from shopping_minion.preferences import load_preferences
 from shopping_minion.reconcile import report_lines
@@ -226,6 +227,7 @@ def decide_config_row(config: DecideConfig) -> dict:
     return {
         "model": config.model,
         "history": config.history,
+        "learned": config.learned,
         "accept_at": config.accept_at,
         "ask_below": config.ask_below,
         "batch_size": config.batch_size,
@@ -241,6 +243,21 @@ def histories_for(
         lines_for_item(item, found, lines, k=k)
         for item, found in zip(items, candidates, strict=True)
     ]
+
+
+def learned_for(
+    storage: Storage,
+    items: list[Item],
+    config: DecideConfig,
+    learn_from_run: int,
+    run_id: int,
+) -> list[dict[str, LearnedPreference]] | None:
+    """What Johann picked before, per item, from the runs other than this one; None when
+    `learned` is off (nothing is read)."""
+    if not config.learned:
+        return None
+    learned = learned_preferences(storage, learn_from_run, exclude_run=run_id)
+    return [learned.get(norm(item.name), {}) for item in items]
 
 
 def _state(storage: Storage, run_id: int, state: str) -> None:
@@ -306,8 +323,15 @@ def _run_stages(
         print_fn("decidindo com o Jev...")
         histories = histories_for(storage, items, candidates_per_item, history_config.related_lines)
         storage.log(run_id, "decide", decide_config_row(config))
+        learned = learned_for(storage, items, config, history_config.learn_from_run, run_id)
         decisions = decide_list(
-            items, candidates_per_item, prefs, config, client_factory(), histories=histories
+            items,
+            candidates_per_item,
+            prefs,
+            config,
+            client_factory(),
+            histories=histories,
+            learned=learned,
         )
         storage.save_decisions(run_id, decisions)
         storage.set_status(run_id, "decided")

@@ -144,9 +144,10 @@ class World:
         self.synced.append(first_n)
         return self.sync_result
 
-    def decide(self, items, candidates, prefs, config, client, histories=None):
+    def decide(self, items, candidates, prefs, config, client, histories=None, learned=None):
         assert client == "jev-client"
         self.histories_seen = histories
+        self.learned_seen = learned
         self.config_seen = config
         decisions = []
         for it, found in zip(items, candidates, strict=True):
@@ -466,6 +467,7 @@ def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, mo
         {
             "model": "jev-latest",
             "history": "options",
+            "learned": False,
             "accept_at": 0.8,
             "ask_below": 0.5,
             "batch_size": 5,
@@ -1475,3 +1477,33 @@ def test_the_report_route_gives_the_numbers_of_the_current_run(client, world):
         assert data == build_report(db, 1)
     finally:
         db.close()
+
+
+def test_learned_picks_reach_decide_once_per_run(world, client):
+    (world.tmp_path / "decide.yaml").write_text(
+        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\nlearned: true\n"
+    )
+    (world.tmp_path / "history.yaml").write_text(
+        "first_sync_orders: 7\nrelated_lines: 4\nlearn_from_run: 1\n"
+    )
+    db = Storage(world.tmp_path / "db" / "t.sqlite")
+    earlier = db.new_run("old.jpg")
+    db.save_decisions(
+        earlier,
+        [
+            Decision(
+                item=item("atum"),
+                candidates=[ATUM_A, ATUM_B],
+                choice="3",
+                confidence=0.9,
+                probabilities={},
+                status="accepted",
+            )
+        ],
+    )
+    db.close()
+    to_picking(client)
+    assert world.config_seen.learned is True
+    frango, atum, feijao, sal = world.learned_seen  # LIST order
+    assert list(atum) == ["3"] and atum["3"].times == 1
+    assert frango == feijao == sal == {}  # the current run (2) is excluded

@@ -15,6 +15,7 @@ class DecideConfig(Contract):
     accept_at: float = Field(ge=0, le=1)
     ask_below: float = Field(ge=0, le=1)
     history: Literal["none", "options", "list"] = "none"  # LLD-M4 section 11.2
+    learned: bool = False  # LLD-M5 section 4.1: what Johann picked before, as a fact on options
 
     @model_validator(mode="after")
     def _thresholds_ordered(self) -> "DecideConfig":
@@ -31,6 +32,7 @@ def load_decide_config(path: str | Path = "config/decide.yaml") -> DecideConfig:
 class HistoryConfig(Contract):
     first_sync_orders: int = Field(ge=1, le=10)  # the list's first page has 10 orders (T12)
     related_lines: int = Field(ge=1)  # k for the "related" lines of an item (LLD-M4 section 4.3)
+    learn_from_run: int = Field(default=9, ge=1)  # LLD-M5 section 4.1: earlier runs don't teach
 
 
 def load_history_config(path: str | Path = "config/history.yaml") -> HistoryConfig:

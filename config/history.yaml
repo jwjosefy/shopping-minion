@@ -1,3 +1,4 @@
 # Order history (LLD-M4 section 10).
 first_sync_orders: 10     # Johann, 2026-10-02; at most 10, the list's first page
 related_lines: 10         # k for the related lines of an item (step 2)
+learn_from_run: 9        # Johann, HLD-M5 Q6: picks in runs 9 and later teach decide

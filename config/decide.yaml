@@ -3,3 +3,4 @@ batch_size: 5
 accept_at: 0.75         # Johann, HLD-M5 Q5: runs 9-11 gave 53 accepts, 1 miss (0.8: 48, 0)
 ask_below: 0.5           # placeholder
 history: options         # none | options (A) | list (B); A, the main design, for T18 (LLD-M4 section 7, round 5)
+learned: true           # LLD-M5 section 4.1: tell Jev what Johann picked before

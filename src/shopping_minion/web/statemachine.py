@@ -37,7 +37,12 @@ from shopping_minion.orders import sync_orders
 from shopping_minion.preferences import find_preference, load_preferences
 from shopping_minion.quantity import target_quantity
 from shopping_minion.report import build_report
-from shopping_minion.run import _ordered_candidates, decide_config_row, histories_for
+from shopping_minion.run import (
+    _ordered_candidates,
+    decide_config_row,
+    histories_for,
+    learned_for,
+)
 from shopping_minion.search import search as search_one
 from shopping_minion.storage import Storage
 from shopping_minion.workflow import (
@@ -716,6 +721,9 @@ class RunStateMachine:
                 run.histories = histories_for(
                     db, run.items, candidates, run.history_config.related_lines
                 )
+                learned = learned_for(
+                    db, run.items, run.config, run.history_config.learn_from_run, run.id
+                )
                 db.log(run.id, "decide", decide_config_row(run.config))
             decisions = self._decide_fn(
                 run.items,
@@ -724,6 +732,7 @@ class RunStateMachine:
                 run.config,
                 self._client_factory(),
                 histories=run.histories,
+                learned=learned,
             )
         except Exception as exc:
             self._fail(run, f"o Jev falhou: {_describe(exc)}")

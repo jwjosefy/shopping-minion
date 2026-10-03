@@ -10,6 +10,7 @@ from typesafe_sdk import Choice, TypeSafeClient
 from shopping_minion.config import DecideConfig
 from shopping_minion.history import ItemHistory, ProductHistory, local_date
 from shopping_minion.items import Candidate, Decision, Item, Quantity
+from shopping_minion.learned import LearnedPreference
 from shopping_minion.preferences import find_preference
 
 NONE_KEY = "nenhum"
@@ -19,6 +20,9 @@ MAX_WORKERS = 8  # batch_size=1 runs this many calls at once
 OFFER_RULE = "Entre produtos equivalentes, prefira o que está em oferta."
 HISTORY_OPTIONS_RULE = (
     "Entre os produtos que correspondem, prefira o que já foi comprado antes."  # variant A
+)
+LEARNED_OPTIONS_RULE = (
+    "Entre os produtos que correspondem, prefira o que você escolheu ou comprou antes."
 )
 HISTORY_LIST_RULE = (
     "Considere o `historico` de compras: entre os produtos que correspondem, "
@@ -102,6 +106,14 @@ def describe_history(history: ProductHistory) -> str:
     )
 
 
+def describe_learned(learned: LearnedPreference) -> str:
+    """The fact on an option that Johann picked before (LLD-M5 section 4.1)."""
+    return (
+        f"escolhido por você {format_times(learned.times)}, "
+        f"a última em {format_date(learned.last_at)}"
+    )
+
+
 def history_list(candidates: list[Candidate], history: ItemHistory) -> list[str]:
     """Variant B: `<name> | <quantity> | <dd/mm/aaaa>`, the candidates' last purchases first,
     then the related lines."""
@@ -141,11 +153,13 @@ def build_questions(
     prefs: dict[str, dict],
     histories: list[ItemHistory] | None = None,
     mode: Literal["none", "options", "list"] = "none",
+    learned: list[dict[str, LearnedPreference]] | None = None,
 ) -> dict[str, Choice]:
     """One Choice per item, keyed `item_<n>` (n is the position in the list, from 0).
 
     `histories` has one entry per item, in the same order; with None, or mode `none`, the
-    questions have no history (LLD-M4 section 11.2)."""
+    questions have no history (LLD-M4 section 11.2). `learned` is the same, by product id: a
+    candidate with an entry gets the fact, and the question says to prefer what was picked."""
     questions = {}
     for n, (item, candidates) in enumerate(items_with_candidates):
         preference = find_preference(prefs, item)
@@ -155,7 +169,11 @@ def build_questions(
         as_list = (
             mode == "list" and history is not None and bool(history.products or history.related)
         )
-        if as_options:
+        picked = learned[n] if learned is not None else {}
+        has_learned = any(c.product_id in picked for c in candidates)
+        if has_learned:
+            question = _with_rule(question, LEARNED_OPTIONS_RULE)
+        elif as_options:
             question = _with_rule(question, HISTORY_OPTIONS_RULE)
         elif as_list:
             question = _with_rule(question, HISTORY_LIST_RULE)
@@ -169,6 +187,8 @@ def build_questions(
             text = describe_candidate(c)
             if as_options and c.product_id in history.products:
                 text += f"; {describe_history(history.products[c.product_id])}"
+            if c.product_id in picked:
+                text += f"; {describe_learned(picked[c.product_id])}"
             criteria[f"p{c.product_id}"] = text
         criteria[NONE_KEY] = NONE_DESCRIPTION
         questions[f"item_{n}"] = Choice(instructions=instructions, criteria=criteria)
@@ -201,8 +221,11 @@ def _decide_batch(
     config: DecideConfig,
     client: TypeSafeClient,
     histories: list[ItemHistory] | None = None,
+    learned: list[dict[str, LearnedPreference]] | None = None,
 ) -> list[Decision]:
-    questions = build_questions(batch, prefs, histories, config.history)
+    questions = build_questions(
+        batch, prefs, histories, config.history, learned if config.learned else None
+    )
     response = client.system_one(state=STATE, questions=questions, model=config.model)
     decisions = []
     for n, (item, candidates) in enumerate(batch):
@@ -231,11 +254,15 @@ def decide(
     config: DecideConfig,
     client: TypeSafeClient,
     histories: list[ItemHistory] | None = None,
+    learned: list[dict[str, LearnedPreference]] | None = None,
 ) -> list[Decision]:
     """Decisions in the order of the input. Items without candidates never reach Jev.
-    `histories` has one entry per item, in the same order; None is the same as `history: none`."""
+    `histories` has one entry per item, in the same order; None is the same as `history: none`.
+    `learned` is aligned the same way and ignored when `config.learned` is off."""
     if histories is not None and len(histories) != len(items_with_candidates):
         raise ValueError("histories must have one entry per item")
+    if learned is not None and len(learned) != len(items_with_candidates):
+        raise ValueError("learned must have one entry per item")
     decisions: dict[int, Decision] = {}
     to_ask: list[tuple[int, ItemWithCandidates]] = []
     for index, (item, candidates) in enumerate(items_with_candidates):
@@ -251,7 +278,10 @@ def decide(
 
     def run(batch: list[tuple[int, ItemWithCandidates]]) -> list[Decision]:
         batch_histories = None if histories is None else [histories[i] for i, _ in batch]
-        return _decide_batch([pair for _, pair in batch], prefs, config, client, batch_histories)
+        batch_learned = None if learned is None else [learned[i] for i, _ in batch]
+        return _decide_batch(
+            [pair for _, pair in batch], prefs, config, client, batch_histories, batch_learned
+        )
 
     if size == 1 and len(batches) > 1:
         with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(batches))) as pool:
