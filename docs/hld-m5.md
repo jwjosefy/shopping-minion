@@ -1,6 +1,6 @@
 # Shopping Minion — M5: UX and preferences (design)
 
-- **Status:** Draft, for Johann's review. Questions in §9, answered inline with `>`.
+- **Status:** Answered by Johann on 2026-10-02 (§9) and folded in. He said to go ahead ("respondido no hld-m5, pode seguir"). The LLD is [lld-m5.md](lld-m5.md).
 - **Date:** 2026-10-02
 - **Sources:** [ideas-m5.md](ideas-m5.md) (Johann's notes from runs 9–11), [roadmap.md](roadmap.md) §M5, [lld-m4.md](lld-m4.md) §16 (what M4 measured and left open).
 - **Shape:** like M4, this is the design (HLD level). After approval it becomes `lld-m5.md` with contracts and tasks. M5 changes the design in two places: what the app learns and keeps (our own runs as a source of preferences), and how the user goes through a run (one pass instead of two). So it gets its own design first.
@@ -40,9 +40,9 @@ These are facts from runs 9–11: Johann's real list of 2026-10-02, 88 items in 
 
 **Goal:** a long real list goes from photo to a cart Johann doesn't need to recheck on the site, with less of his time, and Jev deciding more of it.
 
-**Done when** (proposal, Q1): on a real list of 40+ items through the web app, all of these hold:
+**Done when** (Johann, Q1): on a real list of 40+ items through the web app, all of these hold:
 1. **Execution:** every product that was decided is in the cart, with the right quantity, by the app's own check. If one fails, the done screen says which one and why.
-2. **Jev:** its pick is the final product for **≥ 95%** of items with history (M4's target, carried over). Wrong accepts are counted, not forced to 0 (Johann, LLD-M4 R1 Q1).
+2. **Jev:** its pick is the final product for **≥ 90%** of items with history (Johann, Q1; M4 had aimed at 95% and reached 85%). Wrong accepts are counted, not forced to 0 (LLD-M4 R1 Q1).
 3. **Time:** Johann's time per item is **half** of run 10's: about 22 s per item instead of 45 s.
 
 ## 3. The flow, after M5
@@ -70,7 +70,7 @@ flowchart TD
 - picking and the cart review become one screen, with product and quantity together;
 - learned preferences go into Jev's question.
 
-**Proposal (Q5):** the separate "revisar o carrinho" step goes away. Its job (quantities, removals) moves into the one-pass screen, and the done screen keeps the final check.
+**The separate cart review becomes optional** (Q5). Quantities and removals move into the one-pass screen. At its end an optional "revisar tudo" button opens the full list, where any line can be edited again before the cart is filled.
 
 ## 4. Part A: a cart that doesn't need rechecking
 
@@ -89,7 +89,7 @@ flowchart TD
 
 From [ideas-m5.md](ideas-m5.md):
 
-1. **Several photos, one OCR.** Upload two to four photos, then read them as one list. The OCR call gets all the images. Whether one `claude -p` call reads several photos well is checked in the LLD, on `list-001` split in two. Lines are numbered across pages.
+1. **Several photos, one OCR.** Upload up to **five** photos (Q4), then read them as one list. The OCR call gets all the images. Whether one `claude -p` call reads several photos well is checked in the LLD, on `list-001` split in two. Lines are numbered across pages.
 2. **The review card shows "linha" (what was read) and "busca" (what will be searched).**
    - Name, constraints and brand move behind "mais".
    - A line read as two products shows as one card with two search fields, grouped.
@@ -108,7 +108,20 @@ From [ideas-m5.md](ideas-m5.md):
    | offer | green |
 
    "Quantidade da última compra" becomes "**mesma quantidade da última vez que comprou este produto**". That is what it means: the same product's quantity in the newest order that has it, among the 10 synced.
-5. **The M3 report on the done screen,** as already planned. The QR bug needs Johann's description (Q3).
+5. **The M3 report on the done screen,** as already planned.
+6. **Losing the connection on the phone** (Q3).
+   - **What happened:**
+     - the phone's screen went off, and the page said the connection was lost;
+     - a reload then asked for the token again, so Johann had to rescan the QR;
+     - another time he had to restart the server and rescan.
+   - **Cause, read from the code:**
+     - the access cookie has no expiry, so it is a session cookie the phone's browser may drop;
+     - the token changes on every server start.
+   - **Fix:**
+     - a cookie that lasts 30 days;
+     - a token kept in `data/` across restarts;
+     - the page reconnecting its event stream by itself when it comes back to the foreground.
+   - **Telemetry** that would show such things is left for M7 (Johann: core first, then cloud, telemetry and CI/CD).
 
 ## 6. Part C: search terms for meat and produce
 
@@ -131,16 +144,18 @@ The 11 brand misses are where the 85% → 95% gap is. Three sources, in order of
 
 **How it reaches Jev (Q7):** like M4's variant A, as a fact on the option, written by code: "escolhido por você nas últimas 3 vezes". Jev reads literally, and M4 showed the fact on the option works.
 
-**Open vs fixed items:**
+**Open vs fixed items** (out of M5 for now: Johann, Q7, wants to pilot more first):
 - **Proposal:** an item is "open" when Johann chose 3 or more different products for it across his history and picks, and "fixed" otherwise.
 - **Effect:** for an open item, every product he has chosen counts as a hit, and Jev's pick among them is accepted. The rule inside the set is: on offer first, then the cheapest per unit.
-- **Status:** this is the sub-decision LLD-M4 left open (Q8).
+- **Status:** the sub-decision LLD-M4 left open. Not built in M5. Revisited after more real runs.
 
 ## 8. What stays out of M5
 
 - Recommendations ("you usually buy X, add it?") and substitutes for products out of stock.
 - Julia-1 (M6) and the cloud (M7).
 - Automated login.
+- Open vs fixed items (§7), until more piloting.
+- Telemetry, CI/CD (M7, with the cloud).
 
 ## 9. Questions
 
@@ -152,33 +167,39 @@ Answer inline with `>` under each one.
    - half of run 10's time per item.
 
    OK, or different numbers?
+   > let's strive for 90% hit, the rest is ok
 
 2. **The add that never starts a stepper (§4.1).** Next time it happens, can you click "Adicionar" by hand on that product and tell me what the page shows? Or add it now with água sanitária or alface, if they are still not in your cart.
 
 3. **The QR code bug** (your note, run 3). What happened?
+> it seems my mobile went screen off, when back it said connection lost, I tried reloading and it got lost because didn't have the token - i had to rescan. Another time I had to force stop the server and reload it. we should have telemetry to monitor things like that, but not now - let's focus on getting the core ready, then the cloud + telemetry + cicd etc.
 
 4. **Several photos (§5.1).** Up to how many pages, in one OCR call? Proposal: up to 4.
+> 5 should be enough.
 
 5. **One pass (§3, §5.3).**
    - Merge picking and the cart review into one screen, with product and quantity together, and drop the separate "revisar o carrinho" step.
    - Accepted items are listed collapsed at the end.
-
    OK, or keep a final review screen?
+> keep an optional review button in the end and let go back to edit if the user wants to. 
 
-6. **Accept threshold.** Move `accept_at` from 0.8 to **0.75** now. On runs 9–11 that is 53 accepts with 1 miss, against 48 with 0. `confidence_report` is rerun after every run, and the threshold moves again only with more data. OK?
+5. **Accept threshold.** Move `accept_at` from 0.8 to **0.75** now. On runs 9–11 that is 53 accepts with 1 miss, against 48 with 0. `confidence_report` is rerun after every run, and the threshold moves again only with more data. OK?
+> ok
 
-7. **Learned preferences (§7).** Picks from runs 9 onward count, and the earlier runs don't. Each pick is shown to Jev as "escolhido por você N vezes", like history. OK?
+6. **Learned preferences (§7).** Picks from runs 9 onward count, and the earlier runs don't. Each pick is shown to Jev as "escolhido por você N vezes", like history. OK?
+> ok. now we can use runs >=9 as test data.
 
-8. **Open items (§7).**
+7. **Open items (§7).**
    - Is "3 or more different products chosen" the right test?
    - Should the rule inside an open set be offer first, then cheapest per unit?
+	 Or do you want to mark open items yourself, for example meat and produce?
+> still not sure on what to do on this one - let's fix the rest and go back to pilot this a bit more
 
-   Or do you want to mark open items yourself, for example meat and produce?
-
-9. **Order of work.** Proposal:
-   1. Part A (a cart that doesn't need rechecking);
-   2. Part B (your time);
-   3. Part C (search terms);
-   4. Part D (preferences).
+7. **Order of work.** Proposal:
+   8. Part A (a cart that doesn't need rechecking);
+   9. Part B (your time);
+   10. Part C (search terms);
+   11. Part D (preferences).
 
    A and B make every later measurement cleaner. OK?
+>ok 
