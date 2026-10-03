@@ -95,6 +95,9 @@ class World:
         self.config_seen = None
         self.fail_ids: set[str] = set()  # lines whose add the site won't take, until retried
         self.fills: list[list[str]] = []  # the line ids of each fill call
+        self.searched_one: list[str] = []  # the terms searched from the picker
+        self.search_one_results: dict[str, list[Candidate]] = {}
+        self.search_one_error: str | None = None
 
     # injected functions
     def transcribe(self, photos):
@@ -115,6 +118,14 @@ class World:
         assert page == "page"
         if not self.logged_in:
             raise NotLoggedInError("Not logged in")
+
+    def search_one(self, page, item):
+        """The picker's own search (a new term for one item)."""
+        assert page == "page"
+        self.searched_one.append(item.search_term)
+        if self.search_one_error:
+            raise RuntimeError(self.search_one_error)
+        return list(self.search_one_results.get(item.search_term, []))
 
     def search(self, page, items, progress):
         self.searched += 1
@@ -212,6 +223,7 @@ def make_machine(world):
         open_browser_fn=lambda: world.open_browser(),
         ensure_logged_in_fn=lambda page: world.ensure_logged_in(page),
         search_fn=lambda *a: world.search(*a),
+        search_one_fn=lambda *a: world.search_one(*a),
         decide_fn=lambda *a, **kw: world.decide(*a, **kw),
         fill_fn=lambda *a, **kw: world.fill(*a, **kw),
         sync_fn=lambda *a, **kw: world.sync(*a, **kw),
@@ -518,14 +530,16 @@ CALLS = {
     "pick": lambda c: c.post("/api/run/picks", json={"index": 0, "product_id": None}),
     "put_cart": lambda c: c.put("/api/run/cart-draft", json={"lines": []}),
     "confirm_cart": lambda c: c.post("/api/run/cart-draft/confirm"),
+    "pick_search": lambda c: c.post("/api/run/picks/search", json={"index": 1, "term": "x"}),
+    "pick_reopen": lambda c: c.post("/api/run/picks/reopen", json={"index": 0}),
     "cancel": lambda c: c.post("/api/run/cancel"),
     "delete": lambda c: c.delete("/api/run"),
 }
 ALLOWED = {
     "idle": {"upload"},
     "reviewing_list": {"put_list", "confirm_list", "cancel"},
-    "picking": {"next_pick", "pick", "cancel"},
-    "reviewing_cart": {"put_cart", "confirm_cart", "cancel"},
+    "picking": {"next_pick", "pick", "pick_search", "cancel"},
+    "reviewing_cart": {"put_cart", "confirm_cart", "pick_reopen", "cancel"},
     "done": {"delete"},
 }
 REACH = {
@@ -1063,9 +1077,9 @@ def test_histories_reach_decide_and_the_draft(client, world, monkeypatch):
     drafted = []
     real = statemachine.draft_cart
 
-    def spy(decisions, prefs, histories=None):
+    def spy(decisions, prefs, histories=None, *args):
         drafted.append(histories)
-        return real(decisions, prefs, histories)
+        return real(decisions, prefs, histories, *args)
 
     monkeypatch.setattr(statemachine, "draft_cart", spy)
     to_reviewing_cart(client)
@@ -1200,3 +1214,245 @@ def test_the_old_single_field_still_uploads(client, world):
     assert response.status_code == 202
     assert wait_for(client, "reviewing_list")["photos"] == 1
     assert len(world.photos_seen) == 1
+
+
+# --- one pass: product and quantity together (LLD-M5 section 2.3) -----------------------------
+
+
+def log_rows(world, kind):
+    rows = Storage(world.tmp_path / "db" / "t.sqlite").read_log(1)
+    return [r["data"] for r in rows if r["kind"] == kind]
+
+
+def test_pick_view_quantities_follow_the_list_the_history_and_the_default(
+    client, world, monkeypatch
+):
+    from datetime import date
+
+    from shopping_minion.history import ProductHistory
+    from shopping_minion.web import statemachine
+
+    items = [
+        item("frango", Quantity(value=1, unit="kg")),
+        item("atum"),
+        item("feijão preto", Quantity(value=5, unit="un")),
+        item("sal"),
+    ]
+    world.transcribe = lambda photos: items
+    last = ProductHistory(
+        product_id="2",
+        orders=3,
+        last_at=date(2026, 9, 1),
+        last_quantity=Quantity(value=3, unit="un"),
+    )  # the atum of candidate 2 was bought before, 3 at a time; candidate 3 never
+    monkeypatch.setattr(
+        statemachine,
+        "histories_for",
+        lambda db, items, candidates, k: [
+            ItemHistory(products={"2": last} if it.name == "atum" else {}, related=[])
+            for it in items
+        ],
+    )
+    to_picking(client)
+
+    atum = client.get("/api/run/picks/next").json()
+    assert atum["quantities"] == {
+        "2": {"value": 3, "unit": "un", "flags": ["QUANTITY_FROM_HISTORY"]},  # that candidate's
+        "3": {"value": 1, "unit": "un", "flags": ["QUANTITY_ASSUMED"]},  # the default
+    }
+    client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
+    feijao = client.get("/api/run/picks/next").json()
+    assert feijao["quantities"] == {"4": {"value": 5, "unit": "un", "flags": []}}  # the list's
+    client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    sal = client.get("/api/run/picks/next").json()
+    assert sal["quantities"] == {}  # no candidates, no quantities
+
+
+def test_pick_view_quantities_follow_the_preference(client, world):
+    (world.tmp_path / "preferencias.yaml").write_text(
+        "atum:\n  quantidade: {valor: 2, unidade: un}\n", encoding="utf-8"
+    )
+    to_picking(client)
+    atum = client.get("/api/run/picks/next").json()
+    assert atum["quantities"] == {
+        "2": {"value": 2, "unit": "un", "flags": []},
+        "3": {"value": 2, "unit": "un", "flags": []},
+    }
+
+
+def test_a_pick_with_a_quantity_reaches_the_draft_and_is_logged(client, world):
+    to_picking(client)
+    body = {"index": 1, "product_id": "3", "quantity": {"value": 4, "unit": "un"}}
+    assert client.post("/api/run/picks", json=body).status_code == 200
+    client.post("/api/run/picks", json={"index": 2, "product_id": "4"})
+    client.post("/api/run/picks", json={"index": 3, "product_id": None})
+    draft = wait_for(client, "reviewing_cart")["cart_draft"]
+    lines = {line["line_id"]: line for line in draft["lines"]}
+    assert (lines["3"]["quantity"], lines["3"]["clicks"], lines["3"]["flags"]) == (
+        {"value": 4, "unit": "un"},
+        4,
+        [],  # the user set it: no flag
+    )
+    assert lines["4"]["flags"] == ["QUANTITY_ASSUMED"]  # no quantity sent: the draft's own
+    assert log_rows(world, "pick_quantity") == [
+        {"index": 1, "quantity": {"value": 4, "unit": "un"}}
+    ]
+    assert [p["chosen"] for p in log_rows(world, "pick")] == ["3", "4", None]  # the pick row stays
+
+
+def test_a_bad_quantity_is_422_and_a_skip_ignores_it(client, world):
+    to_picking(client)
+    for quantity in ({"value": 0, "unit": "un"}, {"value": 1, "unit": "caixote"}):
+        body = {"index": 1, "product_id": "3", "quantity": quantity}
+        assert client.post("/api/run/picks", json=body).status_code == 422
+    assert client.get("/api/run").json()["picks_left"] == 3
+    body = {"index": 1, "product_id": None, "quantity": {"value": 2, "unit": "un"}}
+    assert client.post("/api/run/picks", json=body).status_code == 200
+    assert log_rows(world, "pick_quantity") == []
+
+
+# --- a new search term from the picker --------------------------------------------------------
+
+
+def test_a_search_from_the_picker_replaces_the_cards_and_logs_a_search_row(client, world):
+    world.search_one_results = {"sal grosso": [ATUM_A], "sal fino": []}
+    to_picking(client)
+    client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
+    client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    assert client.get("/api/run/picks/next").json()["no_results"] is True  # sal, index 3
+
+    response = client.post("/api/run/picks/search", json={"index": 3, "term": "  sal fino "})
+    assert (response.status_code, response.json()) == (200, {"found": 0})
+    assert client.get("/api/run/picks/next").json()["no_results"] is True  # still nothing
+
+    response = client.post("/api/run/picks/search", json={"index": 3, "term": "sal grosso"})
+    assert (response.status_code, response.json()) == (200, {"found": 1})
+    assert world.searched_one == ["sal fino", "sal grosso"]  # in the worker, no Jev call
+    pick = client.get("/api/run/picks/next").json()
+    assert pick["index"] == 3 and pick["no_results"] is False
+    assert pick["item"]["search_term"] == "sal grosso"
+    assert [c["product_id"] for c in pick["candidates"]] == ["2"]
+    assert pick["jev"] == {"choice": None, "confidence": None, "nothing_fit": False}
+    assert pick["quantities"] == {"2": {"value": 1, "unit": "un", "flags": ["QUANTITY_ASSUMED"]}}
+    searches = [row for row in log_rows(world, "search") if row.get("picker")]
+    assert [(r["term"], r["found"], r["index"]) for r in searches] == [
+        ("sal fino", 0, 3),
+        ("sal grosso", 1, 3),
+    ]
+
+    client.post("/api/run/picks", json={"index": 3, "product_id": "2"})
+    draft = wait_for(client, "reviewing_cart")["cart_draft"]
+    assert "2" in [line["line_id"] for line in draft["lines"]]
+    stored = Storage(world.tmp_path / "db" / "t.sqlite").read_decisions(1)
+    assert (stored[3].item.search_term, stored[3].status) == ("sal grosso", "user_chosen")
+
+
+def test_a_search_from_the_picker_is_for_the_current_item_and_can_fail(client, world):
+    to_picking(client)
+    assert client.post("/api/run/picks/search", json={"index": 2, "term": "x"}).status_code == 422
+    assert client.post("/api/run/picks/search", json={"index": 1, "term": "  "}).status_code == 422
+    world.search_one_error = "a página mudou"
+    response = client.post("/api/run/picks/search", json={"index": 1, "term": "atum lata"})
+    assert response.status_code == 422 and "a página mudou" in response.json()["detail"]
+    assert client.get("/api/run").json()["state"] == "picking"  # the run goes on
+    assert [c["product_id"] for c in client.get("/api/run/picks/next").json()["candidates"]] == [
+        "3",
+        "2",
+    ]  # the cards are as they were
+
+
+# --- the summary and "trocar" -----------------------------------------------------------------
+
+
+def summary_of(client):
+    return {row["index"]: row for row in client.get("/api/run").json()["summary"]}
+
+
+def test_the_summary_has_a_row_per_item_and_trocar_reopens_one(client, world):
+    to_reviewing_cart(client)
+    rows = summary_of(client)
+    assert [rows[i]["state"] for i in range(4)] == ["in_cart", "in_cart", "skipped", "skipped"]
+    assert rows[0]["item"] == "frango" and rows[0]["product"]["product_id"] == "1"
+    assert rows[1]["quantity"] == {"value": 1, "unit": "un"}
+    assert rows[1]["flags"] == ["QUANTITY_ASSUMED"]
+    assert rows[2]["product"] is None
+
+    # an accepted item can be reopened; it is the only one to pick
+    assert client.post("/api/run/picks/reopen", json={"index": 0}).json() == {"state": "picking"}
+    pick = client.get("/api/run/picks/next").json()
+    assert (pick["index"], pick["left"], pick["position"], pick["total"]) == (0, 1, 1, 1)
+    assert pick["reopened"] is True and pick["jev"]["choice"] == "1"
+    body = {"index": 0, "product_id": "1", "quantity": {"value": 2, "unit": "kg"}}
+    assert client.post("/api/run/picks", json=body).status_code == 200
+    snap = wait_for(client, "reviewing_cart")  # back to the summary
+    assert {line["line_id"]: line["quantity"] for line in snap["cart_draft"]["lines"]}["1"] == {
+        "value": 2,
+        "unit": "kg",
+    }
+    # the report counts the item once, with Jev's own pick kept from the first time
+    picks = [p for p in log_rows(world, "pick") if p["index"] == 0]
+    assert [(p["jev_choice"], p["chosen"]) for p in picks] == [("1", "1")]
+    assert log_rows(world, "reopen") == [{"index": 0}]
+
+    # a skipped item can be reopened too, and then goes into the cart
+    client.post("/api/run/picks/reopen", json={"index": 2})
+    pick = client.get("/api/run/picks/next").json()
+    assert (pick["index"], [c["product_id"] for c in pick["candidates"]]) == (2, ["4"])
+    client.post("/api/run/picks", json={"index": 2, "product_id": "4"})
+    snap = wait_for(client, "reviewing_cart")
+    assert [line["line_id"] for line in snap["cart_draft"]["lines"]] == ["1", "3", "4"]
+    assert summary_of(client)[2]["state"] == "in_cart"
+
+
+def test_reopen_rejects_an_unknown_item(client):
+    to_reviewing_cart(client)
+    assert client.post("/api/run/picks/reopen", json={"index": 9}).status_code == 422
+    assert client.post("/api/run/picks/reopen", json={"index": -1}).status_code == 422
+    assert client.get("/api/run").json()["state"] == "reviewing_cart"
+
+
+def test_edits_from_revisar_tudo_survive_a_trocar(client):
+    to_reviewing_cart(client)
+    edit = {"line_id": "3", "quantity": {"value": 5, "unit": "un"}, "remove": False}
+    client.put("/api/run/cart-draft", json={"lines": [edit]})
+    client.put(
+        "/api/run/cart-draft", json={"lines": [{"line_id": "1", "quantity": None, "remove": True}]}
+    )
+    rows = summary_of(client)
+    assert rows[0]["state"] == "removed" and rows[0]["product"] is None
+    assert rows[1]["quantity"] == {"value": 5, "unit": "un"}
+
+    client.post("/api/run/picks/reopen", json={"index": 2})
+    client.post("/api/run/picks", json={"index": 2, "product_id": "4"})
+    draft = wait_for(client, "reviewing_cart")["cart_draft"]
+    assert {line["line_id"]: line["quantity"]["value"] for line in draft["lines"]} == {
+        "3": 5,
+        "4": 1,
+    }  # the quantity stayed, the removed frango is still out
+    assert "frango" in draft["skipped"]
+
+
+# --- the report on the done screen ------------------------------------------------------------
+
+
+def test_the_report_route_gives_the_numbers_of_the_current_run(client, world):
+    assert client.get("/api/run/report").status_code == 409  # no run
+    to_reviewing_cart(client)
+    client.post("/api/run/cart-draft/confirm")
+    wait_for(client, "done")
+    data = client.get("/api/run/report").json()
+    assert data["run_id"] == 1 and data["items"] == 4
+    states = [step["state"] for step in data["time"]["steps"]]
+    assert states[:2] == ["reading_list", "reviewing_list"] and "filling_cart" in states
+    assert data["time"]["total"]["seconds"] >= 0 and data["time"]["total"]["text"].endswith(" s")
+    assert data["corrections"]["products"]["asked"] == 3
+    assert data["corrections"]["products"]["accepted"] == 1
+    assert data["check"]["total"] == 2
+    # the same data the CLI prints
+    from shopping_minion.report import build_report
+
+    db = Storage(world.tmp_path / "db" / "t.sqlite")
+    try:
+        assert data == build_report(db, 1)
+    finally:
+        db.close()

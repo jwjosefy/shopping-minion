@@ -32,19 +32,24 @@ from shopping_minion.config import (
 )
 from shopping_minion.decide import nothing_fit
 from shopping_minion.history import ItemHistory
-from shopping_minion.items import Candidate, CartDraft, CartResult, Decision, Item
+from shopping_minion.items import Candidate, CartDraft, CartResult, Decision, Item, Quantity
 from shopping_minion.orders import sync_orders
-from shopping_minion.preferences import load_preferences
+from shopping_minion.preferences import find_preference, load_preferences
+from shopping_minion.quantity import target_quantity
+from shopping_minion.report import build_report
 from shopping_minion.run import _ordered_candidates, decide_config_row, histories_for
+from shopping_minion.search import search as search_one
 from shopping_minion.storage import Storage
 from shopping_minion.workflow import (
     CartOutcome,
     DraftEdit,
+    ItemRow,
     _total,
     decide_list,
     draft_cart,
     edit_draft,
     fill_cart,
+    item_rows,
     problem_indexes,
     search_list,
 )
@@ -88,6 +93,7 @@ class Snapshot:
     draft: CartDraft | None
     outcome: CartOutcome | None
     photos: int = 0  # how many pages the list was read from
+    summary: list[ItemRow] | None = None  # reviewing_cart: one row per item
 
 
 @dataclass
@@ -100,6 +106,8 @@ class PickView:
     candidates: list[Candidate]  # Jev's pick first
     nothing_fit: bool
     no_results: bool  # the search found nothing, even after the retry
+    quantities: dict[str, dict]  # product_id -> {value, unit, flags}, for every candidate
+    reopened: bool  # the user came back from the summary to change this item
 
 
 class _Run:
@@ -116,6 +124,10 @@ class _Run:
         self.decisions: list[Decision] = []
         self.pending: list[int] = []  # indexes into `decisions` still to pick, in order
         self.total_picks = 0
+        self.reopened = False  # picking one item again, from the summary
+        self.quantities: dict[int, Quantity] = {}  # set by the user, by item index
+        self.removed: set[int] = set()  # items taken out in the full editor, by index
+        self.jev_picks: dict[int, tuple[str | None, float | None]] = {}  # Jev's own answers
         self.draft: CartDraft | None = None
         self.outcome: CartOutcome | None = None
         self.cart_results: dict[str, CartResult] = {}  # last result per product, across retries
@@ -153,6 +165,7 @@ class RunStateMachine:
         open_browser_fn: Callable[[], Any] = open_browser,
         ensure_logged_in_fn: Callable[[Any], None] = ensure_logged_in,
         search_fn: Callable[..., list[list[Candidate]]] = search_list,
+        search_one_fn: Callable[[Any, Item], list[Candidate]] = search_one,
         decide_fn: Callable[..., list[Decision]] = decide_list,
         fill_fn: Callable[..., CartOutcome] = fill_cart,
         sync_fn: Callable[..., Any] = sync_orders,
@@ -167,6 +180,7 @@ class RunStateMachine:
         self._open_browser_fn = open_browser_fn
         self._ensure_logged_in_fn = ensure_logged_in_fn
         self._search_fn = search_fn
+        self._search_one_fn = search_one_fn
         self._decide_fn = decide_fn
         self._fill_fn = fill_fn
         self._sync_fn = sync_fn
@@ -202,6 +216,7 @@ class RunStateMachine:
                 draft=run.draft,
                 outcome=run.outcome,
                 photos=len(run.photos),
+                summary=self._summary(run) if self._state == "reviewing_cart" else None,
             )
 
     def events_after(self, seq: int) -> list[dict]:
@@ -281,10 +296,35 @@ class RunStateMachine:
                 candidates=_ordered_candidates(decision),
                 nothing_fit=nothing_fit(decision, run.config),
                 no_results=not decision.candidates,
+                quantities=self._pick_quantities(run, index),
+                reopened=run.reopened,
             )
 
-    def pick(self, index: int, product_id: str | None) -> None:
-        """picking: the answer for the item `next_pick` showed; None skips it."""
+    def _pick_quantities(self, run: _Run, index: int) -> dict[str, dict]:
+        """What the draft would use for each candidate (list, preference, that candidate's
+        history, 1 un), so the picker shows it before the user chooses. An amount the user set
+        for this item earlier (a reopened item) holds for every candidate, with no flag."""
+        decision = run.decisions[index]
+        pref = find_preference(run.prefs, decision.item)
+        histories = run.histories[index].products if run.histories else {}
+        out = {}
+        for candidate in decision.candidates:
+            set_by_user = run.quantities.get(index)
+            if set_by_user is not None:
+                quantity, flags = set_by_user, []
+            else:
+                quantity, flags = target_quantity(
+                    decision.item,
+                    pref,
+                    histories.get(candidate.product_id),
+                    candidate.unit_of_sale,
+                )
+            out[candidate.product_id] = {**quantity.model_dump(mode="json"), "flags": list(flags)}
+        return out
+
+    def pick(self, index: int, product_id: str | None, quantity: Quantity | None = None) -> None:
+        """picking: the answer for the item `next_pick` showed; None skips it. A `quantity`
+        replaces the item's target in the draft (no flag)."""
         with self._lock:
             run = self._require("picking")
             if index != run.pending[0]:
@@ -293,12 +333,21 @@ class RunStateMachine:
             chosen = product_id
             if product_id is None:
                 update = {"choice": None, "status": "skipped"}
+                quantity = None
             elif product_id in {c.product_id for c in decision.candidates}:
                 update = {"choice": product_id, "confidence": None, "status": "user_chosen"}
             else:
                 raise BadRequest(f"produto {product_id!r} não está entre os candidatos")
+            # Jev's own answer is kept from the first pick, for an item reopened later.
+            jev_choice, jev_confidence = run.jev_picks.setdefault(
+                index, (decision.choice, decision.confidence)
+            )
             run.decisions[index] = decision.model_copy(update=update)
             run.pending.pop(0)
+            if quantity is not None:
+                run.quantities[index] = quantity
+            else:
+                run.quantities.pop(index, None)
             with self._db() as db:
                 db.save_decisions(run.id, run.decisions)
                 db.log(  # Jev's own pick, before the decision is overwritten
@@ -307,22 +356,70 @@ class RunStateMachine:
                     {
                         "index": index,
                         "item": decision.item.name,
-                        "jev_choice": decision.choice,
-                        "jev_confidence": decision.confidence,
+                        "jev_choice": jev_choice,
+                        "jev_confidence": jev_confidence,
                         "chosen": chosen,
                     },
                 )
+                if quantity is not None:
+                    db.log(
+                        run.id,
+                        "pick_quantity",
+                        {"index": index, "quantity": quantity.model_dump(mode="json")},
+                    )
             if not run.pending:
                 self._enter_cart_review(run)
+
+    def search_pick(self, index: int, term: str) -> list[Candidate]:
+        """picking, the current item: one search with a new term, run by the worker (which owns
+        the browser). The item's candidates and search term are replaced; nobody decides, so the
+        user picks from the new cards. Waits for the worker; returns the new candidates."""
+        term = term.strip()
+        if not term:
+            raise BadRequest("digite o que buscar")
+        done = threading.Event()
+        box: dict[str, Any] = {}
+        with self._lock:
+            run = self._require("picking")
+            if index != run.pending[0]:
+                raise BadRequest(f"índice inesperado {index}; o próximo é {run.pending[0]}")
+            run.jobs.put(("search", index, term, done, box))
+        while not done.wait(0.1):
+            with self._lock:  # the run ended or was cancelled: the worker may never answer
+                if self._run is not run or self._state != "picking":
+                    raise WrongState(self._state)
+            if run.worker is None or not run.worker.is_alive():
+                raise WrongState(self._state)
+        if "error" in box:
+            raise box["error"]
+        return box["candidates"]
+
+    def reopen(self, index: int) -> None:
+        """reviewing_cart -> picking: one item goes back to its cards (the only pending one).
+        After it is picked, the run comes back to the summary."""
+        with self._lock:
+            run = self._require("reviewing_cart")
+            if not 0 <= index < len(run.decisions):
+                raise BadRequest(f"item {index} não existe")
+            if run.decisions[index].status not in ("accepted", "user_chosen", "skipped"):
+                raise BadRequest(f"o item {index} ainda não foi decidido")
+            run.pending = [index]
+            run.total_picks = 1
+            run.reopened = True
+            with self._db() as db:
+                db.log(run.id, "reopen", {"index": index})
+            self._set_state("picking")
 
     def edit_cart(self, edits: list[DraftEdit]) -> CartDraft:
         """reviewing_cart: apply the edits; the draft comes back recomputed."""
         with self._lock:
             run = self._require("reviewing_cart")
+            lines = {line.line_id: line for line in run.draft.lines}
             try:
                 run.draft = edit_draft(run.draft, edits)
             except ValueError as exc:
                 raise BadRequest(str(exc)) from exc
+            self._remember_edits(run, lines, edits)
             with self._db() as db:
                 for edit in edits:
                     quantity = None if edit.quantity is None else edit.quantity.model_dump()
@@ -332,6 +429,40 @@ class RunStateMachine:
                         {"line_id": edit.line_id, "quantity": quantity, "remove": edit.remove},
                     )
             return run.draft
+
+    @staticmethod
+    def _remember_edits(run: _Run, lines: dict, edits: list[DraftEdit]) -> None:
+        """Keep the full editor's changes by item, so the summary shows them and a later "trocar"
+        doesn't undo them. A quantity is kept only for a line of one item: the quantity of a
+        merged line is a sum, and can't be split back."""
+        for edit in edits:
+            product_id = lines[edit.line_id].line_id
+            indexes = [
+                i
+                for i, d in enumerate(run.decisions)
+                if d.status in ("accepted", "user_chosen")
+                and d.choice == product_id
+                and i not in run.removed
+            ]
+            if edit.remove:
+                run.removed.update(indexes)
+            elif edit.quantity is not None and len(indexes) == 1:
+                run.quantities[indexes[0]] = edit.quantity
+
+    def _summary(self, run: _Run) -> list[ItemRow]:
+        rows, _warnings = item_rows(
+            run.decisions, run.prefs, run.histories, run.quantities, run.removed
+        )
+        return rows
+
+    def report(self) -> dict:
+        """The numbers of the current run, as `shopping-minion report` has them."""
+        with self._lock:
+            if self._run is None:
+                raise WrongState(self._state)
+            run_id = self._run.id
+        with self._db() as db:
+            return build_report(db, run_id)
 
     def confirm_cart(self) -> None:
         """reviewing_cart -> filling_cart: the worker adds the products."""
@@ -463,7 +594,10 @@ class RunStateMachine:
 
     def _enter_cart_review(self, run: _Run) -> None:
         with self._lock:
-            run.draft = draft_cart(run.decisions, run.prefs, run.histories)
+            run.reopened = False
+            run.draft = draft_cart(
+                run.decisions, run.prefs, run.histories, run.quantities, run.removed
+            )
             self._set_status(run, "resolved")
             self._set_state("reviewing_cart")
 
@@ -513,6 +647,8 @@ class RunStateMachine:
                         return
                     if job[0] == "fill":
                         self._fill(run, page, job[1])
+                    elif job[0] == "search":
+                        self._search_pick(run, page, *job[1:])
         except Exception as exc:  # the browser failed to open, or the page died
             self._fail(run, _describe(exc))
 
@@ -590,7 +726,7 @@ class RunStateMachine:
             if self._run is not run or self._state != "deciding":
                 return False
             # An item with no results, even after the retry, goes to the picker too: the user
-            # can skip it (the field for a new term is T22's).
+            # can search again with another term, or skip it.
             run.decisions = list(decisions)
             run.pending = [
                 i for i, d in enumerate(run.decisions) if d.status in ("ask", "no_match")
@@ -608,6 +744,55 @@ class RunStateMachine:
             else:
                 self._enter_cart_review(run)
         return True
+
+    def _search_pick(
+        self, run: _Run, page: Any, index: int, term: str, done: threading.Event, box: dict
+    ) -> None:
+        """One search for the item the picker shows, with the user's new term."""
+        try:
+            with self._lock:
+                if self._run is not run or self._state != "picking" or run.pending[:1] != [index]:
+                    raise WrongState(self._state)
+                item = run.decisions[index].item.model_copy(update={"search_term": term})
+            try:
+                found = self._search_one_fn(page, item)
+            except Exception as exc:  # the run goes on: the user can try another term
+                raise BadRequest(f"a busca falhou: {_describe(exc)}") from exc
+            with self._lock:
+                if self._run is not run or self._state != "picking" or run.pending[:1] != [index]:
+                    raise WrongState(self._state)
+                candidates = list(found)
+                run.items[index] = item
+                run.decisions[index] = Decision(
+                    item=item,
+                    candidates=candidates,
+                    choice=None,
+                    confidence=None,
+                    status="ask" if candidates else "no_match",
+                )
+                with self._db() as db:
+                    run.histories[index] = histories_for(
+                        db, [item], [candidates], run.history_config.related_lines
+                    )[0]
+                    db.save_decisions(run.id, run.decisions)
+                    db.log(
+                        run.id,
+                        "search",
+                        {
+                            "i": index + 1,
+                            "n": len(run.items),
+                            "term": term,
+                            "found": len(candidates),
+                            "retried": bool(getattr(found, "retried", False)),
+                            "index": index,
+                            "picker": True,
+                        },
+                    )
+                box["candidates"] = candidates
+        except Exception as exc:
+            box["error"] = exc
+        finally:
+            done.set()
 
     def _fill(self, run: _Run, page: Any, draft: CartDraft) -> None:
         def progress(i: int, n: int, candidate: Candidate, result: Any) -> None:
