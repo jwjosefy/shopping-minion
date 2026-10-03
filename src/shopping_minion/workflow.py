@@ -56,6 +56,34 @@ class CartOutcome(Contract):
     stopped: bool = False  # should_stop ended the cart pass early
 
 
+def problem_indexes(draft: CartDraft, outcome: CartOutcome) -> list[int]:
+    """Positions in `draft.lines` of the lines that are not ok: the add failed, or the check
+    didn't find the expected amount. With no check (the cart couldn't be read), a line counts
+    when its add didn't succeed; a line never attempted counts too."""
+    bad = []
+    for i in range(len(draft.lines)):
+        result = outcome.results[i] if i < len(outcome.results) else None
+        check = outcome.checks[i] if i < len(outcome.checks) else None
+        if check is not None:
+            failed = not check.ok or (result is not None and result.status == "failed")
+        else:
+            failed = result is None or result.status == "failed"
+        if failed:
+            bad.append(i)
+    return bad
+
+
+def problem_message(result: CartResult | None, check: Check | None) -> str | None:
+    """Why a line isn't ok: the add's message, else the check's verdict."""
+    if result is not None and result.status == "failed" and result.message:
+        return result.message
+    if check is not None and not check.ok:
+        return check.verdict
+    if result is not None and result.message:
+        return result.message
+    return None
+
+
 # --- search and decide ----------------------------------------------------------------------
 
 

@@ -92,6 +92,8 @@ class World:
         self.histories_seen = None  # what decide and draft got
         self.draft_histories = None
         self.config_seen = None
+        self.fail_ids: set[str] = set()  # lines whose add the site won't take, until retried
+        self.fills: list[list[str]] = []  # the line ids of each fill call
 
     # injected functions
     def transcribe(self, photo):
@@ -148,12 +150,23 @@ class World:
 
     def fill(self, page, draft, progress, should_stop=None):
         results = []
+        self.fills.append([line.line_id for line in draft.lines])
+        failing = set(self.fail_ids)
+        self.fail_ids.clear()  # a retry succeeds
         for i, line in enumerate(draft.lines, start=1):
             if should_stop is not None and should_stop():
                 break
-            result = CartResult(
-                product_id=line.line_id, status="added", quantity_shown=None, message=None
-            )
+            if line.line_id in failing:
+                result = CartResult(
+                    product_id=line.line_id,
+                    status="failed",
+                    quantity_shown=None,
+                    message="o site não aceitou o clique em Adicionar",
+                )
+            else:
+                result = CartResult(
+                    product_id=line.line_id, status="added", quantity_shown=None, message=None
+                )
             results.append(result)
             progress(i, len(draft.lines), line.candidate, result)
             if self.fill_gate is not None and i == self.fill_gate_at:
@@ -161,6 +174,8 @@ class World:
                 assert self.fill_gate.wait(5)
         after = list(self.cart_before)
         for line in draft.lines[: len(results)]:
+            if line.line_id in failing:
+                continue
             quantity = format_amount(expected_amount(line.candidate, line.target))
             after.append((line.candidate.name, quantity))
         planned = [(line_label(ln), ln.candidate, ln.target) for ln in draft.lines]
@@ -251,6 +266,7 @@ def to_reviewing_cart(client):
     to_picking(client)
     client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
     client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    client.post("/api/run/picks", json={"index": 3, "product_id": None})  # sal: no results
     return wait_for(client, "reviewing_cart")
 
 
@@ -280,22 +296,28 @@ def test_the_whole_flow_in_state_order(client, world):
     # confirm -> searching -> deciding -> picking
     assert client.post("/api/run/list/confirm").status_code == 202
     snap = wait_for(client, "picking")
-    assert snap["picks_left"] == 2
+    assert snap["picks_left"] == 3
     assert world.opened == 1 and world.closed == 0  # the window stays open
 
     first = client.get("/api/run/picks/next").json()
-    assert (first["index"], first["left"], first["position"], first["total"]) == (1, 2, 1, 2)
+    assert (first["index"], first["left"], first["position"], first["total"]) == (1, 3, 1, 3)
     assert first["item"]["name"] == "atum"
     assert [c["product_id"] for c in first["candidates"]] == ["3", "2"]  # Jev's pick first
     assert first["candidates"][0]["description"].startswith("Atum Coqueiro 170g, marca Marca")
     assert first["candidates"][0]["price"] == 12.0
     assert first["jev"] == {"choice": "3", "confidence": 0.6, "nothing_fit": False}
+    assert first["no_results"] is False
 
     assert client.post("/api/run/picks", json={"index": 1, "product_id": "2"}).status_code == 200
     second = client.get("/api/run/picks/next").json()
-    assert (second["index"], second["left"], second["position"]) == (2, 1, 2)
+    assert (second["index"], second["left"], second["position"]) == (2, 2, 2)
     assert second["jev"] == {"choice": None, "confidence": 0.9, "nothing_fit": False}
     assert client.post("/api/run/picks", json={"index": 2, "product_id": None}).status_code == 200
+    # sal found nothing, even after the retry: it reaches the picker, with no candidates
+    third = client.get("/api/run/picks/next").json()
+    assert (third["index"], third["left"], third["position"]) == (3, 1, 3)
+    assert third["candidates"] == [] and third["no_results"] is True
+    assert client.post("/api/run/picks", json={"index": 3, "product_id": None}).status_code == 200
 
     # reviewing_cart
     snap = wait_for(client, "reviewing_cart")
@@ -353,14 +375,14 @@ def test_the_whole_flow_in_state_order(client, world):
     assert [e["seq"] for e in log] == sorted({e["seq"] for e in log})
     searches = [e for e in log if e["kind"] == "search"]
     assert [e["data"] for e in searches][:2] == [
-        {"i": 1, "n": 4, "term": "frango", "found": 1},
-        {"i": 2, "n": 4, "term": "atum", "found": 2},
+        {"i": 1, "n": 4, "term": "frango", "found": 1, "retried": False},
+        {"i": 2, "n": 4, "term": "atum", "found": 2, "retried": False},
     ]
     assert {e["state"] for e in searches} == {"searching"}
     decides = [e["data"] for e in log if e["kind"] == "decide"]
     assert decides == [
         {"phase": "start", "accepted": None, "to_pick": None},
-        {"phase": "end", "accepted": 1, "to_pick": 2},
+        {"phase": "end", "accepted": 1, "to_pick": 3},
     ]
     fills = [e["data"] for e in log if e["kind"] == "fill"]
     assert fills[0] == {
@@ -457,10 +479,12 @@ def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, mo
 def test_nothing_to_pick_goes_straight_to_reviewing_cart(client, monkeypatch):
     monkeypatch.setitem(DECISIONS, "atum", ("3", 0.95, "accepted"))
     monkeypatch.setitem(DECISIONS, "feijão preto", ("4", 0.9, "accepted"))
+    monkeypatch.setitem(RESULTS, "sal", [ATUM_A])
+    monkeypatch.setitem(DECISIONS, "sal", ("2", 0.9, "accepted"))
     to_reviewing_list(client)
     client.post("/api/run/list/confirm")
     snap = wait_for(client, "reviewing_cart")
-    assert [line["line_id"] for line in snap["cart_draft"]["lines"]] == ["1", "3", "4"]
+    assert [line["line_id"] for line in snap["cart_draft"]["lines"]] == ["1", "3", "4", "2"]
     states = [e["data"]["state"] for e in events(client) if e["kind"] == "state"]
     assert "picking" not in states
 
@@ -542,7 +566,7 @@ def test_a_pick_for_the_wrong_index_or_product_is_422(client):
     assert client.post("/api/run/picks", json={"index": 99, "product_id": None}).status_code == 422
     unknown = client.post("/api/run/picks", json={"index": 1, "product_id": "999"})
     assert unknown.status_code == 422
-    assert client.get("/api/run").json()["picks_left"] == 2  # nothing was consumed
+    assert client.get("/api/run").json()["picks_left"] == 3  # nothing was consumed
 
 
 def test_bad_bodies_are_rejected(client):
@@ -1014,3 +1038,92 @@ def test_histories_reach_decide_and_the_draft(client, world, monkeypatch):
     assert all(isinstance(h, ItemHistory) for h in world.histories_seen)
     assert all(h.products == {} and h.related == [] for h in world.histories_seen)
     assert drafted == [world.histories_seen]  # the same objects, built once
+
+
+# --- empty searches and "tentar de novo" (LLD-M5 sections 1.1 and 1.3) -----------------------
+
+
+def test_a_retried_search_is_logged_and_empty_items_reach_the_picker(client, world):
+    from shopping_minion.search import SearchResults
+
+    def search(page, items, progress):
+        out = []
+        for i, it in enumerate(items, start=1):
+            found = SearchResults(RESULTS[it.name])
+            found.retried = it.name in ("sal", "atum")
+            out.append(found)
+            progress(i, len(items), it, found)
+        return out
+
+    world.search = search
+    to_picking(client)
+    retried = {
+        e["data"]["term"]: e["data"]["retried"] for e in events(client) if e["kind"] == "search"
+    }
+    assert retried == {"frango": False, "atum": True, "feijão preto": False, "sal": True}
+    rows = Storage(world.tmp_path / "db" / "t.sqlite").read_log(1)
+    assert [r["data"]["retried"] for r in rows if r["kind"] == "search"] == [
+        False,
+        True,
+        False,
+        True,
+    ]
+    client.post("/api/run/picks", json={"index": 1, "product_id": "3"})
+    client.post("/api/run/picks", json={"index": 2, "product_id": None})
+    pick = client.get("/api/run/picks/next").json()
+    assert (pick["item"]["name"], pick["candidates"], pick["no_results"]) == ("sal", [], True)
+    assert client.post("/api/run/picks", json={"index": 3, "product_id": None}).status_code == 200
+    draft = wait_for(client, "reviewing_cart")["cart_draft"]
+    assert draft["skipped"] == ["feijão preto", "sal"]
+
+
+def test_the_done_screen_lists_failures_and_retry_fills_only_those(client, world):
+    to_reviewing_cart(client)
+    world.fail_ids = {"1"}
+    client.post("/api/run/cart-draft/confirm")
+    snap = wait_for(client, "done")
+    outcome = snap["outcome"]
+    assert (outcome["ok_count"], outcome["total"]) == (1, 2)
+    assert outcome["problems"] == [
+        {
+            "line_id": "1",
+            "item_names": ["frango"],
+            "product_name": "Filé de Frango kg",
+            "expected": "1kg",
+            "found": None,
+            "message": "o site não aceitou o clique em Adicionar",
+        }
+    ]
+
+    assert client.post("/api/run/retry").status_code == 202
+    snap = wait_for(client, "done")
+    assert world.fills == [["1", "3"], ["1"]]  # the second pass has only the failed line
+    assert snap["outcome"]["problems"] == []
+    assert (snap["outcome"]["ok_count"], snap["outcome"]["total"]) == (1, 1)
+    assert [line["line_id"] for line in snap["cart_draft"]["lines"]] == ["1"]
+    assert world.opened == 1 and world.closed == 0  # same browser, still open
+
+    log = Storage(world.tmp_path / "db" / "t.sqlite").read_log(1)
+    states = [r["data"]["state"] for r in log if r["kind"] == "state"]
+    assert states[-4:] == ["filling_cart", "done", "filling_cart", "done"]
+    checks = [r["data"] for r in log if r["kind"] == "check"]
+    assert len(checks) == 2 and checks[0]["not_ok"][0]["product"] == "Filé de Frango kg"
+    assert checks[1]["not_ok"] == []
+    assert [r["data"] for r in log if r["kind"] == "retry"] == [{"lines": ["1"]}]
+    import sqlite3
+
+    con = sqlite3.connect(world.tmp_path / "db" / "t.sqlite")
+    saved = [json.loads(r[0]) for r in con.execute("SELECT result_json FROM cart")]
+    assert sorted((r["product_id"], r["status"]) for r in saved) == [("1", "added"), ("3", "added")]
+    assert client.delete("/api/run").status_code == 200  # the worker still takes the close job
+    assert world.closed == 1
+
+
+def test_retry_is_only_for_done_with_something_to_retry(client, world):
+    assert client.post("/api/run/retry").status_code == 409  # idle
+    to_reviewing_cart(client)
+    assert client.post("/api/run/retry").status_code == 409  # reviewing_cart
+    client.post("/api/run/cart-draft/confirm")
+    wait_for(client, "done")
+    assert client.post("/api/run/retry").status_code == 422  # everything is ok
+    assert client.get("/api/run").json()["state"] == "done"

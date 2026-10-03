@@ -32,7 +32,7 @@ from shopping_minion.config import (
 )
 from shopping_minion.decide import nothing_fit
 from shopping_minion.history import ItemHistory
-from shopping_minion.items import Candidate, CartDraft, Decision, Item
+from shopping_minion.items import Candidate, CartDraft, CartResult, Decision, Item
 from shopping_minion.orders import sync_orders
 from shopping_minion.preferences import load_preferences
 from shopping_minion.run import _ordered_candidates, decide_config_row, histories_for
@@ -40,10 +40,12 @@ from shopping_minion.storage import Storage
 from shopping_minion.workflow import (
     CartOutcome,
     DraftEdit,
+    _total,
     decide_list,
     draft_cart,
     edit_draft,
     fill_cart,
+    problem_indexes,
     search_list,
 )
 
@@ -93,6 +95,7 @@ class PickView:
     decision: Decision
     candidates: list[Candidate]  # Jev's pick first
     nothing_fit: bool
+    no_results: bool  # the search found nothing, even after the retry
 
 
 class _Run:
@@ -111,6 +114,7 @@ class _Run:
         self.total_picks = 0
         self.draft: CartDraft | None = None
         self.outcome: CartOutcome | None = None
+        self.cart_results: dict[str, CartResult] = {}  # last result per product, across retries
         self.cancel = threading.Event()
         self.jobs: queue.Queue[tuple] = queue.Queue()
         self.worker: threading.Thread | None = None
@@ -263,6 +267,7 @@ class RunStateMachine:
                 decision=decision,
                 candidates=_ordered_candidates(decision),
                 nothing_fit=nothing_fit(decision, run.config),
+                no_results=not decision.candidates,
             )
 
     def pick(self, index: int, product_id: str | None) -> None:
@@ -321,6 +326,24 @@ class RunStateMachine:
             run = self._require("reviewing_cart")
             if not run.draft.lines:
                 raise BadRequest("nada a adicionar ao carrinho")
+            self._set_status(run, "adding")
+            self._set_state("filling_cart")
+            run.jobs.put(("fill", run.draft))
+
+    def retry(self) -> None:
+        """done -> filling_cart: the same cart pass on the lines that failed or didn't check.
+
+        The worker still owns the browser in `done`, so it takes the job like the first one.
+        The run's draft becomes the retried lines, so the new outcome lines up with it."""
+        with self._lock:
+            run = self._require("done")
+            bad = problem_indexes(run.draft, run.outcome) if run.outcome else []
+            if not bad:
+                raise BadRequest("nada a tentar de novo")
+            lines = [run.draft.lines[i] for i in bad]
+            run.draft = CartDraft(lines=lines, skipped=[], estimated_total=_total(lines))
+            with self._db() as db:
+                db.log(run.id, "retry", {"lines": [line.line_id for line in lines]})
             self._set_status(run, "adding")
             self._set_state("filling_cart")
             run.jobs.put(("fill", run.draft))
@@ -511,7 +534,13 @@ class RunStateMachine:
         def progress(i: int, n: int, item: Item, candidates: list[Candidate]) -> None:
             if run.cancel.is_set():
                 raise _Cancelled
-            found = {"i": i, "n": n, "term": item.search_term, "found": len(candidates)}
+            found = {
+                "i": i,
+                "n": n,
+                "term": item.search_term,
+                "found": len(candidates),
+                "retried": bool(getattr(candidates, "retried", False)),
+            }
             self._emit(run, "search", found)
             with self._db() as db:  # so an empty search shows in the run's history
                 db.log(run.id, "search", found)
@@ -547,13 +576,9 @@ class RunStateMachine:
         with self._lock:
             if self._run is not run or self._state != "deciding":
                 return False
-            # An item with no results never gets a prompt (as in the terminal): skipped.
-            run.decisions = [
-                d.model_copy(update={"status": "skipped"})
-                if d.status in ("ask", "no_match") and not d.candidates
-                else d
-                for d in decisions
-            ]
+            # An item with no results, even after the retry, goes to the picker too: the user
+            # can skip it (the field for a new term is T22's).
+            run.decisions = list(decisions)
             run.pending = [
                 i for i, d in enumerate(run.decisions) if d.status in ("ask", "no_match")
             ]
@@ -594,8 +619,9 @@ class RunStateMachine:
             if self._run is not run or self._state != "filling_cart":
                 return
             run.outcome = outcome
+            run.cart_results.update({r.product_id: r for r in outcome.results})
             with self._db() as db:
-                db.save_cart(run.id, outcome.results)
+                db.save_cart(run.id, list(run.cart_results.values()))
                 if outcome.after is not None:  # what the report needs for its check line
                     db.log(
                         run.id,
