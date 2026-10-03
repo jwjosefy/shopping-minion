@@ -26,7 +26,7 @@ from shopping_minion.decide import NONE_KEY, decide
 from shopping_minion.history import ItemHistory, lines_for_item, near_misses
 from shopping_minion.items import Candidate, Decision, Item
 from shopping_minion.orders import OrderLine
-from shopping_minion.preferences import load_preferences
+from shopping_minion.preferences import read_yaml_preferences
 from shopping_minion.storage import Storage
 
 ROOT = Path(__file__).parent.parent
@@ -362,7 +362,7 @@ def main(argv: list[str] | None = None, client_factory: Callable[[str], Any] | N
                 print("TYPESAFE_API_KEY is not set; run under `dotenvx run --`.", file=sys.stderr)
                 return 1
             client_factory = typesafe_client
-        prefs = load_preferences(args.preferences)
+        prefs = read_yaml_preferences(args.preferences)
         with client_factory(base.model) as client:
             by_variant = replay(rows, base, variants, alphas, client, prefs)
 

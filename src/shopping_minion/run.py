@@ -17,7 +17,7 @@ from shopping_minion.history import ItemHistory, lines_for_item, norm
 from shopping_minion.items import Candidate, CartDraft, Decision, Item
 from shopping_minion.learned import LearnedPreference, learned_preferences
 from shopping_minion.merge import line_label
-from shopping_minion.preferences import load_preferences
+from shopping_minion.preferences import load_preferences, read_yaml_preferences
 from shopping_minion.reconcile import report_lines
 from shopping_minion.storage import Storage
 from shopping_minion.workflow import CartOutcome, decide_list, draft_cart, fill_cart, search_list
@@ -168,7 +168,7 @@ def _yes(answer: str) -> bool:
 def run(
     path: str | Path,
     *,
-    prefs_path: str | Path = "data/preferencias.yaml",
+    prefs_path: str | Path | None = None,  # None: the preferences table; a file wins
     db_path: str | Path = "data/shopping-minion.sqlite",
     yes: bool = False,
     input_fn: InputFn = input,
@@ -190,8 +190,8 @@ def run(
 
     config = load_decide_config(config_path)
     history_config = load_history_config(history_config_path)
-    prefs = load_preferences(prefs_path)
     storage = Storage(db_path)
+    prefs = load_preferences(storage) if prefs_path is None else read_yaml_preferences(prefs_path)
     run_id = storage.new_run(photo=str(path))
     storage.save_items(run_id, items, items)  # M1: the edited YAML is the confirmed list
     storage.set_status(run_id, "items_saved")

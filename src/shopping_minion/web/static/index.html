@@ -30,6 +30,49 @@
       <p>Carregando…</p>
     </section>
 
+    <!-- 0. Preferências (from the idle screen) -->
+    <section v-else-if="state === 'idle' && prefsOpen" data-screen="preferences">
+      <h2>Preferências</h2>
+      <p class="muted">Valem para a próxima lista que você enviar, em qualquer momento que você as alterar.</p>
+      <div v-if="prefForm" class="card pref-form" data-test="pref-form">
+        <h3>{{ prefForm.key ? 'Editar preferência' : 'Nova preferência' }}</h3>
+        <label>Item <input type="text" v-model="prefForm.nome" data-test="pref-nome" placeholder="ex.: guaraná"></label>
+        <label>Marca <input type="text" v-model="prefForm.marca" data-test="pref-marca" placeholder="ex.: Antarctica"></label>
+        <label>Variante <input type="text" v-model="prefForm.variante" data-test="pref-variante" placeholder="ex.: carioca"></label>
+        <label>Também chamado de <input type="text" v-model="prefForm.apelidos" data-test="pref-apelidos" placeholder="separe por vírgula"></label>
+        <label>Excluir <input type="text" v-model="prefForm.excluir" data-test="pref-excluir" placeholder="separe por vírgula"></label>
+        <div class="pref-qty">
+          <label>Quantidade <input type="number" min="0" step="any" inputmode="decimal" v-model="prefForm.qty_value" data-test="pref-qty"></label>
+          <select v-model="prefForm.qty_unit" aria-label="unidade" data-test="pref-unit">
+            <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
+          </select>
+        </div>
+        <div class="actions-bar">
+          <button class="btn primary" type="button" data-test="pref-save" :disabled="busy" @click="savePref">salvar</button>
+          <button class="btn ghost" type="button" data-test="pref-cancel" @click="prefForm = null">cancelar</button>
+        </div>
+      </div>
+      <div v-else class="card">
+        <button class="btn primary big" type="button" data-test="pref-add" @click="editPref(null)">+ Nova preferência</button>
+      </div>
+      <p v-if="!prefs.length" class="muted" data-test="pref-empty">Nenhuma preferência ainda.</p>
+      <article v-for="p in prefs" :key="p.key" class="card pref" data-test="pref">
+        <p class="pref-name"><strong>{{ p.nome || p.key }}</strong></p>
+        <ul class="pref-facts muted">
+          <li v-if="p.marca">marca: {{ p.marca }}</li>
+          <li v-if="p.variante">variante: {{ p.variante }}</li>
+          <li v-if="p.quantidade">quantidade: {{ numText(p.quantidade.valor) }} {{ p.quantidade.unidade }}</li>
+          <li v-if="(p.apelidos || []).length">também chamado de: {{ p.apelidos.join(', ') }}</li>
+          <li v-if="(p.excluir || []).length">excluir: {{ p.excluir.join(', ') }}</li>
+        </ul>
+        <div class="actions-bar">
+          <button class="btn small" type="button" data-test="pref-edit" @click="editPref(p)">editar</button>
+          <button class="btn small ghost danger" type="button" data-test="pref-remove" @click="removePref(p)">remover</button>
+        </div>
+      </article>
+      <button class="btn ghost" type="button" data-test="pref-back" @click="closePrefs">voltar</button>
+    </section>
+
     <!-- 1. idle: Enviar lista -->
     <section v-else-if="state === 'idle'" data-screen="idle">
       <h2>Enviar lista</h2>
@@ -54,6 +97,8 @@
           {{ uploading ? 'Enviando…' : 'ler lista' }}
         </button>
       </div>
+
+      <button class="btn" type="button" data-test="open-prefs" @click="openPrefs">Preferências</button>
 
       <div v-if="access" class="card access" data-test="access">
         <div class="qr" v-html="access.qr_svg"></div>

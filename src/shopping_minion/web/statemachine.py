@@ -34,7 +34,7 @@ from shopping_minion.decide import nothing_fit
 from shopping_minion.history import ItemHistory
 from shopping_minion.items import Candidate, CartDraft, CartResult, Decision, Item, Quantity
 from shopping_minion.orders import sync_orders
-from shopping_minion.preferences import find_preference, load_preferences
+from shopping_minion.preferences import find_preference, load_preferences, normalize_key
 from shopping_minion.quantity import target_quantity
 from shopping_minion.report import build_report
 from shopping_minion.run import (
@@ -232,6 +232,31 @@ class RunStateMachine:
     def events_after(self, seq: int) -> list[dict]:
         with self._lock:
             return [event for event in self._events if event["seq"] > seq]
+
+    # --- preferences: allowed in any state; the next run's decide reads them -----------------
+
+    def list_preferences(self) -> list[dict]:
+        with self._db() as db:
+            load_preferences(db, self._prefs_path)  # the one-time import, before the first read
+            return [{"key": key, **entry} for key, entry in db.read_preferences().items()]
+
+    def set_preference(self, name: str, entry: dict) -> dict:
+        key = normalize_key(name)
+        if not key:
+            raise BadRequest("informe o nome do item")
+        entry = {"nome": name.strip(), **entry}  # the name as typed; the key loses accents
+        try:
+            with self._db() as db:
+                load_preferences(db, self._prefs_path)
+                db.set_preference(key, entry)
+        except ValueError as exc:
+            raise BadRequest(str(exc)) from exc
+        return {"key": key, **entry}
+
+    def delete_preference(self, name: str) -> bool:
+        with self._db() as db:
+            load_preferences(db, self._prefs_path)
+            return db.delete_preference(normalize_key(name))
 
     def recent_runs(self, limit: int = 5) -> list[dict]:
         with self._db() as db:
@@ -634,7 +659,8 @@ class RunStateMachine:
     def _work(self, run: _Run) -> None:
         try:
             run.config = load_decide_config(self._config_path)
-            run.prefs = load_preferences(self._prefs_path)
+            with self._db() as db:
+                run.prefs = load_preferences(db, self._prefs_path)
             run.history_config = load_history_config(self._history_config_path)
         except Exception as exc:
             self._fail(run, f"configuração inválida: {_describe(exc)}")

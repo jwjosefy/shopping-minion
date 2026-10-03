@@ -298,6 +298,9 @@ class Stub:
         # what the tests assert on
         self.uploads: list[str] = []  # the file names of every photo sent, in order
         self.list_puts: list[dict] = []
+        self.prefs: dict[str, dict] = {
+            "feijao": {"nome": "feijão", "variante": "carioca", "excluir": ["preto"]}
+        }
         self.picks_posted: list[dict] = []
         self.cart_puts: list[dict] = []
         self.searches: list[dict] = []  # POST /api/run/picks/search bodies
@@ -751,6 +754,24 @@ def create_app(stub: Stub) -> FastAPI:
             {"run_id": 7, "created_at": "2026-09-30T18:20:00", "items": 12, "status": "done"},
             {"run_id": 6, "created_at": "2026-09-28T09:05:00", "items": 1, "status": "cancelled"},
         ]
+
+    @app.get("/api/preferences")
+    def list_prefs():
+        return [{"key": key, **entry} for key, entry in stub.prefs.items()]
+
+    @app.put("/api/preferences/{key:path}")
+    async def put_pref(key: str, request: Request):
+        entry = await request.json()
+        norm = key.casefold().replace("ã", "a").replace("á", "a")  # enough for the tests
+        with stub.lock:
+            stub.prefs[norm] = entry
+        return {"key": norm, **entry}
+
+    @app.delete("/api/preferences/{key:path}")
+    def delete_pref(key: str):
+        with stub.lock:
+            stub.prefs.pop(key, None)
+        return {"deleted": True}
 
     @app.get("/api/access")
     def access():

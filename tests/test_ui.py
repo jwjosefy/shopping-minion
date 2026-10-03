@@ -799,3 +799,59 @@ def test_the_done_screen_shows_the_report_under_the_outcome(browser):
             expect(page.locator("[data-test=report]")).to_have_count(0)
         finally:
             context.close()
+
+
+@pytest.mark.parametrize("size", VIEWPORTS.values(), ids=VIEWPORTS.keys())
+def test_preferences_screen_adds_edits_and_removes(browser, size):
+    with StubServer() as server:
+        stub = server.stub
+        context, page = open_page(browser, server, size)
+        try:
+            screen(page, "idle")
+            page.locator("[data-test=open-prefs]").click()
+            prefs = screen(page, "preferences")
+            expect(prefs).to_contain_text("próxima lista")
+            expect(page.locator("[data-test=pref]")).to_have_count(1)
+            expect(page.locator("[data-test=pref]")).to_contain_text("feijão")
+            expect(page.locator("[data-test=pref]")).to_contain_text("variante: carioca")
+            expect(page.locator("[data-test=pref]")).to_contain_text("excluir: preto")
+            assert_fits(page, "preferences")
+
+            # add
+            page.locator("[data-test=pref-add]").click()
+            page.locator("[data-test=pref-nome]").fill("guaraná")
+            page.locator("[data-test=pref-marca]").fill("Antarctica")
+            page.locator("[data-test=pref-apelidos]").fill("refri de guaraná, guarana")
+            page.locator("[data-test=pref-qty]").fill("2")
+            page.locator("[data-test=pref-unit]").select_option("l")
+            assert_fits(page, "preferences form")
+            page.locator("[data-test=pref-save]").click()
+            expect(page.locator("[data-test=pref]")).to_have_count(2)
+            assert stub.prefs["guarana"] == {
+                "nome": "guaraná",
+                "marca": "Antarctica",
+                "apelidos": ["refri de guaraná", "guarana"],
+                "quantidade": {"valor": 2, "unidade": "l"},
+            }
+            card = page.locator("[data-test=pref]", has_text="guaraná")
+            expect(card).to_contain_text("quantidade: 2 l")
+            expect(card).to_contain_text("também chamado de: refri de guaraná, guarana")
+
+            # edit
+            card.locator("[data-test=pref-edit]").click()
+            expect(page.locator("[data-test=pref-marca]")).to_have_value("Antarctica")
+            page.locator("[data-test=pref-marca]").fill("Kuat")
+            page.locator("[data-test=pref-save]").click()
+            expect(card).to_contain_text("marca: Kuat")
+            assert stub.prefs["guarana"]["marca"] == "Kuat"
+
+            # remove
+            page.once("dialog", lambda dialog: dialog.accept())
+            card.locator("[data-test=pref-remove]").click()
+            expect(page.locator("[data-test=pref]")).to_have_count(1)
+            assert "guarana" not in stub.prefs
+
+            page.locator("[data-test=pref-back]").click()
+            screen(page, "idle")
+        finally:
+            context.close()

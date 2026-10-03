@@ -65,6 +65,11 @@ createApp({
       return id && photoCount.value && !photoFailed.value ? `/api/run/photo?i=${i}&run=${id}` : null;
     });
 
+    // preferências (idle)
+    const prefsOpen = ref(false);
+    const prefs = ref([]);
+    const prefForm = ref(null); // the entry being added or edited
+
     // reviewing_list
     const rows = ref([]);
     const saveText = ref("");
@@ -202,6 +207,90 @@ createApp({
     function resetProgress() {
       searchEvents.value = [];
       fillEvents.value = [];
+    }
+
+    // ---- preferências: the table the next run's decide reads ------------------
+    const listText = (v) => (v || []).join(", ");
+    const splitList = (text) => (text || "").split(",").map((s) => s.trim()).filter(Boolean);
+    const numText = (n) => numFmt.format(n);
+
+    async function loadPrefs() {
+      try {
+        prefs.value = (await api("GET", "/api/preferences")) || [];
+      } catch (err) {
+        fail(err);
+      }
+    }
+    async function openPrefs() {
+      prefsOpen.value = true;
+      prefForm.value = null;
+      await loadPrefs();
+    }
+    function closePrefs() {
+      prefsOpen.value = false;
+      prefForm.value = null;
+    }
+    function editPref(p) {
+      prefForm.value = p
+        ? {
+            key: p.key,
+            nome: p.nome || p.key,
+            marca: p.marca || "",
+            variante: p.variante || "",
+            apelidos: listText(p.apelidos),
+            excluir: listText(p.excluir),
+            qty_value: p.quantidade ? p.quantidade.valor : "",
+            qty_unit: p.quantidade ? p.quantidade.unidade : "un",
+            // fields the form doesn't show (e.g. fatiado) are kept as they are
+            extra: Object.fromEntries(
+              Object.entries(p).filter(
+                ([k]) => !["key", "nome", "marca", "variante", "apelidos", "excluir", "quantidade"].includes(k),
+              ),
+            ),
+          }
+        : {
+            key: null, nome: "", marca: "", variante: "", apelidos: "", excluir: "",
+            qty_value: "", qty_unit: "un", extra: {},
+          };
+    }
+    async function savePref() {
+      const f = prefForm.value;
+      const nome = f.nome.trim();
+      if (!nome) {
+        toast.value = "informe o nome do item";
+        return;
+      }
+      const entry = { ...f.extra, nome };
+      if (f.marca.trim()) entry.marca = f.marca.trim();
+      if (f.variante.trim()) entry.variante = f.variante.trim();
+      if (splitList(f.apelidos).length) entry.apelidos = splitList(f.apelidos);
+      if (splitList(f.excluir).length) entry.excluir = splitList(f.excluir);
+      if (f.qty_value !== "" && f.qty_value !== null) {
+        entry.quantidade = { valor: Number(f.qty_value), unidade: f.qty_unit };
+      }
+      busy.value = true;
+      try {
+        const saved = await api("PUT", `/api/preferences/${encodeURIComponent(nome)}`, entry);
+        // renamed: the old key goes away
+        if (f.key && f.key !== saved.key) {
+          await api("DELETE", `/api/preferences/${encodeURIComponent(f.key)}`);
+        }
+        prefForm.value = null;
+        await loadPrefs();
+      } catch (err) {
+        fail(err);
+      } finally {
+        busy.value = false;
+      }
+    }
+    async function removePref(p) {
+      if (!window.confirm(`Remover a preferência de "${p.nome || p.key}"?`)) return;
+      try {
+        await api("DELETE", `/api/preferences/${encodeURIComponent(p.key)}`);
+        await loadPrefs();
+      } catch (err) {
+        fail(err);
+      }
     }
 
     async function loadIdleExtras() {
@@ -788,6 +877,7 @@ createApp({
       money, pct, dateText, countText, fillLabel, fillClass, checkNames, lineProduct, lineItems,
       onPhotos, removePending, readList, touchList, addRow, removeRow, confirmList, takeCandidate, skipPick, editLine,
       removeLine, confirmCart, resetRun, retryFailed, cancelRun,
+      prefsOpen, prefs, prefForm, openPrefs, closePrefs, editPref, savePref, removePref, numText,
     };
   },
 }).mount("#app");

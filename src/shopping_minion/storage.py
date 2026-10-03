@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from shopping_minion.items import CartResult, Decision, Item
 from shopping_minion.orders import Order, OrderLine
+from shopping_minion.preferences import validate_entry
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -62,6 +63,14 @@ CREATE TABLE IF NOT EXISTS order_lines (
     unit        TEXT    NOT NULL,   -- un | kg
     total_price TEXT,
     PRIMARY KEY (order_id, line)
+);
+CREATE TABLE IF NOT EXISTS preferences (
+    key        TEXT PRIMARY KEY,    -- the item name, normalized (preferences.normalize_key)
+    entry_json TEXT NOT NULL        -- the entry, with the pt-BR fields of preferencias.yaml
+);
+CREATE TABLE IF NOT EXISTS meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
 );
 """
 
@@ -262,6 +271,38 @@ class Storage:
             )
             for row in rows
         ]
+
+    def read_preferences(self) -> dict[str, dict]:
+        rows = self._conn.execute("SELECT key, entry_json FROM preferences ORDER BY key")
+        return {row["key"]: json.loads(row["entry_json"]) for row in rows}
+
+    def set_preference(self, key: str, entry: dict) -> None:
+        """Create or replace. The entry is validated; a bad `quantidade` raises ValueError."""
+        entry = validate_entry(entry)
+        with self._conn:
+            self._conn.execute(
+                "INSERT INTO preferences (key, entry_json) VALUES (?, ?) "
+                "ON CONFLICT(key) DO UPDATE SET entry_json = excluded.entry_json",
+                (key, json.dumps(entry, ensure_ascii=False)),
+            )
+
+    def delete_preference(self, key: str) -> bool:
+        """True when there was an entry to remove."""
+        with self._conn:
+            cur = self._conn.execute("DELETE FROM preferences WHERE key = ?", (key,))
+        return cur.rowcount > 0
+
+    def get_meta(self, key: str) -> str | None:
+        row = self._conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+        return None if row is None else row["value"]
+
+    def set_meta(self, key: str, value: str) -> None:
+        with self._conn:
+            self._conn.execute(
+                "INSERT INTO meta (key, value) VALUES (?, ?) "
+                "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (key, value),
+            )
 
     def _replace(self, table: str, column: str, run_id: int, models: Sequence[BaseModel]) -> None:
         rows = [(run_id, idx, model.model_dump_json()) for idx, model in enumerate(models)]
