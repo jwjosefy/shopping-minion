@@ -1,8 +1,9 @@
 """OCR eval: run intake on a list photo and compare the result to a fixture (LLD section 4).
 
-    uv run python evals/intake_eval.py --photo <photo> [--fixture evals/fixtures/list-001.yaml]
+    uv run python evals/intake_eval.py --photo <photo> [--photo <page 2> ...] [--fixture <yaml>]
     uv run python evals/intake_eval.py --result lista.yaml   # score a saved `ocr` output, no call
 
+Several `--photo` are the pages of one list, read in one call.
 The photo run calls `claude -p` once (Haiku, Johann's subscription: no API cost).
 
 Rules, kept simple:
@@ -193,7 +194,12 @@ def load_items(path: Path) -> list[Item]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument("--photo", type=Path, help="photo of the list (runs claude -p once)")
+    source.add_argument(
+        "--photo",
+        type=Path,
+        action="append",
+        help="photo of the list (runs claude -p once); repeat for each page, in order",
+    )
     source.add_argument("--result", type=Path, help="YAML written by `shopping-minion ocr`")
     parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     parser.add_argument("--model", default="sonnet", help="claude model for --photo")

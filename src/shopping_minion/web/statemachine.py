@@ -67,6 +67,9 @@ class WrongState(Exception):
         self.state = state
 
 
+MAX_PHOTOS = 5  # pages of one list (LLD-M5 section 2.1)
+
+
 class BadRequest(ValueError):
     """The call fits the state but its content doesn't (HTTP 422)."""
 
@@ -84,6 +87,7 @@ class Snapshot:
     picks_left: int | None
     draft: CartDraft | None
     outcome: CartOutcome | None
+    photos: int = 0  # how many pages the list was read from
 
 
 @dataclass
@@ -99,9 +103,9 @@ class PickView:
 
 
 class _Run:
-    def __init__(self, run_id: int, photo: Path) -> None:
+    def __init__(self, run_id: int, photos: list[Path]) -> None:
         self.id = run_id
-        self.photo = photo
+        self.photos = photos
         self.message: str | None = None
         self.ocr_items: list[Item] = []
         self.items: list[Item] | None = None
@@ -124,10 +128,10 @@ def _describe(exc: Exception) -> str:
     return str(exc) or type(exc).__name__
 
 
-def _transcribe(photo: Path) -> list[Item]:
+def _transcribe(photos: list[Path]) -> list[Item]:
     from shopping_minion.intake import transcribe
 
-    return transcribe(photo)
+    return transcribe(photos)
 
 
 def _jev_client() -> Any:
@@ -145,7 +149,7 @@ class RunStateMachine:
         config_path: str | Path = "config/decide.yaml",
         history_config_path: str | Path = "config/history.yaml",
         uploads_dir: str | Path = "data/uploads",
-        transcribe_fn: Callable[[Path], list[Item]] | None = None,
+        transcribe_fn: Callable[[list[Path]], list[Item]] | None = None,
         open_browser_fn: Callable[[], Any] = open_browser,
         ensure_logged_in_fn: Callable[[Any], None] = ensure_logged_in,
         search_fn: Callable[..., list[list[Candidate]]] = search_list,
@@ -197,6 +201,7 @@ class RunStateMachine:
                 picks_left=len(run.pending) if self._state == "picking" else None,
                 draft=run.draft,
                 outcome=run.outcome,
+                photos=len(run.photos),
             )
 
     def events_after(self, seq: int) -> list[dict]:
@@ -207,27 +212,35 @@ class RunStateMachine:
         with self._db() as db:
             return db.recent_runs(limit)
 
-    def photo_path(self) -> Path | None:
+    def photo_path(self, index: int = 0) -> Path | None:
         with self._lock:
-            return None if self._run is None else self._run.photo
+            if self._run is None or not 0 <= index < len(self._run.photos):
+                return None
+            return self._run.photos[index]
 
     # --- the run's steps, called by the web layer -------------------------------------------
 
-    def start(self, photo: bytes, suffix: str = ".jpg") -> int:
-        """idle -> reading_list: save the photo and read it in a plain thread."""
+    def start(self, photos: list[tuple[bytes, str]]) -> int:
+        """idle -> reading_list: save the photos (bytes and file suffix, in upload order) and
+        read them as one list in a plain thread."""
+        if not 1 <= len(photos) <= MAX_PHOTOS:
+            raise BadRequest(f"envie de 1 a {MAX_PHOTOS} fotos")
         with self._lock:
             if self._state != "idle":
                 raise WrongState(self._state)
-            suffix = suffix.lower()
-            if not re.fullmatch(r"\.[a-z0-9]{1,5}", suffix):
-                suffix = ".jpg"
             with self._db() as db:
                 run_id = db.new_run(photo=None)
-                path = self._uploads_dir / f"{run_id}{suffix}"
                 self._uploads_dir.mkdir(parents=True, exist_ok=True)
-                path.write_bytes(photo)
-                db.set_photo(run_id, str(path))
-            run = _Run(run_id, path)
+                paths = []
+                for n, (data, suffix) in enumerate(photos, start=1):
+                    suffix = suffix.lower()
+                    if not re.fullmatch(r"\.[a-z0-9]{1,5}", suffix):
+                        suffix = ".jpg"
+                    path = self._uploads_dir / f"{run_id}-{n}{suffix}"
+                    path.write_bytes(data)
+                    paths.append(path)
+                db.set_photo(run_id, [str(p) for p in paths])
+            run = _Run(run_id, paths)
             self._run = run
             self._events.clear()
             self._set_state("reading_list")
@@ -458,7 +471,7 @@ class RunStateMachine:
 
     def _ocr(self, run: _Run) -> None:
         try:
-            items = self._transcribe_fn(run.photo)
+            items = self._transcribe_fn(run.photos)
         except Exception as exc:
             self._fail(run, f"não consegui ler a lista: {_describe(exc)}")
             return

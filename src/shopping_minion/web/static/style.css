@@ -190,6 +190,34 @@ button.badge { cursor: pointer; }
 }
 .bar { display: flex; align-items: center; gap: var(--gap); margin-top: var(--gap); flex-wrap: wrap; }
 
+/* review cards: one per line of the list */
+.photo .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.tab {
+  appearance: none; font: inherit; font-size: 0.9rem; color: var(--text); cursor: pointer;
+  min-height: 36px; padding: 4px 12px; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px;
+}
+.tab.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.thumbs { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--gap); }
+.thumbs li { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 96px; }
+.thumbs img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+.btn.disabled { opacity: 0.5; cursor: not-allowed; }
+.upload + .btn { margin-top: var(--gap); width: 100%; }
+.rcards { display: grid; gap: var(--gap); }
+.rcard { display: grid; gap: 8px; }
+.rcard.review { border-color: var(--amber); box-shadow: inset 3px 0 0 var(--amber); }
+.rline { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.rline .line { font-weight: 600; overflow-wrap: anywhere; }
+.ritem { display: grid; gap: 6px; }
+.ritem + .ritem { border-top: 1px dashed var(--border); padding-top: 8px; }
+.rsearch { display: flex; gap: 6px; align-items: center; }
+.rqty { display: flex; gap: 6px; align-items: center; }
+.rqty input { width: 6rem; }
+.rmore { display: grid; gap: 6px; }
+.rmore label { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 8px; align-items: center; color: var(--muted); font-size: 0.85rem; }
+.linkbtn { appearance: none; background: none; border: 0; padding: 4px 0; font: inherit; font-size: 0.9rem; color: var(--accent); cursor: pointer; justify-self: start; min-height: 32px; }
+.linkbtn:hover { text-decoration: underline; }
+
 /* tables: real tables on wide screens, stacked cards on phones */
 .tablewrap { min-width: 0; overflow-x: auto; }
 .editable td input[type="text"] { min-width: 6rem; }

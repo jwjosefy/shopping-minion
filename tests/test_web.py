@@ -87,6 +87,7 @@ class World:
         self.fill_gate_at = 1  # ... after this one (1-based)
         self.fill_started = threading.Event()
         self.cart_before = [("Leite UHT", "1")]
+        self.photos_seen: list[tuple[str, bytes]] = []  # what the OCR was given, in order
         self.synced = []  # first_n of each sync
         self.sync_result = SyncResult(new=2, skipped=1, stored=5)
         self.histories_seen = None  # what decide and draft got
@@ -96,8 +97,8 @@ class World:
         self.fills: list[list[str]] = []  # the line ids of each fill call
 
     # injected functions
-    def transcribe(self, photo):
-        assert photo.read_bytes() == b"fake-jpeg"
+    def transcribe(self, photos):
+        self.photos_seen = [(p.name, p.read_bytes()) for p in photos]
         if self.transcribe_error:
             raise RuntimeError(self.transcribe_error)
         return list(LIST)
@@ -246,6 +247,11 @@ def upload(client):
     return client.post("/api/run", files={"photo": ("lista.jpg", b"fake-jpeg", "image/jpeg")})
 
 
+def upload_many(client, n, field="photos"):
+    files = [(field, (f"p{i}.jpg", b"fake-jpeg", "image/jpeg")) for i in range(n)]
+    return client.post("/api/run", files=files)
+
+
 def events(client, after=0):
     text = client.get(f"/api/run/events?after={after}&follow=false").text
     return [json.loads(line[6:]) for line in text.splitlines() if line.startswith("data: ")]
@@ -284,7 +290,8 @@ def test_the_whole_flow_in_state_order(client, world):
     snap = wait_for(client, "reviewing_list")
     assert snap["run_id"] == run_id
     assert [i["name"] for i in snap["list"]] == ["frango", "atum", "feijão preto", "sal"]
-    assert (world.tmp_path / "uploads" / f"{run_id}.jpg").read_bytes() == b"fake-jpeg"
+    assert (world.tmp_path / "uploads" / f"{run_id}-1.jpg").read_bytes() == b"fake-jpeg"
+    assert snap["photos"] == 1
     assert client.get("/api/run/photo").content == b"fake-jpeg"
 
     # PUT list keeps the edits across a reload
@@ -572,7 +579,7 @@ def test_a_pick_for_the_wrong_index_or_product_is_422(client):
 def test_bad_bodies_are_rejected(client):
     to_reviewing_list(client)
     assert client.put("/api/run/list", json={"items": [{"name": "x"}]}).status_code == 422
-    assert client.post("/api/run").status_code == 422  # no photo
+    assert client.post("/api/run").status_code == 400  # no photo: 1 to 5 are expected
     assert client.put("/api/run/list", json={"items": []}).status_code == 200
     assert client.post("/api/run/list/confirm").status_code == 422  # empty list
 
@@ -667,9 +674,9 @@ def test_cancel_during_reading_ignores_the_ocr_result(client, world, monkeypatch
     gate = threading.Event()
     original = world.transcribe
 
-    def slow(photo):
+    def slow(photos):
         gate.wait(5)
-        return original(photo)
+        return original(photos)
 
     monkeypatch.setattr(world, "transcribe", slow)
     upload(client)
@@ -947,7 +954,7 @@ def test_the_stream_follows_new_events_and_sends_keepalives(machine, world):
 
     def start_later():
         time.sleep(0.15)  # no event yet: the stream has to wait and send a comment
-        machine.start(b"fake-jpeg", ".jpg")
+        machine.start([(b"fake-jpeg", ".jpg")])
 
     threading.Thread(target=start_later).start()
     asyncio.run(asyncio.wait_for(read(), 5))
@@ -1156,3 +1163,40 @@ def test_retry_is_only_for_done_with_something_to_retry(client, world):
     wait_for(client, "done")
     assert client.post("/api/run/retry").status_code == 422  # everything is ok
     assert client.get("/api/run").json()["state"] == "done"
+
+
+@pytest.mark.parametrize(("count", "status"), [(0, 400), (1, 202), (5, 202), (6, 400)])
+def test_upload_limit(client, count, status):
+    response = upload_many(client, count)
+    assert response.status_code == status
+    if status == 400:
+        assert "1 a 5" in response.json()["detail"]
+        assert client.get("/api/run").json()["state"] == "idle"  # no run was started
+
+
+def test_several_photos_are_read_in_order_and_served_by_index(client, world):
+    files = [("photos", (f"p{i}.png", f"page{i}".encode(), "image/png")) for i in range(3)]
+    run_id = client.post("/api/run", files=files).json()["run_id"]
+    snap = wait_for(client, "reviewing_list")
+    assert snap["photos"] == 3
+    assert world.photos_seen == [(f"{run_id}-{n}.png", f"page{n - 1}".encode()) for n in (1, 2, 3)]
+    assert [client.get(f"/api/run/photo?i={i}").content for i in range(3)] == [
+        b"page0",
+        b"page1",
+        b"page2",
+    ]
+    assert client.get("/api/run/photo").content == b"page0"  # the default is the first
+    assert client.get("/api/run/photo?i=3").status_code == 404
+    assert client.get("/api/run/photo?i=-1").status_code == 404
+    # the row keeps a JSON list of the paths
+    stored = Storage(world.tmp_path / "db" / "t.sqlite").list_runs()[0]["photo"]
+    assert json.loads(stored) == [
+        str(world.tmp_path / "uploads" / f"{run_id}-{n}.png") for n in (1, 2, 3)
+    ]
+
+
+def test_the_old_single_field_still_uploads(client, world):
+    response = upload_many(client, 1, field="photo")
+    assert response.status_code == 202
+    assert wait_for(client, "reviewing_list")["photos"] == 1
+    assert len(world.photos_seen) == 1

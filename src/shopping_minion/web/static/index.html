@@ -34,12 +34,25 @@
     <section v-else-if="state === 'idle'" data-screen="idle">
       <h2>Enviar lista</h2>
       <div class="card">
-        <p class="muted">Fotografe a lista de compras (ou escolha uma imagem).</p>
-        <label class="btn primary big upload">
-          <input type="file" accept="image/*" capture="environment" data-test="photo"
-                 :disabled="uploading" @change="onPhoto">
-          {{ uploading ? 'Enviando…' : 'Enviar foto da lista' }}
+        <p class="muted">Fotografe a lista de compras (ou escolha imagens). Até {{ maxPhotos }} fotos, se a lista tiver mais de uma página.</p>
+        <ul v-if="pending.length" class="thumbs" data-test="pending">
+          <li v-for="(p, i) in pending" :key="p.url" data-test="pending-photo">
+            <img :src="p.url" :alt="'Página ' + (i + 1)">
+            <span class="muted small">página {{ i + 1 }}</span>
+            <button class="btn ghost small danger" type="button" :aria-label="'remover página ' + (i + 1)"
+                    @click="removePending(i)">✕</button>
+          </li>
+        </ul>
+        <p v-if="pending.length > 1" class="muted small">São as páginas de uma lista só, na ordem acima.</p>
+        <label class="btn big upload" :class="{ primary: !pending.length, disabled: pending.length >= maxPhotos }">
+          <input type="file" accept="image/*" capture="environment" multiple data-test="photo"
+                 :disabled="uploading || pending.length >= maxPhotos" @change="onPhotos">
+          {{ pending.length ? 'Adicionar outra foto (' + pending.length + ' de ' + maxPhotos + ')' : 'Enviar foto da lista' }}
         </label>
+        <button v-if="pending.length" class="btn primary big" type="button" data-test="read-list"
+                :disabled="uploading" @click="readList">
+          {{ uploading ? 'Enviando…' : 'ler lista' }}
+        </button>
       </div>
 
       <div v-if="access" class="card access" data-test="access">
@@ -76,54 +89,58 @@
       <h2>Revisar lista</h2>
       <div class="split" :class="{ withphoto: listPhoto }">
         <figure v-if="listPhoto" class="photo">
+          <div v-if="photoCount > 1" class="tabs" role="tablist">
+            <button v-for="n in photoCount" :key="n" type="button" role="tab" class="tab"
+                    :class="{ on: photoTab === n - 1 }" :aria-selected="photoTab === n - 1"
+                    data-test="photo-tab" @click="photoTab = n - 1">página {{ n }}</button>
+          </div>
           <img :src="listPhoto" alt="Foto da lista" data-test="list-photo" @error="photoFailed = true">
         </figure>
         <div class="tablewrap">
-          <table class="grid editable">
-            <thead>
-              <tr>
-                <th>linha</th><th>nome</th><th>busca</th><th>restrições</th>
-                <th>marca</th><th>quantidade</th><th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, i) in rows" :key="row.key"
-                  :class="{ review: row.needs_review }" data-test="list-row">
-                <td data-label="linha">
-                  <input type="text" v-model="row.source_line" @input="touchList" aria-label="linha">
-                </td>
-                <td data-label="nome">
-                  <input type="text" v-model="row.name" @input="touchList" aria-label="nome">
-                </td>
-                <td data-label="busca">
-                  <input type="text" v-model="row.search_term" @input="touchList" aria-label="busca">
-                </td>
-                <td data-label="restrições">
-                  <input type="text" v-model="row.constraints" @input="touchList"
-                         placeholder="separadas por vírgula" aria-label="restrições">
-                </td>
-                <td data-label="marca">
-                  <input type="text" v-model="row.brand" @input="touchList" aria-label="marca">
-                </td>
-                <td data-label="quantidade" class="qty">
-                  <input type="number" min="0" step="any" inputmode="decimal"
-                         v-model="row.qty_value" @input="touchList" aria-label="quantidade">
-                  <select v-model="row.qty_unit" @change="touchList" aria-label="unidade">
-                    <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
-                  </select>
-                </td>
-                <td class="actions">
-                  <button v-if="row.needs_review" class="badge amber" type="button"
-                          title="marcar como revisado" @click="row.needs_review = false; touchList()">
+          <div class="rcards">
+            <article v-for="card in cards" :key="card.key" class="card rcard"
+                     :class="{ review: card.items.some((it) => it.row.needs_review) }" data-test="list-card">
+              <p class="rline">
+                <span class="muted small">linha</span>
+                <span class="line" data-test="line">{{ card.line || '(adicionada à mão)' }}</span>
+              </p>
+              <div v-for="it in card.items" :key="it.row.key" class="ritem" data-test="list-item">
+                <div class="rsearch">
+                  <input type="text" v-model="it.row.search_term" @input="touchList"
+                         aria-label="busca" placeholder="busca">
+                  <button v-if="it.row.needs_review" class="badge amber" type="button"
+                          title="marcar como revisado" @click="it.row.needs_review = false; touchList()">
                     revisar ✓
                   </button>
-                  <button class="btn ghost small danger" type="button" @click="removeRow(i)"
-                          aria-label="remover linha" title="remover linha">✕</button>
-                </td>
-              </tr>
-              <tr v-if="!rows.length"><td class="muted" colspan="7">A lista está vazia.</td></tr>
-            </tbody>
-          </table>
+                  <button class="btn ghost small danger" type="button" @click="removeRow(it.i)"
+                          :aria-label="card.items.length > 1 ? 'remover busca' : 'remover linha'"
+                          title="remover">✕</button>
+                </div>
+                <div v-if="it.row.qty_on" class="qty rqty">
+                  <input type="number" min="0" step="any" inputmode="decimal"
+                         v-model="it.row.qty_value" @input="touchList" aria-label="quantidade">
+                  <select v-model="it.row.qty_unit" @change="touchList" aria-label="unidade">
+                    <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
+                  </select>
+                  <button class="btn ghost small" type="button" aria-label="tirar quantidade"
+                          title="tirar quantidade" @click="dropQuantity(it.row)">✕</button>
+                </div>
+                <button v-else class="linkbtn" type="button" data-test="add-qty"
+                        @click="addQuantity(it.row)">+ quantidade</button>
+                <div v-if="it.row.open" class="rmore" data-test="more-fields">
+                  <label>nome <input type="text" v-model="it.row.name" @input="touchList"
+                                     aria-label="nome"></label>
+                  <label>restrições <input type="text" v-model="it.row.constraints" @input="touchList"
+                                           placeholder="separadas por vírgula" aria-label="restrições"></label>
+                  <label>marca <input type="text" v-model="it.row.brand" @input="touchList"
+                                      aria-label="marca"></label>
+                </div>
+              </div>
+              <button class="linkbtn" type="button" data-test="more" :aria-expanded="cardOpen(card)"
+                      @click="toggleMore(card)">{{ cardOpen(card) ? 'menos' : 'mais' }}</button>
+            </article>
+            <p v-if="!rows.length" class="muted">A lista está vazia.</p>
+          </div>
           <div class="bar">
             <button class="btn" type="button" data-test="add-row" @click="addRow">+ adicionar linha</button>
             <span class="muted saved">{{ saveText }}</span>
