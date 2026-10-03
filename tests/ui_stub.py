@@ -143,9 +143,47 @@ OUTCOME = {
             "verdict": "QUANTIDADE DIFERENTE: carrinho tem 1, esperado 2",
         },
     ],
+    "problems": [
+        {
+            "line_id": "p-tomate",
+            "item_names": ["tomate"],
+            "product_name": "Tomate italiano kg",
+            "expected": "1kg",
+            "found": None,
+            "message": "o site não aceitou o clique em Adicionar",
+        },
+        {
+            "line_id": "p-req",
+            "item_names": ["requeijão", "requeijão"],
+            "product_name": "Requeijão cremoso 200g",
+            "expected": "2",
+            "found": "1",
+            "message": "QUANTIDADE DIFERENTE: carrinho tem 1, esperado 2",
+        },
+    ],
     "extras": [{"name": "Sabão em pó 1kg", "quantity": "1", "was_before": True}],
     "ok_count": 1,
     "total": 3,
+}
+
+# What the retry leaves: the two lines again, now ok.
+OUTCOME_AFTER_RETRY = {
+    "checks": [
+        {**OUTCOME["checks"][1], "found": "1kg", "ok": True, "verdict": "ok"},
+        {**OUTCOME["checks"][2], "found": "2", "ok": True, "verdict": "ok"},
+    ],
+    "problems": [],
+    "extras": OUTCOME["extras"],
+    "ok_count": 2,
+    "total": 2,
+}
+
+# An item the search found nothing for, even after the retry (picker with `no_results`).
+NO_RESULTS_PICK = {
+    "item": {**LIST_ITEMS[1], "name": "sal grosso", "search_term": "sal grosso"},
+    "candidates": [],
+    "jev": {"choice": None, "confidence": None, "nothing_fit": False},
+    "no_results": True,
 }
 
 WORKING = {"reading_list", "syncing_history", "searching", "deciding", "filling_cart"}
@@ -157,8 +195,9 @@ class WrongState(Exception):
 
 
 class Stub:
-    def __init__(self, hold=(), access=True):
+    def __init__(self, hold=(), access=True, picks=None):
         self.hold = set(hold)
+        self.picks = list(PICKS if picks is None else picks)
         self.access = access
         self.lock = threading.RLock()
         self.closing = False
@@ -174,6 +213,7 @@ class Stub:
         self.list_puts: list[dict] = []
         self.picks_posted: list[dict] = []
         self.cart_puts: list[dict] = []
+        self.retries = 0
 
     def reset(self):
         self.state = "idle"
@@ -253,7 +293,7 @@ class Stub:
         self.gate("deciding", lambda: self._if("deciding", self._to_picking))
 
     def _to_picking(self):
-        self.emit("decide", {"phase": "end", "accepted": 1, "to_pick": len(PICKS)})
+        self.emit("decide", {"phase": "end", "accepted": 1, "to_pick": len(self.picks)})
         self.go("picking")
 
     def draft(self):
@@ -315,6 +355,15 @@ class Stub:
             )
         self.go("done")
 
+    def retry(self):
+        self.retries += 1
+        self.go("filling_cart")
+        self.emit(
+            "fill",
+            {"i": 1, "n": 2, "name": "Tomate italiano kg", "status": "added", "message": None},
+        )
+        self.gate("retry", lambda: self._if("filling_cart", lambda: self.go("done")))
+
     def snapshot(self):
         body = {"state": self.state, "run_id": 1, "message": self.message}
         if self.state == "idle":
@@ -322,11 +371,11 @@ class Stub:
         if self.state == "reviewing_list":
             body["list"] = {"items": self.items}
         if self.state == "picking":
-            body["picks_left"] = len(PICKS) - self.pick_at
+            body["picks_left"] = len(self.picks) - self.pick_at
         if self.state == "reviewing_cart":
             body["cart_draft"] = self.draft()
         if self.state == "done":
-            body["outcome"] = OUTCOME
+            body["outcome"] = OUTCOME_AFTER_RETRY if self.retries else OUTCOME
         return body
 
 
@@ -401,8 +450,8 @@ def create_app(stub: Stub) -> FastAPI:
     def picks_next():
         with stub.lock:
             stub.need("picking")
-            pick = PICKS[stub.pick_at]
-            return {"index": stub.pick_at, "left": len(PICKS) - stub.pick_at, **pick}
+            pick = stub.picks[stub.pick_at]
+            return {"index": stub.pick_at, "left": len(stub.picks) - stub.pick_at, **pick}
 
     @app.post("/api/run/picks")
     async def post_pick(request: Request):
@@ -413,9 +462,9 @@ def create_app(stub: Stub) -> FastAPI:
                 return JSONResponse({"detail": "índice errado", "state": stub.state}, 409)
             stub.picks_posted.append(body)
             if body.get("product_id") is None:
-                stub.skipped.append(PICKS[stub.pick_at]["item"]["name"])
+                stub.skipped.append(stub.picks[stub.pick_at]["item"]["name"])
             stub.pick_at += 1
-            if stub.pick_at >= len(PICKS):
+            if stub.pick_at >= len(stub.picks):
                 stub.go("reviewing_cart")
         return {}
 
@@ -440,6 +489,13 @@ def create_app(stub: Stub) -> FastAPI:
         with stub.lock:
             stub.need("reviewing_cart")
             stub.confirm_cart()
+        return {}
+
+    @app.post("/api/run/retry", status_code=202)
+    def retry():
+        with stub.lock:
+            stub.need("done")
+            stub.retry()
         return {}
 
     @app.post("/api/run/cancel")

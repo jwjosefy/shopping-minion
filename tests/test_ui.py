@@ -11,7 +11,7 @@ import urllib.request
 import pytest
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import expect, sync_playwright
-from ui_stub import StubServer
+from ui_stub import NO_RESULTS_PICK, StubServer
 
 pytestmark = pytest.mark.live
 
@@ -222,8 +222,11 @@ def test_whole_flow(browser, size):
             expect(done.get_by_role("heading", name="Pronto")).to_be_visible()
             problems = page.locator("[data-test=problem]")
             expect(problems).to_have_count(2)
-            expect(page.locator("[data-test=problems]")).to_contain_text("FALTANDO")
+            expect(page.locator("[data-test=problems]")).to_contain_text(
+                "o site não aceitou o clique em Adicionar"
+            )
             expect(page.locator("[data-test=problems]")).to_contain_text("QUANTIDADE DIFERENTE")
+            expect(page.locator("[data-test=retry]")).to_have_text("tentar de novo (2)")
             expect(page.locator("[data-test=extras]")).to_contain_text("Sabão em pó")
             expect(page.locator("[data-test=extras]")).to_contain_text("não são desta lista")
             assert page.locator("[data-test=oks]").get_attribute("open") is None  # collapsed
@@ -255,6 +258,65 @@ def test_cancel_while_reviewing(browser):
             expect(page.locator("[data-test=open-note]")).to_have_count(0)
             page.locator("[data-test=close-browser]").click()
             screen(page, "idle")
+        finally:
+            context.close()
+
+
+@pytest.mark.parametrize("size", VIEWPORTS.values(), ids=VIEWPORTS.keys())
+def test_done_lists_every_failure_and_retries_them(browser, size):
+    with StubServer(hold={"retry"}) as server:
+        stub = server.stub
+        stub.go("done")
+        context, page = open_page(browser, server, size)
+        try:
+            done = screen(page, "done")
+            problems = page.locator("[data-test=problem]")
+            expect(problems).to_have_count(2)
+            # product, expected, what the cart shows, and the message, for every line
+            tomate, requeijao = problems.nth(0), problems.nth(1)
+            expect(tomate).to_contain_text("Tomate italiano kg")
+            expect(tomate).to_contain_text("esperado 1kg; no carrinho nada")
+            expect(tomate).to_contain_text("o site não aceitou o clique em Adicionar")
+            expect(requeijao).to_contain_text("Requeijão cremoso 200g")
+            expect(requeijao).to_contain_text("esperado 2; no carrinho 1")
+            expect(requeijao).to_contain_text("QUANTIDADE DIFERENTE")
+            assert_fits(page, "done with failures")
+
+            page.locator("[data-test=retry]").click()
+            filling = screen(page, "filling_cart")
+            expect(filling).to_contain_text("Adicionando")
+            assert stub.retries == 1
+            stub.release("retry")
+
+            done = screen(page, "done")
+            expect(page.locator("[data-test=summary]")).to_contain_text("2 de 2")
+            expect(page.locator("[data-test=problems]")).to_have_count(0)
+            expect(page.locator("[data-test=retry]")).to_have_count(0)
+            expect(done.get_by_role("heading", name="Pronto")).to_be_visible()
+        finally:
+            context.close()
+
+
+def test_an_item_with_no_results_offers_only_to_skip(browser):
+    with StubServer(picks=[NO_RESULTS_PICK]) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "idle")
+            page.locator("input[data-test=photo]").set_input_files(PHOTO)
+            screen(page, "reviewing_list")
+            page.locator("[data-test=confirm-list]").click()
+            screen(page, "picking")
+            expect(page.locator("[data-test=pick-item]")).to_have_text("sal grosso")
+            expect(page.locator("[data-test=no-results]")).to_have_text(
+                "nada encontrado para “sal grosso”"
+            )
+            expect(page.locator(".cand")).to_have_count(0)
+            expect(page.locator("[data-test=take]")).to_have_count(0)
+            assert_fits(page, "picking (no results)")
+            page.locator("[data-test=skip]").click()
+            wait_for(lambda: stub.picks_posted == [{"index": 0, "product_id": None}], "the skip")
+            screen(page, "reviewing_cart")
         finally:
             context.close()
 

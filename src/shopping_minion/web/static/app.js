@@ -549,7 +549,8 @@ createApp({
 
     // ---- done ------------------------------------------------------------------------------------------------
     const outcome = computed(() => run.value.outcome || null);
-    const problems = computed(() => ((outcome.value && outcome.value.checks) || []).filter((c) => !c.ok));
+    // Every line that isn't ok, with the add's message or the check's verdict (from the server).
+    const problems = computed(() => (outcome.value && outcome.value.problems) || []);
     const oks = computed(() => ((outcome.value && outcome.value.checks) || []).filter((c) => c.ok));
     const extras = computed(() => (outcome.value && outcome.value.extras) || []);
     const checkNames = (c) => (c.item_names || (c.item_name ? [c.item_name] : [])).join(" + ");
@@ -559,6 +560,20 @@ createApp({
       try {
         await api("DELETE", "/api/run");
         await refresh();
+      } catch (err) {
+        fail(err);
+      } finally {
+        busy.value = false;
+      }
+    }
+
+    // The same cart pass on the failed lines only; the server goes done -> filling_cart -> done.
+    async function retryFailed() {
+      if (busy.value) return;
+      busy.value = true;
+      try {
+        await api("POST", "/api/run/retry");
+        await refresh(true);
       } catch (err) {
         fail(err);
       } finally {
@@ -601,7 +616,7 @@ createApp({
       outcome, problems, oks, extras,
       money, pct, dateText, countText, fillLabel, fillClass, checkNames, lineProduct, lineItems,
       onPhoto, touchList, addRow, removeRow, confirmList, takeCandidate, skipPick, editLine,
-      removeLine, confirmCart, resetRun, cancelRun,
+      removeLine, confirmCart, resetRun, retryFailed, cancelRun,
     };
   },
 }).mount("#app");

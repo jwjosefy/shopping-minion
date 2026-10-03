@@ -109,8 +109,11 @@ def test_response_matching_uses_path_and_param_only():
     assert not is_search_response("https://any.host/1/2/search?q=atum", "atum")
 
 
-def make_page(handler_calls):
-    """A page double: it hands each registered response listener the responses we choose."""
+def make_page(handler_calls, per_goto=None):
+    """A page double: it hands each registered response listener the responses we choose.
+
+    With `per_goto`, the n-th `goto` hands out `per_goto[n]` (the last one repeats) instead.
+    """
 
     class FakeResponse:
         def __init__(self, url, body):
@@ -128,6 +131,7 @@ def make_page(handler_calls):
     class FakePage:
         def __init__(self):
             self.listeners = []
+            self.gotos = []
 
         def on(self, event, fn):
             assert event == "response"
@@ -137,7 +141,11 @@ def make_page(handler_calls):
             self.listeners.remove(fn)
 
         def goto(self, url):
-            for from_, body in handler_calls:
+            self.gotos.append(url)
+            calls = handler_calls
+            if per_goto is not None:
+                calls = per_goto[min(len(self.gotos), len(per_goto)) - 1]
+            for from_, body in calls:
                 for fn in self.listeners:
                     fn(FakeResponse(f"https://h/1/2/search?search=atum&size=12&from={from_}", body))
 
@@ -188,3 +196,39 @@ def test_live_search_atum():
     print(f"atum: {len(candidates)} candidates")
     assert len(candidates) >= 12
     assert all(c.product_id and c.slug and c.name for c in candidates)
+
+
+EMPTY = {"hits": [], "total": 0, "hasNext": False}
+
+
+def test_an_empty_first_read_is_opened_once_more():
+    full = {**load("atum"), "hasNext": False}
+    page = make_page(None, per_goto=[[(0, EMPTY)], [(0, full)]])
+    result = search(page, Item(source_line="atum", name="atum", search_term="atum"))
+    assert len(result) == 12
+    assert result.retried is True
+    assert len(page.gotos) == 2 and page.gotos[0] == page.gotos[1] == search_url("atum")
+    assert page.listeners == []
+
+
+def test_a_search_with_results_is_not_retried():
+    full = {**load("atum"), "hasNext": False}
+    page = make_page([(0, full)])
+    result = search(page, Item(source_line="atum", name="atum", search_term="atum"))
+    assert result.retried is False and len(page.gotos) == 1
+
+
+def test_still_empty_after_the_retry_gives_an_empty_retried_list():
+    page = make_page([(0, EMPTY)])
+    result = search(page, Item(source_line="x", name="x", search_term="atum"))
+    assert result == [] and result.retried is True
+    assert len(page.gotos) == 2  # once more, not a loop
+
+
+def test_search_all_hands_the_retry_flag_to_progress():
+    full = {**load("atum"), "hasNext": False}
+    page = make_page(None, per_goto=[[(0, EMPTY)], [(0, full)], [(0, full)]])
+    seen = []
+    items = [Item(source_line="atum", name="atum", search_term="atum")] * 2
+    search_all(page, items, progress=lambda i, n, item, c: seen.append(c.retried))
+    assert seen == [True, False]

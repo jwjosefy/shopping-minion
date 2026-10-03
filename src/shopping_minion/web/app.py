@@ -27,9 +27,9 @@ from pydantic import BaseModel
 
 from shopping_minion.decide import describe_candidate
 from shopping_minion.items import Candidate, CartDraft, Item
-from shopping_minion.reconcile import normalize
+from shopping_minion.reconcile import expected_amount, format_amount, normalize
 from shopping_minion.web.statemachine import BadRequest, RunStateMachine, WrongState
-from shopping_minion.workflow import CartOutcome, DraftEdit
+from shopping_minion.workflow import CartOutcome, DraftEdit, problem_indexes, problem_message
 
 STATIC_DIR = Path(__file__).parent / "static"
 COOKIE = "sm_token"
@@ -186,8 +186,29 @@ def outcome_json(outcome: CartOutcome, draft: CartDraft | None) -> dict:
             }
         )
     before = {normalize(name) for name, _ in outcome.before or []}
+    problems = []
+    for i in problem_indexes(draft, outcome) if draft is not None else []:
+        line = draft.lines[i]
+        result = outcome.results[i] if i < len(outcome.results) else None
+        check = outcome.checks[i] if i < len(outcome.checks) else None
+        found = check.found if check is not None else None
+        problems.append(
+            {
+                "line_id": line.line_id,
+                "item_names": [item.name for item in line.items],
+                "product_name": line.candidate.name,
+                "expected": check.expected
+                if check is not None
+                else format_amount(expected_amount(line.candidate, line.target)),
+                "found": found
+                if found is not None
+                else (result.quantity_shown if result else None),
+                "message": problem_message(result, check) or "não foi adicionado",
+            }
+        )
     return {
         "checks": checks,
+        "problems": problems,  # every line that isn't ok, with why; what "tentar de novo" retries
         "extras": [
             {"name": name, "quantity": quantity, "was_before": normalize(name) in before}
             for name, quantity in outcome.extras
@@ -383,6 +404,7 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
                 "confidence": pick.decision.confidence,
                 "nothing_fit": pick.nothing_fit,
             },
+            "no_results": pick.no_results,
         }
 
     @app.post("/api/run/picks")
@@ -397,6 +419,11 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
     @app.post("/api/run/cart-draft/confirm", status_code=202)
     def post_cart_confirm():
         machine.confirm_cart()
+        return {"state": machine.state}
+
+    @app.post("/api/run/retry", status_code=202)
+    def post_retry():
+        machine.retry()
         return {"state": machine.state}
 
     @app.post("/api/run/cancel")
