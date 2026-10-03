@@ -175,6 +175,32 @@ Each wave is reviewed by Johann before merge, as before. Part A goes first, so e
 - T24's tests use a fake client.
 - T26 is a live run.
 
+## 5.1 Build log (2026-10-02)
+
+Waves 1–5 ran on their own, as Johann asked, each task merged into `main` with its own commit:
+
+| Wave | Task | Merge |
+|---|---|---|
+| 1 | T20 | `4f5fb27` |
+| 1 | T19 | `c831834` |
+| 2 | T21 | `1cf672f` |
+| 3 | T22 | `18b8fe0` |
+| 4 | T23 | `c6126ba` |
+| 5 | T24 | after `c6126ba` |
+| 5 | T25 | `3d0b200` |
+
+The commits to revert by are in `git log`.
+
+**Changes outside the tasks:**
+- **Browser:** headless by default, with `login` headed (`f907565`). Checked live: search, order sync, and the anonymous cart tests.
+- **Test fix:** a flaky UI test, which was flaky before T20 too, now tolerates the event stream redrawing first (`0b701d3`).
+- **Prompt fix:** the ground-meat rule after T23's eval (`c6126ba`).
+
+**State before T26:**
+- 457 tests pass, and the 20 UI tests pass 3 times in a row.
+- The server starts with everything merged, checked locally on another port: the idle state and 3 preferences imported from `data/preferencias.yaml`.
+- `accept_at` 0.75, `history: options`, `learned: true`.
+
 ## 6. Open
 
 - **HLD Q2:** what the store's page shows when "Adicionar" doesn't take. The screenshot of §1.2 should answer it on the next real case.
