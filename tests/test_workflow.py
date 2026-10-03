@@ -183,7 +183,7 @@ def test_draft_cart_ignores_history_in_another_unit_and_prefers_the_list_quantit
 def test_decide_list_passes_the_histories_to_decide(monkeypatch):
     seen = {}
 
-    def fake_decide(pairs, prefs, config, client, histories):
+    def fake_decide(pairs, prefs, config, client, histories, learned=None):
         seen["histories"] = histories
         return []
 

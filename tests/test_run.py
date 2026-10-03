@@ -499,6 +499,7 @@ def test_the_decide_config_is_logged_and_empty_order_tables_are_fine(world):
     assert decide == {
         "model": "jev-latest",
         "history": "options",
+        "learned": False,
         "accept_at": 0.8,
         "ask_below": 0.5,
         "batch_size": 5,
@@ -623,3 +624,43 @@ def test_cli_wires_the_run_command():
     assert args.yes is True
     assert str(args.db) == "x.sqlite"
     assert str(args.preferences) == "data/preferencias.yaml"
+
+
+def test_learned_picks_of_earlier_runs_reach_decide_but_not_this_run(world, monkeypatch):
+    world.config.write_text(
+        "model: jev-latest\nbatch_size: 5\naccept_at: 0.8\nask_below: 0.5\nlearned: true\n",
+        encoding="utf-8",
+    )
+    world.history_config.write_text("first_sync_orders: 10\nrelated_lines: 10\nlearn_from_run: 1\n")
+    storage = Storage(world.db)
+    earlier = storage.new_run("old.yaml")
+    storage.save_decisions(
+        earlier,
+        [
+            Decision(
+                item=Item(source_line="atum", name="atum", search_term="atum"),
+                candidates=[],
+                choice="1",
+                confidence=0.9,
+                probabilities={},
+                status="accepted",
+            )
+        ],
+    )
+    storage.close()
+    seen = {}
+    real = run_module.decide_list
+
+    def spy(*args, **kwargs):
+        seen["learned"] = kwargs["learned"]
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(run_module, "decide_list", spy)
+    assert world.run(Script("1", "s", "")) == 0
+    atum, papel, frango = seen["learned"]
+    assert list(atum) == ["1"] and atum["1"].times == 1
+    assert papel == {} and frango == {}  # this run's own picks (run 2) are not learned
+    storage = Storage(world.db)
+    (row,) = [r["data"] for r in storage.read_log(2) if r["kind"] == "decide"]
+    storage.close()
+    assert row["learned"] is True

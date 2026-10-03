@@ -27,6 +27,7 @@ from shopping_minion.items import (
     Item,
     Quantity,
 )
+from shopping_minion.learned import LearnedPreference
 from shopping_minion.merge import build_line, line_label, merge_lines
 from shopping_minion.preferences import find_preference
 from shopping_minion.quantity import target_quantity
@@ -103,10 +104,13 @@ def decide_list(
     config: DecideConfig,
     client: Any,
     histories: list[ItemHistory] | None = None,
+    learned: list[dict[str, LearnedPreference]] | None = None,
 ) -> list[Decision]:
-    """Jev's decision per item, in the order of `items`. `histories`, if given, has one entry
-    per item, in the same order."""
-    return decide(list(zip(items, candidates, strict=True)), prefs, config, client, histories)
+    """Jev's decision per item, in the order of `items`. `histories` and `learned`, if given,
+    have one entry per item, in the same order."""
+    return decide(
+        list(zip(items, candidates, strict=True)), prefs, config, client, histories, learned
+    )
 
 
 # --- the cart draft -------------------------------------------------------------------------
