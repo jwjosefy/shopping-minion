@@ -2,9 +2,17 @@ import json
 import sqlite3
 from decimal import Decimal
 
+import pytest
+
 from shopping_minion import cli
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
-from shopping_minion.report import format_duration, list_corrections, report
+from shopping_minion.report import (
+    build_report,
+    format_duration,
+    format_report,
+    list_corrections,
+    report,
+)
 from shopping_minion.storage import Storage
 
 
@@ -175,3 +183,63 @@ def test_cli_report_subcommand(tmp_path, capsys):
     Storage(path).new_run(None)
     cli.main(["report", "--db", str(path)])
     assert "Rodada 1" in capsys.readouterr().out
+
+
+def test_build_report_is_pure_data_and_the_text_prints_it(tmp_path):
+    path = tmp_path / "db.sqlite"
+    s = Storage(path)
+    run_id = s.new_run("a.jpg")
+    s.save_items(run_id, [it("arroz"), it("sal")], [it("arroz")])
+    s.save_decisions(run_id, [decision("a", "accepted"), decision("b", "user_chosen")])
+    s.save_cart(
+        run_id, [CartResult(product_id="p", status="added", quantity_shown="1", message=None)]
+    )
+    s.close()
+    put_log(
+        path,
+        run_id,
+        [
+            state(0, "reading_list"),
+            state(30, "picking"),
+            state(90, "reviewing_cart"),
+            state(100, "picking"),  # "trocar": the same item again
+            state(130, "reviewing_cart"),
+            state(150, "filling_cart"),
+            state(160, "done"),
+            pick(1, "1", "2"),
+            pick(1, "1", "1"),  # reopened: the item counts once, as it ended
+            pick(2, None, None),
+            (900, "pick_quantity", {"index": 1, "quantity": {"value": 2, "unit": "un"}}),
+            (900, "check", {"ok_count": 1, "total": 1, "extras": 0}),
+        ],
+    )
+    storage = Storage(path)
+    try:
+        data = build_report(storage, run_id)
+        json.dumps(data)  # plain data
+        assert data["run_id"] == run_id
+        assert data["items"] == 1 and data["in_cart"] == 1 and data["cart_size"] == 1
+        steps = {step["state"]: step for step in data["time"]["steps"]}
+        assert steps["reading_list"]["seconds"] == 30 and steps["reading_list"]["who"] == "machine"
+        assert steps["picking"]["seconds"] == 60 + 30  # both visits are summed
+        assert steps["picking"]["who"] == "you" and steps["picking"]["text"] == "1 min 30 s"
+        assert data["time"]["machine"]["seconds"] == 30 + 10
+        assert data["time"]["you"]["seconds"] == 90 + 30
+        assert data["time"]["total"]["text"] == "2 min 40 s"
+        assert data["corrections"]["list"] == {"edited": 0, "deleted": 1, "added": 0, "ocr": 2}
+        assert data["corrections"]["products"] == {
+            "accepted": 1,
+            "asked": 2,
+            "same": 1,
+            "other": 0,
+            "skipped": 1,
+        }
+        assert data["corrections"]["cart"] == {"changed": 0, "removed": 0}
+        assert data["check"] == {"ok_count": 1, "total": 1, "extras": 0}
+        text = format_report(data)
+        assert text[0].endswith(" — 1 itens na lista, 1 no carrinho")
+        assert text[-1] == "Conferência: 1 de 1 itens conferem"
+        with pytest.raises(LookupError):
+            build_report(storage, 99)
+    finally:
+        storage.close()
