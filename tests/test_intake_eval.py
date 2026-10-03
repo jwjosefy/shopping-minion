@@ -89,3 +89,20 @@ def test_duplicate_lines_are_claimed_in_order():
     items = [i for i in perfect() if i.name in ("requeijão", "margarina")]
     report = compare(FIXTURE, items)
     assert [line.produced for line in report.lines if line.raw == "Requeijão"] == [1, 1]
+
+
+def test_main_takes_several_photos_as_pages_of_one_list(monkeypatch, tmp_path, capsys):
+    import intake_eval
+
+    seen = []
+    monkeypatch.setattr(
+        intake_eval, "transcribe", lambda photos, model: seen.append(photos) or perfect()
+    )
+    fixture = tmp_path / "f.yaml"
+    fixture.write_text(yaml.safe_dump(FIXTURE), encoding="utf-8")
+
+    assert (
+        intake_eval.main(["--photo", "p1.jpg", "--photo", "p2.jpg", "--fixture", str(fixture)]) == 0
+    )
+    assert seen == [[Path("p1.jpg"), Path("p2.jpg")]]
+    assert "items found" in capsys.readouterr().out

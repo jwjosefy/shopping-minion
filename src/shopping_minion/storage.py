@@ -75,6 +75,19 @@ def _dump(model: BaseModel | None) -> str | None:
     return None if model is None else model.model_dump_json()
 
 
+def photo_list(value: str | None) -> list[str]:
+    """The paths in a `runs.photo` value: a JSON list, or (old rows) one plain path."""
+    if not value:
+        return []
+    if value.startswith("["):
+        try:
+            paths = json.loads(value)
+        except json.JSONDecodeError:
+            return [value]
+        return [p for p in paths if isinstance(p, str)] if isinstance(paths, list) else [value]
+    return [value]
+
+
 class Storage:
     def __init__(self, path: str | Path = "data/shopping-minion.sqlite") -> None:
         path = Path(path)
@@ -119,10 +132,16 @@ class Storage:
     def save_cart(self, run_id: int, results: Sequence[CartResult]) -> None:
         self._replace("cart", "result_json", run_id, results)
 
-    def set_photo(self, run_id: int, photo: str) -> None:
-        """The web app learns the file name (<run_id>.<ext>) only after the run row exists."""
+    def set_photo(self, run_id: int, photos: str | Sequence[str]) -> None:
+        """The web app learns the file names (<run_id>-<n>.<ext>) only after the run row exists.
+        `runs.photo` keeps a JSON list of paths."""
+        value = json.dumps([photos] if isinstance(photos, str) else list(photos))
         with self._conn:
-            self._conn.execute("UPDATE runs SET photo = ? WHERE id = ?", (photo, run_id))
+            self._conn.execute("UPDATE runs SET photo = ? WHERE id = ?", (value, run_id))
+
+    def photos(self, run_id: int) -> list[str]:
+        row = self._conn.execute("SELECT photo FROM runs WHERE id = ?", (run_id,)).fetchone()
+        return photo_list(None if row is None else row["photo"])
 
     def set_status(self, run_id: int, status: str) -> None:
         with self._conn:

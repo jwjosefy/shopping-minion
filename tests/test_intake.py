@@ -39,11 +39,11 @@ class FakeRunner:
         self.proc = subprocess.CompletedProcess([], returncode, stdout, stderr)
         self.raises = raises
         self.calls: list[tuple[list[str], Path]] = []
-        self.copy_existed = False
+        self.files: list[str] = []  # what was in cwd during the call
 
     def __call__(self, args, cwd):
         self.calls.append((args, cwd))
-        self.copy_existed = Path(args[2].rsplit(" ", 1)[1]).is_file()
+        self.files = sorted(p.name for p in cwd.iterdir())
         if self.raises:
             raise self.raises
         return self.proc
@@ -106,7 +106,7 @@ def test_transcribe_runs_claude_in_a_temp_dir_with_a_copy(photo):
     assert json.loads(args[args.index("--json-schema") + 1]) == INTAKE_SCHEMA
     assert "handwritten grocery list" in args[args.index("--system-prompt") + 1]
     assert cwd != photo.parent and cwd.name.startswith("shopping-minion-ocr-")
-    assert runner.copy_existed  # the request names a real file inside cwd...
+    assert runner.files == [photo.name]  # the request names a real file inside cwd...
     assert str(cwd / photo.name) in args[2]  # ...by absolute path
     assert not cwd.exists()  # cleaned up afterwards
     assert photo.exists()  # the original is untouched
@@ -115,6 +115,52 @@ def test_transcribe_runs_claude_in_a_temp_dir_with_a_copy(photo):
 def test_build_command_names_the_copy(tmp_path):
     copy = tmp_path / "x.jpg"
     assert str(copy) in build_command(copy)[2]
+
+
+def test_transcribe_names_every_photo_in_upload_order(tmp_path):
+    pages = []
+    for name in ("b.jpg", "a.jpg", "c.jpg"):  # not alphabetical: the order given is what counts
+        (tmp_path / name).write_bytes(name.encode())
+        pages.append(tmp_path / name)
+    runner = FakeRunner(stdout=json.dumps(envelope()))
+    assert transcribe(pages, runner=runner) == [Item.model_validate(ITEM)]
+
+    args, cwd = runner.calls[0]
+    assert runner.files == ["1-b.jpg", "2-a.jpg", "3-c.jpg"]
+    request = args[2]
+    assert "3 images" in request and "pages" in request
+    at = [request.index(str(cwd / name)) for name in runner.files]
+    assert at == sorted(at)  # named in order
+    assert not cwd.exists()
+
+
+def test_same_file_name_from_two_folders_does_not_collide(tmp_path):
+    pages = []
+    for folder in ("x", "y"):
+        (tmp_path / folder).mkdir()
+        (tmp_path / folder / "lista.jpg").write_bytes(folder.encode())
+        pages.append(tmp_path / folder / "lista.jpg")
+    runner = FakeRunner(stdout=json.dumps(envelope()))
+    transcribe(pages, runner=runner)
+    assert runner.files == ["1-lista.jpg", "2-lista.jpg"]
+
+
+def test_a_one_item_list_of_photos_is_the_single_photo_request(photo):
+    runner = FakeRunner(stdout=json.dumps(envelope()))
+    transcribe([photo], runner=runner)
+    assert runner.files == [photo.name]
+    assert runner.calls[0][0][2].startswith("Transcribe the grocery list in the file ")
+
+
+def test_the_prompt_says_the_images_are_pages_of_one_list():
+    command = build_command([Path("/t/1-a.jpg"), Path("/t/2-b.jpg")])
+    prompt = command[command.index("--system-prompt") + 1]
+    assert "pages of one list" in prompt and "page order" in prompt
+
+
+def test_no_photos_raises():
+    with pytest.raises(IntakeError, match="no photos"):
+        transcribe([], runner=FakeRunner())
 
 
 def test_result_string_is_the_fallback(photo):
@@ -162,6 +208,11 @@ def test_errors_raise_intake_error(photo, runner, needle):
         transcribe(photo, runner=runner)
 
 
+def test_missing_second_photo_raises(photo, tmp_path):
+    with pytest.raises(IntakeError, match="not found"):
+        transcribe([photo, tmp_path / "nope.jpg"], runner=FakeRunner())
+
+
 def test_missing_photo_raises(tmp_path):
     with pytest.raises(IntakeError, match="not found"):
         transcribe(tmp_path / "nope.jpg", runner=FakeRunner())
@@ -178,6 +229,22 @@ def test_cli_ocr_writes_yaml(tmp_path, monkeypatch, capsys):
     assert "feijão" in text  # allow_unicode
     assert yaml.safe_load(text)["items"][0]["constraints"] == ["não preto"]
     assert "1 items" in capsys.readouterr().err
+
+
+def test_cli_ocr_takes_several_photos_in_order(tmp_path, monkeypatch, capsys):
+    pages = []
+    for name in ("p2.jpg", "p1.jpg"):
+        (tmp_path / name).write_bytes(b"x")
+        pages.append(tmp_path / name)
+    runner = FakeRunner(stdout=json.dumps(envelope()))
+    monkeypatch.setattr(
+        "shopping_minion.intake.transcribe", lambda photos: transcribe(photos, runner=runner)
+    )
+
+    cli.main(["ocr", *map(str, pages)])
+
+    assert yaml.safe_load(capsys.readouterr().out)["items"][0]["name"] == "presunto"
+    assert runner.files == ["1-p2.jpg", "2-p1.jpg"]
 
 
 def test_cli_ocr_prints_to_stdout_and_reports_errors(tmp_path, monkeypatch, capsys):

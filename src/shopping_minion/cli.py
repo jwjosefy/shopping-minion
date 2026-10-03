@@ -9,7 +9,7 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
     from shopping_minion.intake import IntakeError, transcribe
 
     try:
-        items = transcribe(args.photo)
+        items = transcribe(args.photo)  # several photos: the pages of one list, in order
     except IntakeError as exc:
         print(f"ocr failed: {exc}", file=sys.stderr)
         return 1
@@ -144,8 +144,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = parser.add_subparsers(dest="command")
 
-    ocr = sub.add_parser("ocr", help="transcribe a photo of a list into YAML")
-    ocr.add_argument("photo", type=Path)
+    ocr = sub.add_parser("ocr", help="transcribe photos of a list into YAML")
+    ocr.add_argument("photo", type=Path, nargs="+", help="the photos, in page order")
     ocr.add_argument("-o", "--output", type=Path, help="write here instead of stdout")
     ocr.set_defaults(func=_cmd_ocr)
 

@@ -28,7 +28,7 @@ from pydantic import BaseModel
 from shopping_minion.decide import describe_candidate
 from shopping_minion.items import Candidate, CartDraft, Item
 from shopping_minion.reconcile import expected_amount, format_amount, normalize
-from shopping_minion.web.statemachine import BadRequest, RunStateMachine, WrongState
+from shopping_minion.web.statemachine import MAX_PHOTOS, BadRequest, RunStateMachine, WrongState
 from shopping_minion.workflow import CartOutcome, DraftEdit, problem_indexes, problem_message
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -233,6 +233,8 @@ def outcome_json(outcome: CartOutcome, draft: CartDraft | None) -> dict:
 def snapshot_json(machine: RunStateMachine) -> dict:
     snap = machine.snapshot()
     data: dict = {"state": snap.state, "run_id": snap.run_id, "message": snap.message}
+    if snap.photos:
+        data["photos"] = snap.photos
     if snap.items is not None:
         data["list"] = [item.model_dump(mode="json") for item in snap.items]
     if snap.picks_left is not None:
@@ -363,19 +365,27 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
         )
 
     @app.get("/api/run/photo")
-    def get_photo():  # beyond the LLD: the review screen shows the photo beside the list
-        photo = machine.photo_path()
+    def get_photo(i: int = 0):  # beyond the LLD: the review screen shows the photos beside the list
+        photo = machine.photo_path(i)
         if photo is None or not photo.exists():
             return JSONResponse({"detail": "sem foto"}, status_code=404)
         return FileResponse(photo)
 
     @app.post("/api/run", status_code=202)
-    async def post_run(photo: UploadFile):
-        data = await photo.read()
-        if not data:
-            raise BadRequest("arquivo vazio")
-        run_id = machine.start(data, Path(photo.filename or "").suffix)
-        return {"run_id": run_id}
+    async def post_run(
+        photos: list[UploadFile] | None = None,
+        photo: list[UploadFile] | None = None,  # the old single field, still accepted
+    ):
+        files = (photos or []) + (photo or [])
+        if not 1 <= len(files) <= MAX_PHOTOS:
+            return JSONResponse({"detail": f"envie de 1 a {MAX_PHOTOS} fotos"}, status_code=400)
+        uploads = []
+        for file in files:
+            data = await file.read()
+            if not data:
+                raise BadRequest("arquivo vazio")
+            uploads.append((data, Path(file.filename or "").suffix))
+        return {"run_id": machine.start(uploads)}
 
     @app.put("/api/run/list")
     def put_list(body: ListBody):

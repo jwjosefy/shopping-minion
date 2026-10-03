@@ -1,4 +1,4 @@
-"""OCR of a handwritten list photo through `claude -p` (LLD section 3.1)."""
+"""OCR of handwritten list photos through `claude -p` (LLD section 3.1)."""
 
 import json
 import shutil
@@ -85,11 +85,22 @@ def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 DEFAULT_MODEL = "sonnet"
 
 
-def build_command(photo_copy: Path, model: str = DEFAULT_MODEL) -> list[str]:
+def _request(copies: list[Path]) -> str:
+    if len(copies) == 1:
+        return f"Transcribe the grocery list in the file {copies[0]}"
+    names = "\n".join(f"{n}. {copy}" for n, copy in enumerate(copies, start=1))
+    return (
+        f"Transcribe the grocery list on these {len(copies)} images. They are its pages, "
+        f"in this order:\n{names}"
+    )
+
+
+def build_command(photo_copies: Path | list[Path], model: str = DEFAULT_MODEL) -> list[str]:
+    copies = [photo_copies] if isinstance(photo_copies, Path) else list(photo_copies)
     return [
         "claude",
         "-p",
-        f"Transcribe the grocery list in the file {photo_copy}",
+        _request(copies),
         "--model",
         model,
         "--system-prompt",
@@ -104,17 +115,28 @@ def build_command(photo_copy: Path, model: str = DEFAULT_MODEL) -> list[str]:
     ]
 
 
-def transcribe(photo: Path, runner: Runner = _run, model: str = DEFAULT_MODEL) -> list[Item]:
-    """Copy the photo to a fresh temp dir, run claude there, and return the items."""
-    photo = Path(photo)
-    if not photo.is_file():
-        raise IntakeError(f"photo not found: {photo}")
+def transcribe(
+    photos: Path | list[Path], runner: Runner = _run, model: str = DEFAULT_MODEL
+) -> list[Item]:
+    """Copy the photos (the pages of one list, in order) to a fresh temp dir, run claude there,
+    and return the items."""
+    paths = [Path(photos)] if isinstance(photos, (str, Path)) else [Path(p) for p in photos]
+    if not paths:
+        raise IntakeError("no photos")
+    for photo in paths:
+        if not photo.is_file():
+            raise IntakeError(f"photo not found: {photo}")
     with tempfile.TemporaryDirectory(prefix="shopping-minion-ocr-") as tmp:
         workdir = Path(tmp).resolve()
-        copy = workdir / photo.name
-        shutil.copyfile(photo, copy)
+        copies = []
+        for n, photo in enumerate(paths, start=1):
+            # Several photos can share a file name (different folders): the page number keeps
+            # them apart. A single photo keeps its own name.
+            copy = workdir / (photo.name if len(paths) == 1 else f"{n}-{photo.name}")
+            shutil.copyfile(photo, copy)
+            copies.append(copy)
         try:
-            proc = runner(build_command(copy, model), workdir)
+            proc = runner(build_command(copies, model), workdir)
         except subprocess.TimeoutExpired as exc:
             raise IntakeError(f"claude timed out after {TIMEOUT_SECONDS} s") from exc
         except OSError as exc:

@@ -7,7 +7,7 @@ import pytest
 
 from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantity
 from shopping_minion.orders import Order, OrderLine
-from shopping_minion.storage import Storage
+from shopping_minion.storage import Storage, photo_list
 
 
 def make_item(name: str) -> Item:
@@ -219,3 +219,18 @@ def test_a_failing_line_rolls_the_whole_order_back(tmp_path):
     with pytest.raises(sqlite3.IntegrityError):
         storage.save_order(order)  # its line 1 collides with the row above
     assert storage.known_order_ids() == {"x"}  # the order row was rolled back too
+
+
+def test_photo_is_a_json_list_and_old_single_paths_still_read(tmp_path):
+    storage = Storage(tmp_path / "db.sqlite")
+    run_id = storage.new_run(None)
+    assert storage.photos(run_id) == []
+    storage.set_photo(run_id, ["u/1-1.jpg", "u/1-2.jpg"])
+    assert storage.photos(run_id) == ["u/1-1.jpg", "u/1-2.jpg"]
+    storage.set_photo(run_id, "u/one.jpg")  # a bare string is stored as a list of one
+    assert storage.list_runs()[0]["photo"] == '["u/one.jpg"]'
+    assert storage.photos(run_id) == ["u/one.jpg"]
+    old = storage.new_run("uploads/3.jpg")  # a row written before M5: a plain path
+    assert storage.photos(old) == ["uploads/3.jpg"]
+    assert storage.photos(999) == []
+    assert photo_list("[not json") == ["[not json"]
