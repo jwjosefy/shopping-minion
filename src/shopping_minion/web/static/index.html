@@ -187,9 +187,16 @@
       <h2>Escolher produto</h2>
       <div v-if="!pick" class="card center"><div class="spinner" aria-hidden="true"></div></div>
       <template v-else>
-        <div class="card">
-          <p class="muted" data-test="pick-count">item {{ pickPosition }} de {{ pickTotal }}</p>
+        <!-- stays on top while the cards scroll: what was searched is what to compare against -->
+        <div class="pickhead" data-test="pick-head">
+          <p class="muted small" data-test="pick-count">
+            <template v-if="pick.reopened">trocando a escolha deste item</template>
+            <template v-else>item {{ pickPosition }} de {{ pickTotal }}</template>
+          </p>
           <h3 data-test="pick-item">{{ pick.item.name }}</h3>
+          <p class="muted small" data-test="pick-term">busca: “{{ pick.item.search_term }}”</p>
+        </div>
+        <div class="card">
           <p v-if="pick.item.source_line" class="muted">na lista: “{{ pick.item.source_line }}”</p>
           <p v-if="pick.item.constraints && pick.item.constraints.length" class="chips">
             <span class="chip" v-for="c in pick.item.constraints" :key="c">{{ c }}</span>
@@ -197,7 +204,12 @@
           <p v-if="jevNote" class="note" data-test="jev-note">{{ jevNote }}</p>
           <template v-if="pick.no_results">
             <p class="note" data-test="no-results">nada encontrado para “{{ pick.item.search_term }}”</p>
-            <!-- T22 (LLD-M5 2.3): the field for a new search term goes here, in this card. -->
+            <form class="rsearch newsearch" data-test="new-search" @submit.prevent="searchAgain">
+              <input type="text" v-model="newTerm" data-test="new-term" aria-label="novo termo de busca"
+                     placeholder="outro termo de busca" autocomplete="off">
+              <button class="btn primary" type="submit" data-test="search-again"
+                      :disabled="busy || !newTerm.trim()">{{ busy ? 'buscando…' : 'buscar' }}</button>
+            </form>
           </template>
         </div>
 
@@ -206,7 +218,7 @@
                :class="{ selected: i === selected, unavailable: !c.available,
                          jev: c.product_id === pick.jev.choice }"
                :aria-selected="i === selected" :data-test="'cand-' + c.product_id"
-               @click="takeCandidate(i)">
+               @click="selectCandidate(i)">
             <div class="thumb">
               <img v-if="c.image" :src="c.image" :alt="c.name" loading="lazy">
               <span v-else class="noimg">sem foto</span>
@@ -219,28 +231,87 @@
                 <strong>{{ c.price == null ? 'sem preço' : money(c.price) }}</strong>
                 <span class="muted">{{ c.unit_of_sale === 'kg' ? 'por kg' : 'por unidade' }}</span>
               </p>
-              <p>
-                <span v-if="c.product_id === pick.jev.choice" class="badge blue">escolha do Jev</span>
+              <p class="flags">
+                <span v-if="c.product_id === pick.jev.choice" class="badge">{{ pick.reopened ? 'escolha atual' : 'escolha do Jev' }}</span>
+                <span v-if="onOffer(c)" class="badge offer" data-test="badge-offer">oferta</span>
                 <span v-if="!c.available" class="badge red">indisponível</span>
               </p>
+              <!-- the quantity the draft would use, editable here: one confirmation sets both -->
+              <div v-if="i === selected" class="pickqty" data-test="pick-qty" @click.stop>
+                <div class="qtyrow">
+                  <input type="number" min="0" step="any" inputmode="decimal" v-model="qty.value"
+                         data-test="pick-qty-value" aria-label="quantidade"
+                         @input="qtyEdited = true" @keydown.enter.prevent="takeCandidate(selected)">
+                  <select v-model="qty.unit" data-test="pick-qty-unit" aria-label="unidade"
+                          @change="qtyEdited = true">
+                    <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
+                  </select>
+                </div>
+                <p v-if="qtyFlags.length" class="flags">
+                  <span v-for="b in flagBadges(qtyFlags)" :key="b.flag" class="badge" :class="b.cls"
+                        :data-test="'badge-' + b.cls">{{ b.text }}</span>
+                </p>
+                <button class="btn primary" data-test="take" :disabled="busy"
+                        @click="takeCandidate(selected)">escolher</button>
+              </div>
             </div>
           </div>
         </div>
         <div class="actions-bar">
           <button class="btn" data-test="skip" :disabled="busy" @click="skipPick">pular (0)</button>
-          <button v-if="!pick.no_results" class="btn primary" data-test="take"
-                  :disabled="busy || selected < 0"
-                  @click="takeCandidate(selected)">escolher (Enter)</button>
         </div>
         <p v-if="pick.no_results" class="muted hint">0 pula.</p>
         <p v-else class="muted hint">Enter escolhe o produto marcado, ← → mudam a seleção, 0 pula.</p>
       </template>
     </section>
 
-    <!-- 6. reviewing_cart: Revisar carrinho -->
-    <section v-else-if="state === 'reviewing_cart'" data-screen="reviewing_cart">
-      <h2>Revisar carrinho</h2>
+    <!-- 6. reviewing_cart: Resumo (and "Revisar tudo", the full editor) -->
+    <section v-else-if="state === 'reviewing_cart'" data-screen="reviewing_cart"
+             :data-view="reviewAll ? 'editor' : 'summary'">
+      <h2>{{ reviewAll ? 'Revisar tudo' : 'Resumo' }}</h2>
       <div v-if="!cart" class="card center"><div class="spinner" aria-hidden="true"></div></div>
+
+      <!-- the summary: one collapsed line per item -->
+      <template v-else-if="!reviewAll">
+        <ul class="sumlist" data-test="summary-list">
+          <li v-for="r in summaryRows" :key="r.index" class="sumline" :class="r.state"
+              data-test="summary-line" :data-index="r.index">
+            <div class="sumbody">
+              <p class="sumhead">
+                <span class="name">{{ r.item }}</span>
+                <strong v-if="r.state === 'in_cart'" class="sumqty" data-test="summary-qty">{{ qtyText(r.quantity) }}</strong>
+              </p>
+              <template v-if="r.state === 'in_cart'">
+                <p class="muted small">{{ r.product.name }}<span v-if="r.estimated_price != null"> · {{ money(r.estimated_price) }}</span></p>
+                <p v-if="r.flags.length || onOffer(r.product) || r.merged" class="flags">
+                  <span v-for="b in flagBadges(r.flags)" :key="b.flag" class="badge" :class="b.cls"
+                        :data-test="'badge-' + b.cls">{{ b.text }}</span>
+                  <span v-if="onOffer(r.product)" class="badge offer" data-test="badge-offer">oferta</span>
+                  <span v-if="r.merged" class="badge">somado com outra linha da lista</span>
+                </p>
+              </template>
+              <p v-else class="muted small">{{ r.state === 'removed' ? 'removido do carrinho' : 'pulado' }}</p>
+            </div>
+            <button class="btn small" data-test="trocar" :disabled="busy" @click="reopen(r.index)">trocar</button>
+          </li>
+        </ul>
+
+        <div v-if="cart.warnings && cart.warnings.length" class="banner warn">
+          <span v-for="(w, i) in cart.warnings" :key="i">{{ w }}</span>
+        </div>
+
+        <div class="card total">
+          <span>Total <em>estimado</em></span>
+          <strong data-test="total">{{ cart.estimated_total == null ? '—' : money(cart.estimated_total) }}</strong>
+        </div>
+        <div class="actions-bar">
+          <button class="btn" data-test="review-all" :disabled="busy" @click="reviewAll = true">Revisar tudo</button>
+          <button class="btn primary big" data-test="confirm-cart"
+                  :disabled="!cart.lines.length || busy" @click="confirmCart">Adicionar ao carrinho</button>
+        </div>
+      </template>
+
+      <!-- "Revisar tudo": the full editor, quantity changes and removals -->
       <template v-else>
         <div class="tablewrap">
           <table class="grid cart">
@@ -257,10 +328,10 @@
                     <p class="name">{{ lineProduct(l).name }}</p>
                     <p class="muted small">{{ lineItems(l).join(' + ') }}</p>
                     <p class="flags">
-                      <span v-if="l.flags && l.flags.includes('QUANTITY_ASSUMED')" class="badge amber">quantidade assumida</span>
-                      <span v-if="l.flags && l.flags.includes('QUANTITY_INEXACT')" class="badge amber">aproximada</span>
-                      <span v-if="l.flags && l.flags.includes('QUANTITY_FROM_HISTORY')" class="badge amber">quantidade da última compra</span>
-                      <span v-if="lineItems(l).length > 1" class="badge blue">{{ lineItems(l).length }} linhas da lista</span>
+                      <span v-for="b in flagBadges(l.flags)" :key="b.flag" class="badge" :class="b.cls"
+                            :data-test="'badge-' + b.cls">{{ b.text }}</span>
+                      <span v-if="onOffer(lineProduct(l))" class="badge offer" data-test="badge-offer">oferta</span>
+                      <span v-if="lineItems(l).length > 1" class="badge">{{ lineItems(l).length }} linhas da lista</span>
                     </p>
                   </div>
                   </div>
@@ -305,8 +376,9 @@
           <strong data-test="total">{{ cart.estimated_total == null ? '—' : money(cart.estimated_total) }}</strong>
         </div>
         <div class="actions-bar">
+          <button class="btn" data-test="back-to-summary" :disabled="busy" @click="backToSummary">voltar ao resumo</button>
           <button class="btn primary big" data-test="confirm-cart"
-                  :disabled="!cart.lines.length || busy" @click="confirmCart">adicionar ao carrinho</button>
+                  :disabled="!cart.lines.length || busy" @click="confirmCart">Adicionar ao carrinho</button>
         </div>
       </template>
     </section>
@@ -373,6 +445,41 @@
           </ul>
         </div>
       </template>
+
+      <div v-if="report" class="card report" data-test="report">
+        <h3>Tempo</h3>
+        <template v-if="report.time">
+          <ul class="steps" data-test="report-steps">
+            <li v-for="st in report.time.steps" :key="st.state" :data-who="st.who">
+              <span class="grow">{{ st.label }}</span>
+              <span class="muted small">{{ st.who === 'you' ? 'você' : 'máquina' }}</span>
+              <span class="mono">{{ st.text }}</span>
+            </li>
+          </ul>
+          <p data-test="report-total">
+            <strong>total {{ report.time.total.text }}</strong>
+            <span class="muted small"> — máquina {{ report.time.machine.text }}, você {{ report.time.you.text }}</span>
+          </p>
+          <p class="muted small">{{ report.time.baseline }}</p>
+        </template>
+        <p v-else class="muted">sem registro de tempo</p>
+        <h3>Correções</h3>
+        <ul class="plain" data-test="report-corrections">
+          <li>lista: {{ plural(report.corrections.list.edited, 'linha editada', 'linhas editadas') }},
+            {{ plural(report.corrections.list.deleted, 'apagada', 'apagadas') }},
+            {{ plural(report.corrections.list.added, 'adicionada', 'adicionadas') }}
+            (de {{ report.corrections.list.ocr }} lidas pelo OCR)</li>
+          <li v-if="report.corrections.products">produtos:
+            {{ plural(report.corrections.products.accepted, 'aceito', 'aceitos') }} pelo Jev sozinho;
+            dos {{ report.corrections.products.asked }} que vieram para você,
+            {{ report.corrections.products.same }} confirmou a escolha do Jev,
+            {{ report.corrections.products.other }} escolheu outro,
+            {{ report.corrections.products.skipped }} pulou</li>
+          <li v-if="report.corrections.cart">carrinho:
+            {{ plural(report.corrections.cart.changed, 'quantidade mudada', 'quantidades mudadas') }},
+            {{ plural(report.corrections.cart.removed, 'removido', 'removidos') }}</li>
+        </ul>
+      </div>
 
       <p v-if="state === 'done'" class="open-note" data-test="open-note">
         o carrinho está aberto na janela do navegador; revise e finalize no site

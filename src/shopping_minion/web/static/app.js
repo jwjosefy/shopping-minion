@@ -16,6 +16,17 @@ class ApiError extends Error {
   }
 }
 
+// One color per meaning (style.css): the same badge on the picker cards and the summary.
+const FLAG_BADGES = {
+  QUANTITY_ASSUMED: { cls: "assumed", text: "quantidade assumida" },
+  QUANTITY_FROM_HISTORY: {
+    cls: "history",
+    text: "mesma quantidade da última vez que comprou este produto",
+  },
+  QUANTITY_INEXACT: { cls: "inexact", text: "aproximada" },
+};
+
+const numFmt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 3 });
 const moneyFmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const confFmt = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -69,9 +80,16 @@ createApp({
     const pick = ref(null);
     const selected = ref(-1);
     const pickTotal = ref(0);
+    const qty = ref({ value: "", unit: "un" }); // under the selected card
+    const qtyEdited = ref(false); // the user changed it: card changes don't overwrite it
+    const newTerm = ref(""); // no results: the new search term
 
     // reviewing_cart
     const cart = ref(null);
+    const reviewAll = ref(false); // "Revisar tudo": the full editor instead of the summary
+
+    // done
+    const report = ref(null);
 
     // reading_list timer
     let readingSince = null;
@@ -171,6 +189,13 @@ createApp({
       }
       if (s === "reviewing_cart") {
         if (r.cart_draft) cart.value = r.cart_draft;
+      } else {
+        reviewAll.value = false;
+      }
+      if (["done", "failed", "cancelled"].includes(s)) {
+        if (prev !== s || force) await loadReport();
+      } else {
+        report.value = null;
       }
     }
 
@@ -475,10 +500,32 @@ createApp({
       if (at > 0) list.unshift(...list.splice(at, 1));
       cands.value = list;
       selected.value = at >= 0 && list[0].available ? 0 : -1;
+      qtyEdited.value = false;
+      newTerm.value = "";
+      applyQty(p);
       // `position`/`total` come from the backend; the max of `left` is the fallback.
       pickTotal.value = p.total || Math.max(pickTotal.value, p.left || 0);
       pick.value = p;
     }
+
+    // The quantity under the selected card: what the draft would use for that product, until
+    // the user types another.
+    function applyQty(p = pick.value) {
+      const c = cands.value[selected.value];
+      const q = c && p && p.quantities && p.quantities[c.product_id];
+      if (q && !qtyEdited.value) qty.value = { value: q.value, unit: q.unit };
+    }
+    const qtyFlags = computed(() => {
+      const c = cands.value[selected.value];
+      const q = c && pick.value && pick.value.quantities && pick.value.quantities[c.product_id];
+      return qtyEdited.value || !q ? [] : q.flags || [];
+    });
+    const flagBadges = (flags) =>
+      (flags || []).filter((f) => FLAG_BADGES[f]).map((f) => ({ flag: f, ...FLAG_BADGES[f] }));
+    const onOffer = (c) =>
+      !!c && c.price != null && c.list_price != null && Number(c.list_price) > Number(c.price);
+    const qtyText = (q) => (q ? `${numFmt.format(q.value)} ${q.unit}` : "");
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
     const pickPosition = computed(() => {
       if (!pick.value) return 0;
@@ -487,7 +534,7 @@ createApp({
 
     const jevNote = computed(() => {
       const j = pick.value && pick.value.jev;
-      if (!j) return "";
+      if (!j || pick.value.reopened) return "";
       if (j.nothing_fit) return "Jev: nada parece servir";
       if (j.confidence !== null && j.confidence !== undefined) {
         return `Jev não tem certeza (${confFmt.format(j.confidence)})`;
@@ -495,11 +542,13 @@ createApp({
       return "";
     });
 
-    async function sendPick(productId) {
+    async function sendPick(productId, quantity) {
       if (busy.value || !pick.value) return;
       busy.value = true;
       try {
-        await api("POST", "/api/run/picks", { index: pick.value.index, product_id: productId });
+        const body = { index: pick.value.index, product_id: productId };
+        if (quantity) body.quantity = quantity;
+        await api("POST", "/api/run/picks", body);
         await refresh(true);
       } catch (err) {
         fail(err);
@@ -508,10 +557,43 @@ createApp({
       }
     }
 
+    function selectCandidate(i) {
+      const c = cands.value[i];
+      if (!c || !c.available) return;
+      selected.value = i;
+      applyQty();
+    }
+
+    // One confirmation: the product and, if the user changed it, the quantity. An untouched
+    // quantity isn't sent, so the draft keeps its own flag on it.
     function takeCandidate(i) {
       const c = cands.value[i];
       if (!c || !c.available) return;
-      sendPick(c.product_id);
+      let quantity = null;
+      if (qtyEdited.value) {
+        const value = Number(qty.value.value);
+        if (!(value > 0)) {
+          toast.value = "informe uma quantidade maior que zero";
+          return;
+        }
+        quantity = { value, unit: qty.value.unit };
+      }
+      sendPick(c.product_id, quantity);
+    }
+
+    // No results: one search with the new term, run by the server; then the item is reloaded.
+    async function searchAgain() {
+      const term = newTerm.value.trim();
+      if (busy.value || !pick.value || !term) return;
+      busy.value = true;
+      try {
+        await api("POST", "/api/run/picks/search", { index: pick.value.index, term });
+        await refresh(true);
+      } catch (err) {
+        fail(err);
+      } finally {
+        busy.value = false;
+      }
     }
     function skipPick() {
       sendPick(null);
@@ -525,6 +607,7 @@ createApp({
         i = i < 0 ? (step > 0 ? 0 : n - 1) : (i + step + n) % n;
         if (cands.value[i].available) {
           selected.value = i;
+          applyQty();
           const el = document.querySelector(`[data-test="cand-${cands.value[i].product_id}"]`);
           if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
           return;
@@ -585,6 +668,25 @@ createApp({
       return putCart({ line_id: l.line_id, quantity: null, remove: true });
     }
 
+    // The summary's rows, one per item; "trocar" sends one item back to its cards.
+    const summaryRows = computed(() => run.value.summary || []);
+    async function reopen(index) {
+      if (busy.value) return;
+      busy.value = true;
+      try {
+        await api("POST", "/api/run/picks/reopen", { index });
+        await refresh(true);
+      } catch (err) {
+        fail(err);
+      } finally {
+        busy.value = false;
+      }
+    }
+    async function backToSummary() {
+      reviewAll.value = false;
+      await refresh(); // the rows follow what the editor changed
+    }
+
     async function confirmCart() {
       busy.value = true;
       try {
@@ -604,6 +706,14 @@ createApp({
     const oks = computed(() => ((outcome.value && outcome.value.checks) || []).filter((c) => c.ok));
     const extras = computed(() => (outcome.value && outcome.value.extras) || []);
     const checkNames = (c) => (c.item_names || (c.item_name ? [c.item_name] : [])).join(" + ");
+
+    async function loadReport() {
+      try {
+        report.value = await api("GET", "/api/run/report");
+      } catch (_) {
+        report.value = null; // the done screen works without it
+      }
+    }
 
     async function resetRun() {
       busy.value = true;
@@ -662,6 +772,8 @@ createApp({
       units: UNITS, run, state, toast, offline, reconnecting, busy, canCancel, runs, access, uploading,
       pending, maxPhotos: MAX_PHOTOS, photoCount, photoTab, listPhoto, photoFailed,
       rows, cards, cardOpen, toggleMore, addQuantity, dropQuantity, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
+      qty, qtyEdited, qtyFlags, newTerm, flagBadges, onOffer, qtyText, plural, selectCandidate, searchAgain,
+      reviewAll, summaryRows, reopen, backToSummary, report,
       elapsed, searchList, searchLast, searchTotal, searchDone, fillList, fillTotal, fillDone,
       outcome, problems, oks, extras,
       money, pct, dateText, countText, fillLabel, fillClass, checkNames, lineProduct, lineItems,
