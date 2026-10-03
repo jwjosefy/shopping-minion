@@ -1,6 +1,6 @@
 # Shopping Minion — LLD M5: UX and preferences
 
-- **Status:** Draft, for Johann's review.
+- **Status:** Approved by Johann on 2026-10-02. He asked for waves 1–5 to run on their own, one after another, with each wave's tasks in parallel, a commit per task and wave, and a stop at T26 for his end-to-end test.
 - **Date:** 2026-10-02
 - **Implements:** [hld-m5.md](hld-m5.md), as answered on 2026-10-02. **Done when** (HLD §2): on a real list of 40+ items through the web app:
   1. the app's check finds every decided product in the cart, or names each failure;
