@@ -117,7 +117,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
     from shopping_minion.web.app import create_app, make_access, print_qr
     from shopping_minion.web.statemachine import RunStateMachine
 
-    access = make_access(local=args.local, port=args.port)
+    access = make_access(local=args.local, port=args.port, new_token=args.new_token)
     if access is None:
         print("Could not find this machine's LAN address; use --local.", file=sys.stderr)
         return 1
@@ -175,6 +175,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     serve = sub.add_parser("serve", help="start the web app (on the LAN, with a token, by default)")
     serve.add_argument("--local", action="store_true", help="127.0.0.1 only: no token, no QR")
+    serve.add_argument(
+        "--new-token",
+        action="store_true",
+        help="make a new access token (the phone must scan the QR again); default: reuse it",
+    )
     serve.add_argument("--port", type=int, default=8000)
     serve.set_defaults(func=_cmd_serve)
     return parser
