@@ -753,6 +753,7 @@ def test_lan_with_the_token_sets_a_cookie_and_redirects_without_it(machine):
         assert response.headers["location"] == "/api/run?x=1"
         cookie = response.headers["set-cookie"]
         assert "sm_token=s3cret" in cookie and "HttpOnly" in cookie
+        assert "Max-Age=2592000" in cookie and "SameSite=lax" in cookie
         # the client keeps the cookie: no token needed now
         assert client.get("/api/run").json()["state"] == "idle"
         client.cookies.clear()
@@ -806,11 +807,39 @@ def test_is_loopback():
     assert not is_loopback(None)
 
 
-def test_make_access_builds_a_random_token_url():
-    a = make_access(local=False, port=8123, ip="192.168.0.5")
-    b = make_access(local=False, port=8123, ip="192.168.0.5")
+def test_make_access_builds_a_random_token_url(tmp_path):
+    a = make_access(local=False, port=8123, ip="192.168.0.5", token_file=tmp_path / "t1")
+    b = make_access(local=False, port=8123, ip="192.168.0.5", token_file=tmp_path / "t2")
     assert a.url == f"http://192.168.0.5:8123/?t={a.token}"
     assert len(a.token) >= 32 and a.token != b.token
+
+
+def test_make_access_keeps_the_token_across_starts_until_asked_for_a_new_one(tmp_path):
+    file = tmp_path / "data" / "web-token"
+    first = make_access(local=False, port=8000, ip="192.168.0.5", token_file=file)
+    assert file.stat().st_mode & 0o777 == 0o600
+    again = make_access(local=False, port=8000, ip="192.168.0.5", token_file=file)
+    assert again.token == first.token
+    rotated = make_access(local=False, port=8000, ip="192.168.0.5", token_file=file, new_token=True)
+    assert rotated.token != first.token
+    assert make_access(local=False, port=8000, ip="192.168.0.5", token_file=file).token == (
+        rotated.token
+    )
+    assert file.stat().st_mode & 0o777 == 0o600
+
+
+def test_token_file_with_loose_mode_is_tightened_on_rotation(tmp_path):
+    file = tmp_path / "web-token"
+    file.write_text("old")
+    file.chmod(0o644)
+    make_access(local=False, port=8000, ip="192.168.0.5", token_file=file, new_token=True)
+    assert file.stat().st_mode & 0o777 == 0o600
+
+
+def test_local_access_writes_no_token_file(tmp_path):
+    file = tmp_path / "web-token"
+    assert make_access(local=True, port=8000, token_file=file).token is None
+    assert not file.exists()
 
 
 def test_make_access_without_a_lan_address(monkeypatch):

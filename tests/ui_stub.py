@@ -162,6 +162,9 @@ class Stub:
         self.access = access
         self.lock = threading.RLock()
         self.closing = False
+        self.events_down = False  # the event stream answers 503, as a dropped connection would
+        self.stream_opens: list[int] = []  # the `after` of every stream opened
+        self.snapshots = 0
         self.events: list[dict] = []  # not cleared by reset(): seq only grows
         self.reset()
         self.released: set[str] = set()
@@ -349,10 +352,15 @@ def create_app(stub: Stub) -> FastAPI:
 
     @app.get("/api/run")
     def get_run():
+        stub.snapshots += 1
         return stub.snapshot()
 
     @app.get("/api/run/events")
     async def events(request: Request, after: int = 0):
+        if stub.events_down:
+            return Response(status_code=503)
+        stub.stream_opens.append(after)
+
         async def gen():
             seen = after
             yield ": ok\n\n"

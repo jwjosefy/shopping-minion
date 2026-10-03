@@ -20,7 +20,8 @@
     <span>{{ toast }}</span>
     <button class="btn ghost small" @click="toast = ''">ok</button>
   </div>
-  <div v-if="offline" class="banner warn">sem conexão com o servidor; tentando de novo…</div>
+  <div v-if="reconnecting" class="banner warn" data-test="reconnecting">reconectando…</div>
+  <div v-if="offline && !reconnecting" class="banner warn">sem conexão com o servidor; tentando de novo…</div>
 
   <main class="screen">
     <!-- loading -->

@@ -8,6 +8,7 @@ import asyncio
 import io
 import ipaddress
 import json
+import os
 import secrets
 import socket
 from collections.abc import AsyncIterator, Callable
@@ -32,6 +33,8 @@ from shopping_minion.workflow import CartOutcome, DraftEdit
 
 STATIC_DIR = Path(__file__).parent / "static"
 COOKIE = "sm_token"
+COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days: not a session cookie the phone's browser drops
+TOKEN_FILE = Path("data/web-token")
 SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
 
@@ -81,15 +84,40 @@ def lan_ip() -> str | None:
     return None if is_loopback(candidate) else candidate
 
 
-def make_access(*, local: bool, port: int, ip: str | None = None) -> Access | None:
-    """`--local`: no token, no URL. Otherwise a random token and the LAN URL; None when
-    there is no LAN address to put in it."""
+def load_token(path: Path, *, new: bool = False) -> str:
+    """The token kept in `path` (mode 600), made on first use; `new=True` replaces it."""
+    if not new:
+        try:
+            token = path.read_text().strip()
+        except OSError:
+            token = ""
+        if token:
+            return token
+    token = secrets.token_urlsafe(32)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(token + "\n")
+    path.chmod(0o600)  # a file that already existed keeps its old mode otherwise
+    return token
+
+
+def make_access(
+    *,
+    local: bool,
+    port: int,
+    ip: str | None = None,
+    token_file: Path = TOKEN_FILE,
+    new_token: bool = False,
+) -> Access | None:
+    """`--local`: no token, no URL. Otherwise the saved token (made on first use, or again
+    with `new_token`) and the LAN URL; None when there is no LAN address to put in it."""
     if local:
         return Access()
     ip = ip or lan_ip()
     if ip is None:
         return None
-    token = secrets.token_urlsafe(32)
+    token = load_token(token_file, new=new_token)
     return Access(token=token, url=f"http://{ip}:{port}/?t={token}")
 
 
@@ -286,7 +314,9 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
             rest = [(k, v) for k, v in request.query_params.multi_items() if k != "t"]
             target = request.url.path + (f"?{urlencode(rest)}" if rest else "")
             response = RedirectResponse(target, status_code=303)
-            response.set_cookie(COOKIE, token, httponly=True, samesite="lax")
+            response.set_cookie(
+                COOKIE, token, max_age=COOKIE_MAX_AGE, httponly=True, samesite="lax"
+            )
             return response
         if secrets.compare_digest(request.cookies.get(COOKIE, ""), token):
             return await call_next(request)

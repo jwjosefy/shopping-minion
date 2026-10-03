@@ -52,6 +52,15 @@ def wait_for(predicate, what, timeout=5.0):
     raise AssertionError(f"timed out waiting for {what}")
 
 
+def set_visibility(page, value):
+    page.evaluate(
+        "v => {"
+        " Object.defineProperty(document, 'visibilityState', {value: v, configurable: true});"
+        " document.dispatchEvent(new Event('visibilitychange')); }",
+        value,
+    )
+
+
 def assert_fits(page, screen):
     width, inner = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     assert width <= inner, f"{screen}: scrollWidth {width} > innerWidth {inner}"
@@ -276,5 +285,40 @@ def test_access_block_hidden_when_it_errors(browser):
             screen(page, "idle")
             expect(page.locator("[data-test=photo]")).to_be_attached()
             expect(page.locator("[data-test=access]")).to_have_count(0)
+        finally:
+            context.close()
+
+
+def test_reconnects_when_the_page_comes_back_and_shows_a_banner_only_while_down(browser):
+    with StubServer() as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "idle")
+            banner = page.locator("[data-test=reconnecting]")
+            expect(banner).to_have_count(0)
+            wait_for(lambda: len(stub.stream_opens) >= 1, "the first stream")
+
+            # back to the foreground: the stream is reopened and the snapshot reloaded
+            opens, snapshots = len(stub.stream_opens), stub.snapshots
+            set_visibility(page, "visible")
+            wait_for(lambda: len(stub.stream_opens) > opens, "the stream reopened")
+            wait_for(lambda: stub.snapshots > snapshots, "the snapshot reloaded")
+            expect(banner).to_have_count(0)
+
+            # hidden does nothing
+            opens = len(stub.stream_opens)
+            set_visibility(page, "hidden")
+            time.sleep(0.3)
+            assert len(stub.stream_opens) == opens
+
+            # the stream drops: banner while down, gone when it is back
+            stub.events_down = True
+            set_visibility(page, "visible")
+            expect(banner).to_be_visible()
+            expect(banner).to_have_text("reconectando…")
+            assert_fits(page, "reconnecting banner")
+            stub.events_down = False
+            expect(banner).to_have_count(0, timeout=6000)
         finally:
             context.close()

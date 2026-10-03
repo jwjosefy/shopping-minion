@@ -31,6 +31,7 @@ createApp({
     const state = computed(() => run.value.state);
     const toast = ref("");
     const offline = ref(false);
+    const reconnecting = ref(false); // the event stream dropped and isn't back yet
     const busy = ref(false);
     const now = ref(Date.now());
 
@@ -197,6 +198,7 @@ createApp({
       source = new EventSource(`/api/run/events?after=${lastSeq}`);
       source.onopen = () => {
         offline.value = false;
+        reconnecting.value = false;
       };
       source.onmessage = (m) => {
         let ev;
@@ -213,6 +215,7 @@ createApp({
         source.close();
         source = null;
         offline.value = true;
+        reconnecting.value = true;
         clearTimeout(reconnectTimer);
         reconnectTimer = setTimeout(() => {
           refresh();
@@ -220,6 +223,15 @@ createApp({
         }, 1500);
       };
     }
+
+    // Coming back to the foreground, a phone may have silently lost the stream: reopen it
+    // from the last seq and reload the snapshot.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      clearTimeout(reconnectTimer);
+      refresh();
+      subscribe();
+    });
 
     function onEvent(ev) {
       const d = ev.data || {};
@@ -582,7 +594,7 @@ createApp({
     });
 
     return {
-      units: UNITS, run, state, toast, offline, busy, canCancel, runs, access, uploading, photoUrl,
+      units: UNITS, run, state, toast, offline, reconnecting, busy, canCancel, runs, access, uploading, photoUrl,
       listPhoto, photoFailed,
       rows, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
       elapsed, searchList, searchLast, searchTotal, searchDone, fillList, fillTotal, fillDone,
