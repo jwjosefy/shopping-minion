@@ -51,6 +51,13 @@ So M5 makes this case recognizable and leaves a trace:
 - `runs.photo` keeps a JSON list of paths, and a single path is still read for old runs. `GET /api/run/photo?i=<n>` serves each photo, and the review screen shows them as tabs.
 - **Check before merging:** `intake_eval.py` on `list-001`, and on today's 3 pages read as one call against the 3 separate reads. These are the same `claude -p` calls on Johann's subscription; Claude says so before running them.
 
+**Eval after T21 (2026-10-02, 2 `claude -p` calls on Johann's subscription):**
+- **`list-001`, one photo, with the new prompt:** 32/32 items found (the Sonnet eval of 2026-10-01 found 31/32), 1 line split wrong, constraints 30/32, quantity 31/32. The 2 extra items are the crossed-out "saco lixo" line, a known issue.
+- **Today's 3 pages in one call:**
+  - **Time:** 41 s, against 58 s for the three separate reads (runs 9–11).
+  - **Content:** every line came back, 90 items against 88 in the reviewed list. Matched by exact name, 75/88. Most of the 13 differences are wording, such as "café em cápsulas" for "café", "óleo" for "óleo maria", and "fubá" and "flocão" as two items.
+  - **The comparison isn't neutral:** the reference is the list Johann reviewed from the separate reads, so those reads score 88/88 by construction. One call is kept, as designed. The review screen is where wording is fixed.
+
 ### 2.2 The review card (`index.html`, `app.js`)
 
 - **Shown by default:** "linha" (`source_line`, read-only) and "busca" (`search_term`, editable). Name, constraints and brand go behind a "mais" toggle per card.
