@@ -1,4 +1,5 @@
 import json
+import re
 from decimal import Decimal
 from pathlib import Path
 
@@ -274,3 +275,41 @@ def test_quantity_text_above_one_kg_uses_a_dot():
         assert QUANTITY_TEXT.match(text), text
     for text in ("1 2", "Instruções Remover", "1.5.2kg"):
         assert not QUANTITY_TEXT.match(text), text
+
+
+DEAD_ADD = "<button><p>Adicionar ao carrinho</p></button>"  # the click does nothing (runs 10, 11)
+
+
+def test_an_add_the_site_does_not_take_fails_and_leaves_a_screenshot(page, monkeypatch, tmp_path):
+    monkeypatch.setattr("shopping_minion.cart.ADD_WAIT_SECONDS", 0.5)
+    monkeypatch.setattr("shopping_minion.cart.LOG_DIR", tmp_path / "logs")
+    serve(page, control=DEAD_ADD)
+    result = add_to_cart(page, candidate(product_id="42"), CartTarget(product_id="42", clicks=2))
+    assert result.status == "failed"
+    assert result.message == "o site não aceitou o clique em Adicionar"
+    assert page.get_by_role("button", name="Adicionar ao carrinho").count() == 1  # nothing else
+    assert page.locator("#other span").inner_text() == "7"  # the other card was not touched
+    shots = list((tmp_path / "logs").glob("add-42-*.png"))
+    assert len(shots) == 1
+    assert re.fullmatch(r"add-42-\d{8}-\d{6}\.png", shots[0].name)
+    assert shots[0].read_bytes().startswith(b"\x89PNG")
+
+
+def test_a_failing_screenshot_does_not_break_the_run(page, monkeypatch, tmp_path):
+    monkeypatch.setattr("shopping_minion.cart.ADD_WAIT_SECONDS", 0.5)
+    blocker = tmp_path / "logs"
+    blocker.write_text("a file where the directory should be")
+    monkeypatch.setattr("shopping_minion.cart.LOG_DIR", blocker)
+    serve(page, control=DEAD_ADD)
+    result = add_to_cart(page, candidate(), CartTarget(product_id="1", clicks=1))
+    assert result.message == "o site não aceitou o clique em Adicionar"
+
+
+def test_a_slow_add_that_does_show_the_stepper_is_not_the_not_taken_case(
+    page, monkeypatch, tmp_path
+):
+    monkeypatch.setattr("shopping_minion.cart.LOG_DIR", tmp_path / "logs")
+    serve(page)
+    result = add_to_cart(page, candidate(), CartTarget(product_id="1", clicks=1))
+    assert result.status == "added"
+    assert not (tmp_path / "logs").exists()

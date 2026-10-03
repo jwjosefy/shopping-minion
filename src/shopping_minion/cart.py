@@ -9,6 +9,8 @@ import json
 import re
 import time
 from collections.abc import Callable
+from datetime import datetime
+from pathlib import Path
 
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Locator, Page, Request, Response
@@ -18,6 +20,11 @@ from shopping_minion.items import Candidate, CartResult, CartTarget
 
 CLICK_TIMEOUT_MS = 5_000
 STEPPER_WAIT_SECONDS = 5.0
+# After the click on "Adicionar" the stepper is expected within this time; if the button is
+# still there, the site didn't take the click (runs 10 and 11; cause unknown, HLD-M5 Q2).
+ADD_WAIT_SECONDS = 3.0
+NOT_TAKEN_MESSAGE = "o site não aceitou o clique em Adicionar"
+LOG_DIR = Path("data/logs")  # personal, never committed; tests point it elsewhere
 PAGE_WAIT_MS = 10_000
 
 # The main buy box of the product page (name, SKU, price, add button or stepper). Seen live
@@ -59,9 +66,11 @@ def _text(locator: Locator) -> str | None:
         return None
 
 
-def _wait_stepper_change(stepper: Locator, page: Page, before: str | None) -> str | None:
+def _wait_stepper_change(
+    stepper: Locator, page: Page, before: str | None, seconds: float | None = None
+) -> str | None:
     """Poll until the stepper shows text different from `before`; None on timeout."""
-    deadline = time.monotonic() + STEPPER_WAIT_SECONDS
+    deadline = time.monotonic() + (STEPPER_WAIT_SECONDS if seconds is None else seconds)
     candidate: str | None = None
     since = 0.0
     while time.monotonic() < deadline:
@@ -80,6 +89,16 @@ def _failed(target: CartTarget, message: str, shown: str | None = None) -> CartR
     return CartResult(
         product_id=target.product_id, status="failed", quantity_shown=shown, message=message
     )
+
+
+def _save_buy_box(box: Locator, product_id: str) -> None:
+    """Screenshot of the buy box to LOG_DIR, to see what the page showed. Never raises."""
+    try:
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        box.screenshot(path=str(LOG_DIR / f"add-{product_id}-{stamp}.png"), timeout=5_000)
+    except Exception:  # a screenshot is a trace; it must not break the run
+        pass
 
 
 def _is_sync(request: Request) -> bool:
@@ -183,8 +202,11 @@ def _add(
         else:
             stepper.first.locator("xpath=./button[last()]").click(timeout=CLICK_TIMEOUT_MS)
             settle(page)
-        new = _wait_stepper_change(stepper, page, shown)
+        new = _wait_stepper_change(stepper, page, shown, ADD_WAIT_SECONDS if click == 0 else None)
         if new is None:
+            if click == 0 and add_button.count() and add_button.first.is_visible():
+                _save_buy_box(box, target.product_id)
+                return _failed(target, NOT_TAKEN_MESSAGE)
             return _failed(target, f"a quantidade não mudou após o clique {click + 1}", shown)
         shown = new
     if watch is not None and not watch.wait_confirmed_after(last_click):
