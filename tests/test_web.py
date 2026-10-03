@@ -1475,3 +1475,62 @@ def test_the_report_route_gives_the_numbers_of_the_current_run(client, world):
         assert data == build_report(db, 1)
     finally:
         db.close()
+
+
+def test_preferences_api_crud(client):
+    assert client.get("/api/preferences").json() == []
+    body = {
+        "marca": "Antarctica",
+        "apelidos": ["refri"],
+        "quantidade": {"valor": 2, "unidade": "l"},
+    }
+    put = client.put("/api/preferences/Guaraná", json=body)
+    assert put.status_code == 200
+    assert put.json() == {"key": "guarana", "nome": "Guaraná", **body}
+    assert client.get("/api/preferences").json() == [put.json()]
+    client.put("/api/preferences/GUARANA", json={"marca": "Kuat"})  # same key: replaces
+    (entry,) = client.get("/api/preferences").json()
+    assert entry["marca"] == "Kuat" and "apelidos" not in entry
+    assert client.delete("/api/preferences/guaraná").status_code == 200
+    assert client.get("/api/preferences").json() == []
+    assert client.delete("/api/preferences/guarana").status_code == 404
+
+
+def test_preferences_api_rejects_a_bad_quantity(client):
+    bad = client.put("/api/preferences/atum", json={"quantidade": {"valor": 0, "unidade": "un"}})
+    assert bad.status_code == 422
+    assert "quantidade" in bad.json()["detail"]
+    assert client.get("/api/preferences").json() == []
+
+
+def test_preferences_api_imports_the_file_once(client, world):
+    (world.tmp_path / "preferencias.yaml").write_text(
+        "feijão:\n  variante: carioca\n", encoding="utf-8"
+    )
+    (entry,) = client.get("/api/preferences").json()
+    assert entry["key"] == "feijao" and entry["variante"] == "carioca"
+    client.delete("/api/preferences/feijao")
+    assert client.get("/api/preferences").json() == []
+
+
+def test_preferences_are_allowed_while_a_run_is_going(client):
+    to_picking(client)
+    assert client.put("/api/preferences/atum", json={"marca": "Gomes"}).status_code == 200
+    assert client.get("/api/preferences").status_code == 200
+    assert client.delete("/api/preferences/atum").status_code == 200
+
+
+def test_preferences_need_the_token(world):
+    machine = make_machine(world)
+    app = create_app(machine, access=Access(token="s3cret"))
+    with TestClient(app) as anon:  # the test client is not loopback
+        assert anon.get("/api/preferences").status_code == 401
+        assert anon.put("/api/preferences/atum", json={}).status_code == 401
+    machine.shutdown()
+
+
+def test_a_preference_saved_in_the_app_reaches_the_next_runs_quantities(client):
+    client.put("/api/preferences/atum", json={"quantidade": {"valor": 2, "unidade": "un"}})
+    to_picking(client)
+    atum = client.get("/api/run/picks/next").json()
+    assert atum["quantities"]["2"] == {"value": 2, "unit": "un", "flags": []}

@@ -20,10 +20,10 @@ from urllib.parse import urlencode, urlsplit
 
 import qrcode
 import qrcode.image.svg
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from shopping_minion.decide import describe_candidate
 from shopping_minion.items import Candidate, CartDraft, Item, Quantity
@@ -298,6 +298,12 @@ class ReopenBody(BaseModel):
     index: int
 
 
+class PreferenceBody(BaseModel):
+    """An entry of preferencias.yaml, in pt-BR; other fields the file supports pass through."""
+
+    model_config = ConfigDict(extra="allow")
+
+
 class CartDraftBody(BaseModel):
     lines: list[DraftEdit]
 
@@ -500,6 +506,20 @@ def create_app(machine: RunStateMachine, *, access: Access) -> FastAPI:
     def delete_run():
         machine.dispose()
         return {"state": machine.state}
+
+    @app.get("/api/preferences")
+    def get_preferences():
+        return machine.list_preferences()
+
+    @app.put("/api/preferences/{key:path}")
+    def put_preference(key: str, body: PreferenceBody):
+        return machine.set_preference(key, body.model_dump(mode="json"))
+
+    @app.delete("/api/preferences/{key:path}")
+    def delete_preference(key: str):
+        if not machine.delete_preference(key):
+            raise HTTPException(status_code=404, detail="preferência não encontrada")
+        return {"deleted": True}
 
     @app.get("/api/runs")
     def get_runs():
