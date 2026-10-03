@@ -77,6 +77,10 @@ PICKS = [
             _candidate("t-3", "Tomate cereja 300g", "6.99", ok=False),
         ],
         "jev": {"choice": "t-jev", "confidence": 0.56, "nothing_fit": False},
+        # the list says 1 kg: no flag
+        "quantities": {
+            pid: {"value": 1, "unit": "kg", "flags": []} for pid in ("t-1", "t-jev", "t-3")
+        },
     },
     {
         "item": LIST_ITEMS[2],
@@ -85,8 +89,31 @@ PICKS = [
             _candidate("r-2", "Requeijão light 200g", "7.99"),
         ],
         "jev": {"choice": None, "confidence": None, "nothing_fit": True},
+        # r-1 was bought before, 2 at a time; r-2 never: the default
+        "quantities": {
+            "r-1": {"value": 2, "unit": "un", "flags": ["QUANTITY_FROM_HISTORY"]},
+            "r-2": {"value": 1, "unit": "un", "flags": ["QUANTITY_ASSUMED"]},
+        },
     },
 ]
+
+# What a search for a new term finds, for the item with no results.
+SEARCH_FOUND = [
+    _candidate("sg-1", "Sal grosso 1kg", "3.49"),
+    _candidate("sg-2", "Sal grosso moído 1kg", "4.20", list_price="5.00"),
+]
+
+# A long list of candidates, to scroll the picker on a phone.
+MANY_PICK = {
+    "item": {**LIST_ITEMS[1], "name": "arroz", "search_term": "arroz agulhinha 5kg"},
+    "candidates": [
+        _candidate(f"a-{n}", f"Arroz agulhinha tipo {n} 5kg", f"{20 + n}.90") for n in range(12)
+    ],
+    "jev": {"choice": "a-0", "confidence": 0.6, "nothing_fit": False},
+    "quantities": {
+        f"a-{n}": {"value": 1, "unit": "un", "flags": ["QUANTITY_ASSUMED"]} for n in range(12)
+    },
+}
 
 # One line read as two products, for the grouped review card.
 GROUPED_ITEMS = [
@@ -106,7 +133,7 @@ GROUPED_ITEMS = [
 DRAFT = [
     (
         "p-leite",
-        _candidate("p-leite", "Leite integral 1L", "4.50"),
+        _candidate("p-leite", "Leite integral 1L", "4.50", list_price="5.20"),
         ["leite integral"],
         {"value": 1, "unit": "un"},
         ["QUANTITY_FROM_HISTORY"],
@@ -198,6 +225,51 @@ NO_RESULTS_PICK = {
     "candidates": [],
     "jev": {"choice": None, "confidence": None, "nothing_fit": False},
     "no_results": True,
+    "quantities": {},
+}
+
+# What the done screen shows under the outcome (GET /api/run/report).
+REPORT = {
+    "run_id": 1,
+    "when": "2026-10-02 10:00",
+    "items": 3,
+    "in_cart": 1,
+    "cart_size": 3,
+    "time": {
+        "steps": [
+            {
+                "state": "reading_list",
+                "label": "lendo a lista (OCR)",
+                "who": "machine",
+                "seconds": 24,
+                "text": "24 s",
+            },
+            {
+                "state": "picking",
+                "label": "escolhendo produtos",
+                "who": "you",
+                "seconds": 365,
+                "text": "6 min 05 s",
+            },
+            {
+                "state": "filling_cart",
+                "label": "adicionando ao carrinho",
+                "who": "machine",
+                "seconds": 270,
+                "text": "4 min 30 s",
+            },
+        ],
+        "machine": {"seconds": 294, "text": "4 min 54 s"},
+        "you": {"seconds": 365, "text": "6 min 05 s"},
+        "total": {"seconds": 659, "text": "10 min 59 s"},
+        "baseline": "referência (estimativa do Johann): mais de 1 h à mão",
+    },
+    "corrections": {
+        "list": {"edited": 1, "deleted": 0, "added": 2, "ocr": 3},
+        "products": {"accepted": 1, "asked": 2, "same": 1, "other": 1, "skipped": 0},
+        "cart": {"changed": 1, "removed": 1},
+    },
+    "check": {"ok_count": 1, "total": 3, "extras": 1},
 }
 
 WORKING = {"reading_list", "syncing_history", "searching", "deciding", "filling_cart"}
@@ -228,6 +300,8 @@ class Stub:
         self.list_puts: list[dict] = []
         self.picks_posted: list[dict] = []
         self.cart_puts: list[dict] = []
+        self.searches: list[dict] = []  # POST /api/run/picks/search bodies
+        self.reopens: list[dict] = []  # POST /api/run/picks/reopen bodies
         self.retries = 0
         self.photos = 0
 
@@ -236,10 +310,18 @@ class Stub:
         self.message = None
         self.items = [dict(i) for i in self.initial_items]
         self.pick_at = 0
+        self.reopen_at: int | None = None  # the item sent back from the summary
         self.skipped: list[str] = []
         self.lines = [
             {"id": i, "cand": c, "items": n, "quantity": dict(q), "flags": list(f)}
             for i, c, n, q, f in DRAFT
+        ]
+        # one row per item of the draft, in list order (what the summary shows)
+        self.rows = [
+            {"index": k, "line": i, "item": name}
+            for k, (i, name) in enumerate(
+                (i, name) for i, _c, names, _q, _f in DRAFT for name in names
+            )
         ]
 
     # -- events and states ---------------------------------------------------------
@@ -342,6 +424,79 @@ class Stub:
             "estimated_total": None if total is None else f"{total:.2f}",
         }
 
+    def summary(self):
+        live = {ln["id"]: ln for ln in self.lines}
+        out = []
+        for row in self.rows:
+            ln = live.get(row["line"])
+            if ln is None:
+                out.append(
+                    {
+                        "index": row["index"],
+                        "item": row["item"],
+                        "state": "removed",
+                        "product": None,
+                        "quantity": None,
+                        "flags": [],
+                        "estimated_price": None,
+                        "merged": False,
+                    }
+                )
+                continue
+            share = len(ln["items"])
+            drafted = next(d for d in self.draft()["lines"] if d["line_id"] == ln["id"])
+            out.append(
+                {
+                    "index": row["index"],
+                    "item": row["item"],
+                    "state": "in_cart",
+                    "product": ln["cand"],
+                    "quantity": {**ln["quantity"], "value": ln["quantity"]["value"] / share},
+                    "flags": ln["flags"],
+                    "estimated_price": float(drafted["estimated_price"]) / share,
+                    "merged": share > 1,
+                }
+            )
+        for k, name in enumerate(self.skipped):
+            out.append(
+                {
+                    "index": 100 + k,
+                    "item": name,
+                    "state": "skipped",
+                    "product": None,
+                    "quantity": None,
+                    "flags": [],
+                    "estimated_price": None,
+                    "merged": False,
+                }
+            )
+        return out
+
+    def reopen(self, index):
+        self.reopen_at = index
+        self.go("picking")
+
+    def reopened_pick(self):
+        row = next(r for r in self.summary() if r["index"] == self.reopen_at)
+        mine = row["product"] or _candidate("x-1", "Produto antigo", "3.00")
+        other = _candidate("x-2", "Outro produto", "4.00")
+        quantity = row["quantity"] or {"value": 1, "unit": "un"}
+        return {
+            "index": self.reopen_at,
+            "left": 1,
+            "position": 1,
+            "total": 1,
+            "reopened": True,
+            "item": {**LIST_ITEMS[0], "name": row["item"], "search_term": row["item"]},
+            "candidates": [mine, other],
+            "jev": {
+                "choice": mine["product_id"] if row["product"] else None,
+                "confidence": None,
+                "nothing_fit": False,
+            },
+            "quantities": {c["product_id"]: {**quantity, "flags": []} for c in (mine, other)},
+        }
+
     def confirm_cart(self):
         self.go("filling_cart")
         n = len(self.lines)
@@ -393,6 +548,7 @@ class Stub:
             body["picks_left"] = len(self.picks) - self.pick_at
         if self.state == "reviewing_cart":
             body["cart_draft"] = self.draft()
+            body["summary"] = self.summary()
         if self.state == "done":
             body["outcome"] = OUTCOME_AFTER_RETRY if self.retries else OUTCOME
         return body
@@ -469,14 +625,35 @@ def create_app(stub: Stub) -> FastAPI:
     def picks_next():
         with stub.lock:
             stub.need("picking")
+            if stub.reopen_at is not None:
+                return stub.reopened_pick()
             pick = stub.picks[stub.pick_at]
-            return {"index": stub.pick_at, "left": len(stub.picks) - stub.pick_at, **pick}
+            return {
+                "index": stub.pick_at,
+                "left": len(stub.picks) - stub.pick_at,
+                "position": stub.pick_at + 1,
+                "total": len(stub.picks),
+                "reopened": False,
+                **pick,
+            }
 
     @app.post("/api/run/picks")
     async def post_pick(request: Request):
         body = await request.json()
         with stub.lock:
             stub.need("picking")
+            if stub.reopen_at is not None:
+                if body.get("index") != stub.reopen_at:
+                    return JSONResponse({"detail": "índice errado", "state": stub.state}, 409)
+                stub.picks_posted.append(body)
+                quantity = body.get("quantity")
+                row = next(r for r in stub.rows if r["index"] == stub.reopen_at)
+                for ln in stub.lines:
+                    if quantity and ln["id"] == row["line"]:
+                        ln["quantity"], ln["flags"] = quantity, []
+                stub.reopen_at = None
+                stub.go("reviewing_cart")
+                return {}
             if body.get("index") != stub.pick_at:
                 return JSONResponse({"detail": "índice errado", "state": stub.state}, 409)
             stub.picks_posted.append(body)
@@ -486,6 +663,43 @@ def create_app(stub: Stub) -> FastAPI:
             if stub.pick_at >= len(stub.picks):
                 stub.go("reviewing_cart")
         return {}
+
+    @app.post("/api/run/picks/search")
+    async def post_pick_search(request: Request):
+        body = await request.json()
+        with stub.lock:
+            stub.need("picking")
+            if body.get("index") != stub.pick_at:
+                return JSONResponse({"detail": "índice errado"}, 422)
+            stub.searches.append(body)
+            pick = stub.picks[stub.pick_at]
+            stub.picks[stub.pick_at] = {
+                **pick,
+                "item": {**pick["item"], "search_term": body["term"]},
+                "candidates": SEARCH_FOUND,
+                "no_results": False,
+                "quantities": {
+                    c["product_id"]: {"value": 1, "unit": "un", "flags": ["QUANTITY_ASSUMED"]}
+                    for c in SEARCH_FOUND
+                },
+            }
+        return {"found": len(SEARCH_FOUND)}
+
+    @app.post("/api/run/picks/reopen")
+    async def post_pick_reopen(request: Request):
+        body = await request.json()
+        with stub.lock:
+            stub.need("reviewing_cart")
+            stub.reopens.append(body)
+            stub.reopen(body["index"])
+        return {"state": "picking"}
+
+    @app.get("/api/run/report")
+    def get_report():
+        with stub.lock:
+            if stub.state == "idle":
+                raise WrongState
+        return REPORT
 
     @app.put("/api/run/cart-draft")
     async def put_cart(request: Request):
