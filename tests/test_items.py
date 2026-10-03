@@ -7,6 +7,7 @@ from shopping_minion.items import CartResult, CartTarget, Item, Quantity
 def test_item_defaults():
     item = Item(source_line="atum", name="atum", search_term="atum")
     assert item.constraints == []
+    assert item.alternatives == []
     assert item.brand is None
     assert item.quantity is None
     assert item.needs_review is False
@@ -42,3 +43,16 @@ def test_cart_target_flags_are_restricted():
 def test_cart_result_roundtrip():
     result = CartResult(product_id="1", status="added", quantity_shown="2", message=None)
     assert CartResult.model_validate_json(result.model_dump_json()) == result
+
+
+def test_an_old_saved_item_without_alternatives_still_loads():
+    old = (
+        '{"source_line": "atum", "name": "atum", "search_term": "atum", "constraints": [],'
+        ' "brand": null, "quantity": null, "needs_review": false}'
+    )
+    assert Item.model_validate_json(old).alternatives == []
+
+
+def test_alternatives_round_trip():
+    item = Item(source_line="x", name="x", search_term="acém", alternatives=["paleta"])
+    assert Item.model_validate_json(item.model_dump_json()).alternatives == ["paleta"]

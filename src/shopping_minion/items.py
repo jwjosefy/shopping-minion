@@ -21,6 +21,7 @@ class Item(Contract):
     source_line: str
     name: str
     search_term: str
+    alternatives: list[str] = []  # other terms to search too: "A ou B" gives B (LLD-M5 3.1)
     constraints: list[str] = []
     brand: str | None = None
     quantity: Quantity | None = None

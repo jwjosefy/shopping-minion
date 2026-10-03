@@ -7,7 +7,14 @@ import pytest
 import yaml
 
 from shopping_minion import cli
-from shopping_minion.intake import INTAKE_SCHEMA, IntakeError, build_command, transcribe
+from shopping_minion.intake import (
+    INTAKE_SCHEMA,
+    PROMPT_PATH,
+    IntakeError,
+    build_command,
+    parse_output,
+    transcribe,
+)
 from shopping_minion.items import Item, Quantity
 
 ITEM = {
@@ -59,7 +66,8 @@ def photo(tmp_path) -> Path:
 def test_schema_and_item_stay_in_sync():
     item_schema = INTAKE_SCHEMA["properties"]["items"]["items"]
     assert set(item_schema["properties"]) == set(Item.model_fields)
-    assert set(item_schema["required"]) == set(Item.model_fields)
+    # `alternatives` is optional: a model that leaves it out gets the default []
+    assert set(item_schema["required"]) == set(Item.model_fields) - {"alternatives"}
 
     quantity_schema = next(
         s for s in item_schema["properties"]["quantity"]["anyOf"] if s["type"] == "object"
@@ -76,7 +84,7 @@ def test_every_schema_object_forbids_extra_properties():
         if isinstance(node, dict):
             if node.get("type") == "object":
                 assert node["additionalProperties"] is False
-                assert set(node["required"]) == set(node["properties"])
+                assert set(node["required"]) == set(node["properties"]) - {"alternatives"}
             for value in node.values():
                 walk(value)
         elif isinstance(node, list):
@@ -84,6 +92,29 @@ def test_every_schema_object_forbids_extra_properties():
                 walk(value)
 
     walk(INTAKE_SCHEMA)
+
+
+def test_alternatives_is_an_optional_array_of_strings():
+    props = INTAKE_SCHEMA["properties"]["items"]["items"]["properties"]
+    assert props["alternatives"] == {"type": "array", "items": {"type": "string"}}
+
+
+def _proc(items):
+    envelope = {"type": "result", "subtype": "success", "structured_output": {"items": items}}
+    return subprocess.CompletedProcess([], 0, stdout=json.dumps(envelope), stderr="")
+
+
+def test_parse_output_accepts_and_omits_alternatives():
+    base = {"source_line": "x", "name": "x", "search_term": "acém"}
+    with_alt, without = parse_output(_proc([{**base, "alternatives": ["paleta"]}, base]))
+    assert with_alt.alternatives == ["paleta"]
+    assert without.alternatives == []
+
+
+def test_the_prompt_teaches_the_cut_and_the_alternatives():
+    prompt = PROMPT_PATH.read_text(encoding="utf-8")
+    for needle in ("alternatives", "acém", "paleta moída", "coxa e sobrecoxa"):
+        assert needle in prompt
 
 
 def test_nullable_fields_accept_null():

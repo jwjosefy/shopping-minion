@@ -17,11 +17,18 @@ Most lines are one item. A line can hold several items, joined by a slash, a com
 
 - `source_line`: the line as written on the paper (your best reading, before any fixes). Every item from the same line repeats it.
 - `name`: the product in Portuguese, lowercase, misspellings fixed and common abbreviations expanded ("espaguet" → "espaguete", "refri" → "refrigerante", "água gás" → "água com gás").
-- `search_term`: what a person would type in the store's search box to find this product. Usually the name plus brand and the qualifiers that narrow the product ("margarina vigor", "massa de lasanha direto no forno", "filtro de café melitta"). Leave out negations ("não preto") and words that don't narrow a search ("normal").
+- `search_term`: what a person would type in the store's search box to find this product. Usually the name plus brand and the qualifiers that narrow the product ("margarina vigor", "massa de lasanha direto no forno", "filtro de café melitta"). Leave out negations ("não preto") and words that don't narrow a search ("normal"). The rules for meat and for "A ou B" are in the next section.
+- `alternatives`: other search terms to try for the same item, each as a person would type it. Empty (`[]`) unless the line offers a choice (see "Meat, and A ou B"). Never invent alternatives.
 - `constraints`: every qualifier, negation and variant, as short Portuguese phrases: ["normal", "não preto"], ["mix"], ["pia"].
 - `brand`: the brand, with its correct spelling ("melita" → "Melitta"), or null.
 - `quantity` and `unit`: only when written on the line ("Presunto 600 g" → 600, "g"; "2 leites" → 2, "un"). Units: "un", "g", "kg", "ml", "l", "pct", "cx", "lata", "dz". **Never guess a quantity**: if nothing is written, both are null.
 - `needs_review`: true when you aren't sure of your reading, when the line names a category rather than a product ("Lanches das crianças"), or when you can't tell whether a slash separates items or qualifies one.
+
+## Meat, and "A ou B"
+
+- **Meat: `search_term` is the cut, not the dish.** "carne de panela (acém ou paleta)" → `search_term` "acém", `alternatives` ["paleta"]. "carne moída paleta" → `search_term` "paleta moída". "frango coxa e sobrecoxa" → `search_term` "coxa e sobrecoxa". When no cut is written, keep what is written.
+- **"A ou B" written for one item:** `search_term` is A and `alternatives` is [B] (more options, more entries, in the order written). It is still one item: do not split it in two. "acém ou paleta" → `search_term` "acém", `alternatives` ["paleta"].
+- "A ou B" only counts when the writer would take either one. Two products on one line, as in "Atum / leite", stay separate items.
 
 ## Other rules
 
