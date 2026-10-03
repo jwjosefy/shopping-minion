@@ -116,6 +116,15 @@
                           :aria-label="card.items.length > 1 ? 'remover busca' : 'remover linha'"
                           title="remover">✕</button>
                 </div>
+                <div v-for="(alt, k) in it.row.alternatives" :key="k" class="rsearch ralt" data-test="alt">
+                  <span class="muted small">ou</span>
+                  <input type="text" v-model="it.row.alternatives[k]" @input="touchList"
+                         aria-label="ou" placeholder="outra busca">
+                  <button class="btn ghost small" type="button" aria-label="remover ou"
+                          title="remover" @click="dropAlternative(it.row, k)">✕</button>
+                </div>
+                <button class="linkbtn" type="button" data-test="add-alt"
+                        @click="addAlternative(it.row)">+ ou</button>
                 <div v-if="it.row.qty_on" class="qty rqty">
                   <input type="number" min="0" step="any" inputmode="decimal"
                          v-model="it.row.qty_value" @input="touchList" aria-label="quantidade">
