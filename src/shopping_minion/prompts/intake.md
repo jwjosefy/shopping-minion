@@ -26,7 +26,7 @@ Most lines are one item. A line can hold several items, joined by a slash, a com
 
 ## Meat, and "A ou B"
 
-- **Meat: `search_term` is the cut, not the dish.** "carne de panela (acém ou paleta)" → `search_term` "acém", `alternatives` ["paleta"]. "carne moída paleta" → `search_term` "paleta moída". "frango coxa e sobrecoxa" → `search_term` "coxa e sobrecoxa". When no cut is written, keep what is written.
+- **Meat: `search_term` is the cut, not the dish.** "carne de panela (acém ou paleta)" → `search_term` "acém", `alternatives` ["paleta"]. Ground meat is the exception: the store names it "Carne Moída …", so "carne moída paleta" → `search_term` "carne moída", `constraints` ["paleta"]. "frango coxa e sobrecoxa" → `search_term` "coxa e sobrecoxa". When no cut is written, keep what is written.
 - **"A ou B" written for one item:** `search_term` is A and `alternatives` is [B] (more options, more entries, in the order written). It is still one item: do not split it in two. "acém ou paleta" → `search_term` "acém", `alternatives` ["paleta"].
 - "A ou B" only counts when the writer would take either one. Two products on one line, as in "Atum / leite", stay separate items.
 

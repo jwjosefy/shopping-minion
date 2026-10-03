@@ -113,7 +113,7 @@ def test_parse_output_accepts_and_omits_alternatives():
 
 def test_the_prompt_teaches_the_cut_and_the_alternatives():
     prompt = PROMPT_PATH.read_text(encoding="utf-8")
-    for needle in ("alternatives", "acém", "paleta moída", "coxa e sobrecoxa"):
+    for needle in ("alternatives", "acém", "Carne Moída", "coxa e sobrecoxa"):
         assert needle in prompt
 
 

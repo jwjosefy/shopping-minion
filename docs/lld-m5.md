@@ -103,9 +103,18 @@ Each color is defined once as a token, in light and dark.
 ### 3.1 The OCR prompt (`prompts/intake.md`)
 
 New rules, each with an example from runs 9–11:
-- **Meat:** `search_term` is the cut, not the dish. "carne de panela (acém ou paleta)" gives the searches "acém" and "paleta"; "carne moída paleta" gives "paleta moída"; "frango coxa e sobrecoxa" gives "coxa e sobrecoxa".
+- **Meat:** `search_term` is the cut, not the dish. "carne de panela (acém ou paleta)" gives the searches "acém" and "paleta"; "carne moída paleta" gives "carne moída" with the constraint "paleta" (corrected after T23: the store has no "paleta moída"; it names ground meat "Carne Moída …"); "frango coxa e sobrecoxa" gives "coxa e sobrecoxa".
 - **"A ou B" written for one item:** `search_term` is A, and the new field `alternatives` is `["B"]`. The schema gets `alternatives: string[]` (default `[]`), and so does `Item`.
 - Every prompt change is run on `list-001` and on today's pages, and the result goes in the commit message ([hld.md](hld.md) §3.1).
+
+**Eval after T23 (2026-10-02; `claude -p` on Johann's subscription; read-only searches):**
+- **`list-001`:** 32/32 found, quantity 32/32, constraints 30/32 (no regression).
+- **Run 10's page, with the new rules:**
+  - "Carne de panela acém ou paleta" → "acém" + alternative "paleta": 11 products, Acém first.
+  - "sobre-coxa com coxa" → "coxa e sobrecoxa": 5 products.
+  - "Bife alcatra ou contra-filé" → "bife de alcatra" + "bife de contra-filé".
+  - "salsinha" → "salsa": 15 products.
+- **First version of the ground-meat rule:** it gave "paleta moída", which finds 0 products. The store names it "Carne Moída …". The rule now gives "carne moída", which finds 8 products, with "paleta" as a constraint.
 
 ### 3.2 Synonyms (`config/search_terms.yaml`, `search.py`)
 
