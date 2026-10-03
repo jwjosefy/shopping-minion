@@ -39,14 +39,19 @@ createApp({
     const runs = ref([]);
     const access = ref(null);
     const uploading = ref(false);
-    const photoUrl = ref(null); // object URL of the File picked in this browser session
+    const MAX_PHOTOS = 5;
+    const pending = ref([]); // {file, url}: photos picked, not sent yet (the pages, in order)
+    const photoUrls = ref([]); // object URLs of the pages sent from this browser session
+    const photoTab = ref(0);
     const photoFailed = ref(false); // the server's copy (GET /api/run/photo) didn't load
-    // The File picked here if there is one, else the server's copy, so the photo also shows
-    // after a reload or when the upload came from the phone.
+    // The pages sent from here if we have them, else the server's copies, so the photos also
+    // show after a reload or when the upload came from the phone.
+    const photoCount = computed(() => photoUrls.value.length || run.value.photos || 0);
     const listPhoto = computed(() => {
-      if (photoUrl.value) return photoUrl.value;
+      const i = Math.min(photoTab.value, Math.max(0, photoCount.value - 1));
+      if (photoUrls.value[i]) return photoUrls.value[i];
       const id = run.value && run.value.run_id;
-      return id && !photoFailed.value ? `/api/run/photo?run=${id}` : null;
+      return id && photoCount.value && !photoFailed.value ? `/api/run/photo?i=${i}&run=${id}` : null;
     });
 
     // reviewing_list
@@ -259,22 +264,38 @@ createApp({
 
     // ---- idle: upload ------------------------------------------------------------
     function clearPhoto() {
-      if (photoUrl.value) URL.revokeObjectURL(photoUrl.value);
-      photoUrl.value = null;
+      photoUrls.value.forEach((u) => URL.revokeObjectURL(u));
+      photoUrls.value = [];
+      photoTab.value = 0;
       photoFailed.value = false;
     }
 
-    async function onPhoto(ev) {
-      const file = ev.target.files && ev.target.files[0];
+    function onPhotos(ev) {
+      const files = Array.from(ev.target.files || []);
       ev.target.value = "";
-      if (!file) return;
+      for (const file of files) {
+        if (pending.value.length >= MAX_PHOTOS) {
+          toast.value = `no máximo ${MAX_PHOTOS} fotos por lista`;
+          break;
+        }
+        pending.value.push({ file, url: URL.createObjectURL(file) });
+      }
+    }
+    function removePending(i) {
+      const [gone] = pending.value.splice(i, 1);
+      if (gone) URL.revokeObjectURL(gone.url);
+    }
+
+    async function readList() {
+      if (!pending.value.length) return;
       uploading.value = true;
       try {
         const form = new FormData();
-        form.append("photo", file);
+        pending.value.forEach((p) => form.append("photos", p.file));
         await api("POST", "/api/run", undefined, form);
         clearPhoto();
-        photoUrl.value = URL.createObjectURL(file);
+        photoUrls.value = pending.value.map((p) => p.url);
+        pending.value = [];
         await refresh();
       } catch (err) {
         fail(err);
@@ -314,6 +335,8 @@ createApp({
         brand: it.brand ?? "",
         qty_value: it.quantity ? it.quantity.value : "",
         qty_unit: it.quantity ? it.quantity.unit : "un",
+        qty_on: !!it.quantity, // the quantity field is showing (the list has one, or "+ quantidade")
+        open: false, // "mais": name, constraints and brand
         needs_review: !!it.needs_review,
       };
     }
@@ -358,10 +381,37 @@ createApp({
       }
     }
 
+    // One card per line: consecutive items with the same source_line share a card.
+    const cards = computed(() => {
+      const out = [];
+      rows.value.forEach((row, i) => {
+        const line = String(row.source_line).trim();
+        const last = out[out.length - 1];
+        if (line && last && last.line === line) last.items.push({ row, i });
+        else out.push({ key: row.key, line, items: [{ row, i }] });
+      });
+      return out;
+    });
+    const cardOpen = (card) => card.items.some((it) => it.row.open);
+    function toggleMore(card) {
+      const open = !cardOpen(card);
+      card.items.forEach((it) => (it.row.open = open));
+    }
+    function addQuantity(row) {
+      row.qty_on = true;
+    }
+    function dropQuantity(row) {
+      row.qty_on = false;
+      row.qty_value = "";
+      touchList();
+    }
+
     function addRow() {
-      rows.value.push(
-        toRow({ source_line: "", name: "", search_term: "", constraints: [], needs_review: false }),
-      );
+      const row = toRow({
+        source_line: "", name: "", search_term: "", constraints: [], needs_review: false,
+      });
+      row.open = true; // a row typed by hand has no reading: name and the rest are what to fill
+      rows.value.push(row);
       touchList();
     }
     function removeRow(i) {
@@ -609,13 +659,13 @@ createApp({
     });
 
     return {
-      units: UNITS, run, state, toast, offline, reconnecting, busy, canCancel, runs, access, uploading, photoUrl,
-      listPhoto, photoFailed,
-      rows, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
+      units: UNITS, run, state, toast, offline, reconnecting, busy, canCancel, runs, access, uploading,
+      pending, maxPhotos: MAX_PHOTOS, photoCount, photoTab, listPhoto, photoFailed,
+      rows, cards, cardOpen, toggleMore, addQuantity, dropQuantity, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
       elapsed, searchList, searchLast, searchTotal, searchDone, fillList, fillTotal, fillDone,
       outcome, problems, oks, extras,
       money, pct, dateText, countText, fillLabel, fillClass, checkNames, lineProduct, lineItems,
-      onPhoto, touchList, addRow, removeRow, confirmList, takeCandidate, skipPick, editLine,
+      onPhotos, removePending, readList, touchList, addRow, removeRow, confirmList, takeCandidate, skipPick, editLine,
       removeLine, confirmCart, resetRun, retryFailed, cancelRun,
     };
   },

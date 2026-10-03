@@ -88,6 +88,20 @@ PICKS = [
     },
 ]
 
+# One line read as two products, for the grouped review card.
+GROUPED_ITEMS = [
+    {
+        "source_line": "saco lixo pia e banheiro",
+        "name": f"saco de lixo ({where})",
+        "search_term": f"saco de lixo {where}",
+        "constraints": [where],
+        "brand": None,
+        "quantity": None,
+        "needs_review": False,
+    }
+    for where in ("pia", "banheiro")
+]
+
 # Draft lines: (line_id, candidate, item names, quantity, flags)
 DRAFT = [
     (
@@ -195,7 +209,8 @@ class WrongState(Exception):
 
 
 class Stub:
-    def __init__(self, hold=(), access=True, picks=None):
+    def __init__(self, hold=(), access=True, picks=None, items=None):
+        self.initial_items = LIST_ITEMS if items is None else items
         self.hold = set(hold)
         self.picks = list(PICKS if picks is None else picks)
         self.access = access
@@ -209,16 +224,17 @@ class Stub:
         self.released: set[str] = set()
         self.pending: dict = {}
         # what the tests assert on
-        self.uploads: list[str] = []
+        self.uploads: list[str] = []  # the file names of every photo sent, in order
         self.list_puts: list[dict] = []
         self.picks_posted: list[dict] = []
         self.cart_puts: list[dict] = []
         self.retries = 0
+        self.photos = 0
 
     def reset(self):
         self.state = "idle"
         self.message = None
-        self.items = [dict(i) for i in LIST_ITEMS]
+        self.items = [dict(i) for i in self.initial_items]
         self.pick_at = 0
         self.skipped: list[str] = []
         self.lines = [
@@ -260,9 +276,10 @@ class Stub:
             self.later(fn)
 
     # -- the script ------------------------------------------------------------------------
-    def start_run(self, filename):
+    def start_run(self, filenames):
         self.reset()
-        self.uploads.append(filename)
+        self.photos = len(filenames)
+        self.uploads.extend(filenames)
         self.go("reading_list")
         self.gate(
             "reading_list", lambda: self._if("reading_list", lambda: self.go("reviewing_list"))
@@ -366,6 +383,8 @@ class Stub:
 
     def snapshot(self):
         body = {"state": self.state, "run_id": 1, "message": self.message}
+        if self.photos:
+            body["photos"] = self.photos
         if self.state == "idle":
             return {"state": "idle"}
         if self.state == "reviewing_list":
@@ -424,10 +443,10 @@ def create_app(stub: Stub) -> FastAPI:
         return StreamingResponse(gen(), media_type="text/event-stream")
 
     @app.post("/api/run", status_code=202)
-    async def post_run(photo: UploadFile):
+    async def post_run(photos: list[UploadFile]):
         with stub.lock:
             stub.need("idle")
-            stub.start_run(photo.filename or "photo")
+            stub.start_run([photo.filename or "photo" for photo in photos])
         return {"run_id": 1}
 
     @app.put("/api/run/list")

@@ -11,12 +11,13 @@ import urllib.request
 import pytest
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import expect, sync_playwright
-from ui_stub import NO_RESULTS_PICK, StubServer
+from ui_stub import GROUPED_ITEMS, LIST_ITEMS, NO_RESULTS_PICK, StubServer
 
 pytestmark = pytest.mark.live
 
 VUE_URL = "https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"
 PHOTO = {"name": "lista.png", "mimeType": "image/png", "buffer": b"\x89PNG\r\n\x1a\n"}
+PHOTO_2 = {**PHOTO, "name": "lista-2.png"}
 VIEWPORTS = {"phone": (390, 844), "desktop": (1280, 800)}
 
 
@@ -62,6 +63,13 @@ def set_visibility(page, value):
     )
 
 
+def send_photos(page, *photos):
+    """Pick the photos, one pick each (as a phone's camera does), then press "ler lista"."""
+    for photo in photos:
+        page.locator("input[data-test=photo]").set_input_files(photo)
+    page.locator("[data-test=read-list]").click()
+
+
 def assert_fits(page, screen):
     width, inner = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     assert width <= inner, f"{screen}: scrollWidth {width} > innerWidth {inner}"
@@ -90,7 +98,10 @@ def test_whole_flow(browser, size):
             photo = page.locator("input[data-test=photo]")
             assert photo.get_attribute("accept") == "image/*"
             assert photo.get_attribute("capture") == "environment"
+            assert photo.get_attribute("multiple") is not None
             photo.set_input_files(PHOTO)
+            expect(page.locator("[data-test=pending-photo]")).to_have_count(1)
+            page.locator("[data-test=read-list]").click()
             wait_for(lambda: stub.uploads == ["lista.png"], "the upload")
 
             # 2. Lendo a lista
@@ -103,19 +114,23 @@ def test_whole_flow(browser, size):
             # 3. Revisar lista
             review = screen(page, "reviewing_list")
             expect(review.get_by_text("Revisar lista")).to_be_visible()
-            rows = page.locator("[data-test=list-row]")
+            rows = page.locator("[data-test=list-card]")
             expect(rows).to_have_count(3)
-            expect(page.locator("tr.review")).to_have_count(1)
+            expect(page.locator(".rcard.review")).to_have_count(1)
             assert_fits(page, "reviewing_list")
             photo_box = page.locator("[data-test=list-photo]").bounding_box()
-            table_box = page.locator("table.grid").bounding_box()
+            table_box = page.locator(".rcards").bounding_box()
             if size[0] < 900:  # on a phone the photo sits above the table
                 assert photo_box["y"] + photo_box["height"] <= table_box["y"] + 1
             else:  # beside it on a desktop
                 assert photo_box["x"] + photo_box["width"] <= table_box["x"] + 1
             # constraints are comma text; edits are saved without pressing anything
-            expect(rows.nth(2).get_by_label("restrições")).to_have_value("cremoso, sem lactose")
-            rows.nth(0).get_by_label("nome").fill("leite integral UHT")
+            rows.nth(2).get_by_role("button", name="mais").click()
+            expect(rows.nth(2).get_by_label("restrições", exact=True)).to_have_value(
+                "cremoso, sem lactose"
+            )
+            rows.nth(0).get_by_role("button", name="mais").click()
+            rows.nth(0).get_by_label("nome", exact=True).fill("leite integral UHT")
             wait_for(lambda: len(stub.list_puts) >= 1, "the debounced save")
             saved = stub.list_puts[-1]["items"]
             assert saved[0]["name"] == "leite integral UHT"
@@ -247,7 +262,7 @@ def test_cancel_while_reviewing(browser):
         context, page = open_page(browser, server, VIEWPORTS["desktop"])
         try:
             screen(page, "idle")
-            page.locator("input[data-test=photo]").set_input_files(PHOTO)
+            send_photos(page, PHOTO)
             screen(page, "reading_list")
             server.stub.release("reading_list")
             screen(page, "reviewing_list")
@@ -303,7 +318,7 @@ def test_an_item_with_no_results_offers_only_to_skip(browser):
         context, page = open_page(browser, server, VIEWPORTS["phone"])
         try:
             screen(page, "idle")
-            page.locator("input[data-test=photo]").set_input_files(PHOTO)
+            send_photos(page, PHOTO)
             screen(page, "reviewing_list")
             page.locator("[data-test=confirm-list]").click()
             screen(page, "picking")
@@ -326,7 +341,7 @@ def test_resync_on_409_and_reload_resumes(browser):
         context, page = open_page(browser, server, VIEWPORTS["phone"])
         try:
             screen(page, "idle")
-            page.locator("input[data-test=photo]").set_input_files(PHOTO)
+            send_photos(page, PHOTO)
             screen(page, "reading_list")
             server.stub.release("reading_list")
             screen(page, "reviewing_list")
@@ -388,5 +403,100 @@ def test_reconnects_when_the_page_comes_back_and_shows_a_banner_only_while_down(
             assert_fits(page, "reconnecting banner")
             stub.events_down = False
             expect(banner).to_have_count(0, timeout=6000)
+        finally:
+            context.close()
+
+
+def test_several_photos_are_sent_together_and_shown_as_tabs(browser):
+    with StubServer(hold={"reading_list"}) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "idle")
+            expect(page.locator("[data-test=read-list]")).to_have_count(0)
+            page.locator("input[data-test=photo]").set_input_files([PHOTO, PHOTO_2])
+            pending = page.locator("[data-test=pending-photo]")
+            expect(pending).to_have_count(2)
+            assert_fits(page, "idle with two photos")
+            pending.nth(0).get_by_role("button", name="remover página 1").click()
+            expect(pending).to_have_count(1)
+            page.locator("input[data-test=photo]").set_input_files(
+                PHOTO
+            )  # one more, as a camera does
+            expect(pending).to_have_count(2)
+            page.locator("[data-test=read-list]").click()
+            wait_for(lambda: stub.uploads == ["lista-2.png", "lista.png"], "both photos, in order")
+            screen(page, "reading_list")
+            stub.release("reading_list")
+            screen(page, "reviewing_list")
+            tabs = page.locator("[data-test=photo-tab]")
+            expect(tabs).to_have_count(2)
+            image = page.locator("[data-test=list-photo]")
+            first = image.get_attribute("src")
+            tabs.nth(1).click()
+            wait_for(lambda: image.get_attribute("src") != first, "the second page")
+            assert_fits(page, "reviewing_list with tabs")
+        finally:
+            context.close()
+
+
+def test_the_sixth_photo_is_refused(browser):
+    with StubServer() as server:
+        context, page = open_page(browser, server, VIEWPORTS["desktop"])
+        try:
+            screen(page, "idle")
+            page.locator("input[data-test=photo]").set_input_files([PHOTO] * 5)
+            expect(page.locator("[data-test=pending-photo]")).to_have_count(5)
+            expect(page.locator("input[data-test=photo]")).to_be_disabled()
+        finally:
+            context.close()
+
+
+def test_the_review_card_groups_a_line_read_as_several_items(browser):
+    with StubServer(items=LIST_ITEMS + GROUPED_ITEMS) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "idle")
+            send_photos(page, PHOTO)
+            screen(page, "reviewing_list")
+            cards = page.locator("[data-test=list-card]")
+            expect(cards).to_have_count(4)  # three lines, the last one holding two items
+            # by default: the line (read-only) and the search; the rest is behind "mais"
+            leite = cards.nth(0)
+            expect(leite.locator("[data-test=line]")).to_have_text("leite int. 1l")
+            expect(leite.locator("input[aria-label=linha]")).to_have_count(0)  # read-only text
+            expect(leite.get_by_label("busca", exact=True)).to_have_value("leite integral 1l")
+            expect(leite.get_by_label("quantidade", exact=True)).to_have_value(
+                "1"
+            )  # the list has one
+            expect(leite.get_by_label("nome", exact=True)).to_have_count(0)
+            expect(leite.get_by_label("marca", exact=True)).to_have_count(0)
+            # no quantity on the list: a link instead of a field
+            req = cards.nth(2)
+            expect(req.get_by_label("quantidade", exact=True)).to_have_count(0)
+            req.locator("[data-test=add-qty]").click()
+            expect(req.get_by_label("quantidade", exact=True)).to_be_visible()
+            # one card, one line, two "busca" fields
+            group = cards.nth(3)
+            expect(group.locator("[data-test=line]")).to_have_count(1)
+            expect(group.get_by_label("busca", exact=True)).to_have_count(2)
+            expect(group.get_by_label("busca", exact=True).nth(1)).to_have_value(
+                "saco de lixo banheiro"
+            )
+            group.get_by_role("button", name="mais").click()
+            expect(group.get_by_label("nome", exact=True)).to_have_count(2)
+            expect(group.get_by_label("restrições", exact=True).nth(1)).to_have_value("banheiro")
+            group.get_by_role("button", name="menos").click()
+            expect(group.get_by_label("nome", exact=True)).to_have_count(0)
+            assert_fits(page, "reviewing_list grouped")
+            # deleting one field deletes that item; the other stays
+            group.get_by_role("button", name="remover busca").first.click()
+            expect(group.get_by_label("busca", exact=True)).to_have_count(1)
+            expect(group.get_by_label("busca", exact=True)).to_have_value("saco de lixo banheiro")
+            wait_for(lambda: stub.list_puts and len(stub.list_puts[-1]["items"]) == 4, "the save")
+            saved = stub.list_puts[-1]["items"]
+            assert [i["name"] for i in saved][-1] == "saco de lixo (banheiro)"
+            assert saved[0] == LIST_ITEMS[0]  # an untouched item goes back as it came
         finally:
             context.close()
