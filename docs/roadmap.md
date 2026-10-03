@@ -22,7 +22,7 @@ A milestone isn't done because its code is merged. It's done when its *done when
 | M2 | Web app | ✅ 2026-10-01 | [lld-m2.md](lld-m2.md) §11 |
 | M3 | Full list, photo to cart, measured | ✅ 2026-10-01 | [lld-m3.md](lld-m3.md) §5 |
 | M4 | Purchase history for Jev | ✅ 2026-10-02 | [lld-m4.md](lld-m4.md) §16 |
-| M5 | UX improvements and preferences | 🟡 designing | [hld-m5.md](hld-m5.md) |
+| M5 | UX improvements and preferences | ✅ 2026-10-03 | [lld-m5.md](lld-m5.md) §7 |
 | M6 | Julia-1 as a local decide backend | ⬜ | to design |
 | M7 | Cloud migration | ⬜ | design TBD |
 
@@ -76,9 +76,14 @@ A milestone isn't done because its code is merged. It's done when its *done when
 - **What was measured:** three runs of Johann's real list, 88 items. Jev's pick was the final product for 63 of 74 items with history (85%; it was 62% without history). Jev accepted 48 items on its own with no wrong accept.
 - **The 95% target was not met.** Johann accepted M4 at 85%, and the target moves to M5. Most misses are brands he alternates between, which history alone can't tell apart.
 
-## M5 — UX improvements and preferences 🟡
+## M5 — UX improvements and preferences ✅
 
 **Goal:** the improvements Johann saw while using M2 and M4, and preferences beyond purchase history. Johann's notes: [ideas-m5.md](ideas-m5.md). Design: [hld-m5.md](hld-m5.md), in progress. M5 also takes over M4's 95% hit-rate target, and the cart failures left open in LLD-M4 §16.
+
+**Done on 2026-10-03** ([lld-m5.md](lld-m5.md) §7):
+- **The run:** the same real list as M4, 90 items in 3 photos, in one run.
+- **Results:** 94% hits on items with history, 55 accepted by Jev with no wrong accept, 90 of 90 products added. Johann spent 8.5 s per item, against 45 s in run 10.
+- **Built:** a cart that names and retries its failures, one pass for product and quantity, several photos, meat by cut, and preferences learned from his picks and editable in the app. Open vs fixed items were left out on purpose.
 
 **Preferences beyond history** (from LLD-M4):
 - user-set preferences, apart from history ("Guaraná Antarctica over Dolly"), edited in the web app;
