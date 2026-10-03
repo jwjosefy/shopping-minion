@@ -116,6 +116,7 @@ Constraints already known, for the design to answer:
 - **Access** today is a LAN token. On the internet it needs real authentication.
 - **Personal data** (session cookies, purchase history, list photos) leaves this machine, so where it lives and who can read it is a design decision, not a detail.
 - Out of scope in v0 per the [reset](project-reset.md). This milestone is where that changes.
+- **Telemetry and CI/CD** come with the cloud: monitoring things like a dropped phone connection, and builds and deploys on every merge (Johann, HLD-M5 Q3: core first, then cloud, telemetry and CI/CD).
 
 ## Questions resolved in review
 
