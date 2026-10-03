@@ -11,7 +11,7 @@ Turns a photo of a handwritten grocery list into a ready-to-review cart at [Ando
 
 You take a photo of the list on the fridge. Shopping Minion reads it, you fix what it misread, it searches the store for every item, picks a product for each one, and fills the cart. **It stops before checkout: a human always reviews and places the order.** The point is to save time on long lists (50+ items).
 
-> **Status (2026-10-01): works end to end, in a web app on the desktop or the phone.** The first real run took a 34-item list photo to 31 products in the real cart, each one checked against the reloaded cart. A measured 32-item run took 8 minutes from photo to checked cart, against over an hour by hand ([M3](docs/lld-m3.md#5-acceptance-t11)).
+> **Status (2026-10-03): works end to end, in a web app on the desktop or the phone.** A real 90-item list, read from 3 photos, reached a checked cart in 22 minutes, 12 of them the person's. Jev picked 55 products on its own without a wrong one. The first real run took a 34-item list photo to 31 products in the real cart, each one checked against the reloaded cart. A measured 32-item run took 8 minutes from photo to checked cart, against over an hour by hand ([M3](docs/lld-m3.md#5-acceptance-t11)).
 >
 > This is the second version. The first one grew too many layers to reach a working cart and is archived in [`alfa0/`](alfa0/). [Why it was reset](docs/project-reset.md) · [what carried over](docs/lessons-learned.md) · [the journey](docs/journal/).
 
@@ -141,7 +141,7 @@ The key to `.env` is never shared: it opens every secret in it, including in old
 - [x] M3: full list from photo to cart, time and number of corrections measured
 - [x] Merge duplicate list lines that point to the same product
 - [x] M4: purchase history for Jev. On a real 88-item list, Jev decided 48 items alone with no wrong pick, and its pick was the final product for 85% of the items bought before (62% without history)
-- [ ] M5: UX and preferences learned from your picks
+- [x] M5: UX and preferences learned from your picks. The same 90-item list: 94% hits, 55 decided by Jev alone, 90/90 in the cart, 8.5 s of your time per item
 - [ ] Julia-1 as a local alternative to Jev
 
 ## License

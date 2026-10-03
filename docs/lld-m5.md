@@ -1,6 +1,6 @@
 # Shopping Minion — LLD M5: UX and preferences
 
-- **Status:** Approved by Johann on 2026-10-02. He asked for waves 1–5 to run on their own, one after another, with each wave's tasks in parallel, a commit per task and wave, and a stop at T26 for his end-to-end test.
+- **Status:** Approved by Johann on 2026-10-02. **M5 accepted on 2026-10-03 (§7).** He asked for waves 1–5 to run on their own, one after another, with each wave's tasks in parallel, a commit per task and wave, and a stop at T26 for his end-to-end test.
 - **Date:** 2026-10-02
 - **Implements:** [hld-m5.md](hld-m5.md), as answered on 2026-10-02. **Done when** (HLD §2): on a real list of 40+ items through the web app:
   1. the app's check finds every decided product in the cart, or names each failure;
@@ -205,3 +205,60 @@ The commits to revert by are in `git log`.
 
 - **HLD Q2:** what the store's page shows when "Adicionar" doesn't take. The screenshot of §1.2 should answer it on the next real case.
 - **Open vs fixed items:** out of M5 until more piloting (HLD Q7).
+
+## 7. Acceptance (T26)
+
+**Accepted by Johann on 2026-10-03** ("aprovado com sucesso").
+
+**The run:** run 12. Johann's real list of 2026-10-02, 3 pages, was uploaded as 3 photos in one run through the web app, end to end. Settings: `accept_at` 0.75, `history: options`, `learned: true`.
+
+| Done-when (HLD §2) | Target | Run 12 |
+|---|---|---|
+| Every decided product in the cart, or each failure named | all | 90 of 90 added; the check found 87 of 90 right and named the other 3 |
+| Hits on items with history | ≥ 90% | **79/84 (94%)**; overall 84/90 (93%) |
+| Johann's time per item | ≤ ~22 s | **8.5 s** (12 min 43 s for 90 items) |
+
+**Against the same list on 2026-10-02** (runs 9–11, M4):
+
+| | Runs 9–11 | Run 12 |
+|---|---|---|
+| Items | 88 | 90 |
+| Johann's time | 33 min | 12 min 43 s |
+| Accepted by Jev alone, wrong | 48, 0 | 55, 0 |
+| Hits, items with history | 85% | 94% |
+| Products that failed to go in the cart | 12 | 0 |
+| Empty searches | 5 | 0 |
+
+**Time:**
+- **Total run:** 22 min 35 s; the machine took 9 min 52 s of it.
+- **Machine steps:** OCR of 3 photos 45 s, search 1 min 47 s, cart 7 min 8 s.
+- **Johann's steps:** list review 4 min 31 s, 35 picks in 7 min 47 s, cart review 25 s.
+
+**Confidence (90 answers):**
+- Every miss was at 0.55 or less.
+- Band 0.6–0.8: 18 of 19 hits. 0.8–0.9: 18 of 18. ≥ 0.9: 33 of 33.
+
+**The 3 lines that didn't check: bulk spices.**
+- **What happened:** expected 300 g, 200 g and 150 g; the cart got 400 g, 250 g and 250 g.
+- **Cause:**
+  - the store's `quantity.min` (0.15 kg) is above the step for these products;
+  - the first click puts the minimum, and the code counted it as one step.
+- **Fix:** after the run, in `f8ad3e1`. See site-notes.
+
+**The 6 misses:**
+- **Size:** Nescau 770 g vs 540 g.
+- **Brand:** presunto Sadia vs Seara.
+- **Variant:**
+  - coxa da asa temperada vs sem tempero;
+  - calabresa Aurora 400 g vs Perdigão granel.
+- **Jev answered "nenhum":**
+  - **toddy**, at 0.68, with Toddy 700 g bought and picked before. It is the same miss as in run 9, and its cause is unknown.
+  - **iogurtinhos crianças**, where the search "iogurte infantil" brought back only bebidas lácteas.
+
+**Left open:**
+- Jev's "nenhum" on toddy.
+- Generic items that the search finds poorly.
+- 14 near misses: order lines that look like a candidate but have another id.
+- Open vs fixed items.
+- The add the site didn't take in runs 10–11 (água sanitária, alface). Both went in on run 12, and no screenshot was taken.
+
