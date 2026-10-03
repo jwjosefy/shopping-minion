@@ -18,6 +18,7 @@ from shopping_minion.items import Candidate, CartResult, Decision, Item, Quantit
 from shopping_minion.merge import line_label
 from shopping_minion.orders import SyncResult
 from shopping_minion.reconcile import expected_amount, format_amount, reconcile
+from shopping_minion.search import SearchResults
 from shopping_minion.storage import Storage
 from shopping_minion.web.app import (
     Access,
@@ -132,7 +133,8 @@ class World:
         self.items_seen = items
         out = []
         for i, it in enumerate(items, start=1):
-            found = RESULTS[it.name]
+            found = SearchResults(RESULTS[it.name])
+            found.terms = [(it.search_term, it.search_term)]
             out.append(found)
             progress(i, len(items), it, found)
         return out
@@ -394,8 +396,8 @@ def test_the_whole_flow_in_state_order(client, world):
     assert [e["seq"] for e in log] == sorted({e["seq"] for e in log})
     searches = [e for e in log if e["kind"] == "search"]
     assert [e["data"] for e in searches][:2] == [
-        {"i": 1, "n": 4, "term": "frango", "found": 1, "retried": False},
-        {"i": 2, "n": 4, "term": "atum", "found": 2, "retried": False},
+        {"i": 1, "n": 4, "term": "frango", "searched": ["frango"], "found": 1, "retried": False},
+        {"i": 2, "n": 4, "term": "atum", "searched": ["atum"], "found": 2, "retried": False},
     ]
     assert {e["state"] for e in searches} == {"searching"}
     decides = [e["data"] for e in log if e["kind"] == "decide"]
@@ -493,6 +495,23 @@ def test_the_run_log_has_states_picks_cart_edits_and_the_check(client, world, mo
     # one search row per item, so an empty search can be told apart afterwards
     searches = [r["data"] for r in log if r["kind"] == "search"]
     assert searches and all("found" in s and "term" in s for s in searches)
+
+
+def test_the_search_row_logs_the_written_term_and_the_terms_searched(client, world, monkeypatch):
+    def search(page, items, progress):
+        found = SearchResults([FEIJAO])
+        found.terms = [("salsinha", "salsa"), ("manjericão", "manjericão")]
+        for i, it in enumerate(items, start=1):
+            progress(i, len(items), it, found)
+        return [found for _ in items]
+
+    monkeypatch.setattr(world, "search", search)
+    to_reviewing_list(client)
+    client.post("/api/run/list/confirm")
+    wait_for(client, "picking")
+    first = [e["data"] for e in events(client) if e["kind"] == "search"][0]
+    assert first["term"] == "frango"  # the item's own written term
+    assert first["searched"] == ["salsa", "manjericão"]  # what the store was asked for
 
 
 def test_nothing_to_pick_goes_straight_to_reviewing_cart(client, monkeypatch):

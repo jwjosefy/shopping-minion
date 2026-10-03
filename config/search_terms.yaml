@@ -1,0 +1,3 @@
+# A term the store does not find, and the one it does (LLD-M5 section 3.2).
+# Keys are matched without accents or case. Grows with what fails on a live run.
+salsinha: salsa

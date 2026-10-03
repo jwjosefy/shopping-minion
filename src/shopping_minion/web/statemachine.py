@@ -79,6 +79,11 @@ class BadRequest(ValueError):
     """The call fits the state but its content doesn't (HTTP 422)."""
 
 
+def _searched_terms(found: Any) -> list[str]:
+    """The terms the store was asked for, after the synonyms (the first is the item's own)."""
+    return [searched for _written, searched in getattr(found, "terms", [])]
+
+
 class _Cancelled(Exception):
     """Raised inside the worker's progress callback to end a search the user cancelled."""
 
@@ -687,6 +692,7 @@ class RunStateMachine:
                 "i": i,
                 "n": n,
                 "term": item.search_term,
+                "searched": _searched_terms(candidates),
                 "found": len(candidates),
                 "retried": bool(getattr(candidates, "retried", False)),
             }
@@ -753,7 +759,10 @@ class RunStateMachine:
             with self._lock:
                 if self._run is not run or self._state != "picking" or run.pending[:1] != [index]:
                     raise WrongState(self._state)
-                item = run.decisions[index].item.model_copy(update={"search_term": term})
+                # a term typed by hand replaces the reading, alternatives included
+                item = run.decisions[index].item.model_copy(
+                    update={"search_term": term, "alternatives": []}
+                )
             try:
                 found = self._search_one_fn(page, item)
             except Exception as exc:  # the run goes on: the user can try another term
@@ -782,6 +791,7 @@ class RunStateMachine:
                             "i": index + 1,
                             "n": len(run.items),
                             "term": term,
+                            "searched": _searched_terms(found),
                             "found": len(candidates),
                             "retried": bool(getattr(found, "retried", False)),
                             "index": index,

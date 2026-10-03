@@ -9,11 +9,14 @@ import re
 import time
 from collections.abc import Callable
 from decimal import Decimal
+from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
+import yaml
 from playwright.sync_api import Page, Response
 
 from shopping_minion.browser import BASE_URL, dismiss_cookie_banner, settle
+from shopping_minion.history import norm
 from shopping_minion.items import Candidate, Item
 
 MAX_CANDIDATES = 15
@@ -78,12 +81,37 @@ def _offset(url: str) -> int:
     return int(_query_of(url).get("from", ["0"])[0])
 
 
+SYNONYMS_PATH = "config/search_terms.yaml"
+
+
+def load_search_terms(path: str | Path = SYNONYMS_PATH) -> dict[str, str]:
+    """The synonym file (LLD-M5 section 3.2): a term to the term the store knows. Keys are
+    normalized like `history.norm`; a missing file means no synonyms."""
+    file = Path(path)
+    if not file.is_file():
+        return {}
+    data = yaml.safe_load(file.read_text(encoding="utf-8")) or {}
+    return {norm(str(key)): str(value) for key, value in data.items()}
+
+
+def apply_synonym(term: str, synonyms: dict[str, str]) -> str:
+    """The synonym of the normalized term on a hit; the term as it is on a miss."""
+    return synonyms.get(norm(term), term)
+
+
 class SearchResults(list[Candidate]):
     """The candidates of one search. `retried` is True when the first read came back empty and
-    the same URL was opened once more (LLD-M5 section 1.1). It is a list, so callers that only
-    want the candidates don't change."""
+    the same URL was opened once more (LLD-M5 section 1.1); with alternatives, when any of the
+    searches did. `terms` has the term of each search that ran, as (written, searched): they
+    differ when a synonym replaced the written one. It is a list, so callers that only want the
+    candidates don't change."""
 
     retried: bool = False
+    terms: list[tuple[str, str]]
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.terms = []
 
 
 def _read_once(page: Page, term: str) -> list[Candidate]:
@@ -102,20 +130,40 @@ def _read_once(page: Page, term: str) -> list[Candidate]:
         page.remove_listener("response", on_response)
 
 
-def search(page: Page, item: Item) -> SearchResults:
-    """Search the store for the item's term and return up to 15 candidates.
-
-    An empty result is read once more, the way a user reloads an empty page: runs 10 and 11
-    had empty searches whose terms found 12 to 15 products later.
-    """
-    term = item.search_term
+def _search_term(page: Page, term: str) -> tuple[list[Candidate], bool]:
+    """One term: the candidates and whether the empty first read was repeated."""
     candidates = _read_once(page, term)
     retried = not candidates
     if retried:
         candidates = _read_once(page, term)
+    return candidates, retried
+
+
+def search(page: Page, item: Item, synonyms: dict[str, str] | None = None) -> SearchResults:
+    """Search the store for the item's term, then for each alternative, and return up to 15
+    candidates: merged in that order, without repeating a `product_id`.
+
+    Each term goes through the synonyms first (`None` loads config/search_terms.yaml). An empty
+    result is read once more, the way a user reloads an empty page: runs 10 and 11 had empty
+    searches whose terms found 12 to 15 products later.
+    """
+    if synonyms is None:
+        synonyms = load_search_terms()
+    results = SearchResults()
+    merged: dict[str, Candidate] = {}
+    searched: set[str] = set()
+    for written in [item.search_term, *item.alternatives]:
+        term = apply_synonym(written, synonyms)
+        if not term.strip() or term in searched:
+            continue
+        searched.add(term)
+        results.terms.append((written, term))
+        candidates, retried = _search_term(page, term)
+        results.retried = results.retried or retried
+        for candidate in candidates:
+            merged.setdefault(candidate.product_id, candidate)
     dismiss_cookie_banner(page)
-    results = SearchResults(candidates[:MAX_CANDIDATES])
-    results.retried = retried
+    results.extend(list(merged.values())[:MAX_CANDIDATES])
     return results
 
 
@@ -150,8 +198,9 @@ def search_all(
 ) -> list[list[Candidate]]:
     """Search the items one after another; `progress(i, total, item, candidates)` after each."""
     results = []
+    synonyms = load_search_terms()
     for i, item in enumerate(items, start=1):
-        candidates = search(page, item)
+        candidates = search(page, item, synonyms)
         results.append(candidates)
         if progress:
             progress(i, len(items), item, candidates)

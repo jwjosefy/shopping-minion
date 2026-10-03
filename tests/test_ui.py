@@ -553,7 +553,47 @@ def test_the_review_card_groups_a_line_read_as_several_items(browser):
             wait_for(lambda: stub.list_puts and len(stub.list_puts[-1]["items"]) == 4, "the save")
             saved = stub.list_puts[-1]["items"]
             assert [i["name"] for i in saved][-1] == "saco de lixo (banheiro)"
-            assert saved[0] == LIST_ITEMS[0]  # an untouched item goes back as it came
+            assert saved[0] == {
+                **LIST_ITEMS[0],
+                "alternatives": [],
+            }  # an untouched item goes back as it came
+        finally:
+            context.close()
+
+
+def test_the_review_card_edits_the_alternatives_under_busca(browser):
+    meat = {
+        **LIST_ITEMS[0],
+        "source_line": "carne de panela (acém ou paleta)",
+        "name": "carne de panela",
+        "search_term": "acém",
+        "alternatives": ["paleta"],
+        "constraints": [],
+        "quantity": None,
+    }
+    with StubServer(items=[meat]) as server:
+        stub = server.stub
+        context, page = open_page(browser, server, VIEWPORTS["phone"])
+        try:
+            screen(page, "idle")
+            send_photos(page, PHOTO)
+            screen(page, "reviewing_list")
+            card = page.locator("[data-test=list-card]")
+            expect(card.get_by_label("busca", exact=True)).to_have_value("acém")
+            expect(card.get_by_label("ou", exact=True)).to_have_value("paleta")
+            # add one, fill it, and remove the first
+            card.locator("[data-test=add-alt]").click()
+            card.get_by_label("ou", exact=True).nth(1).fill("peito")
+            card.get_by_role("button", name="remover ou").first.click()
+            expect(card.get_by_label("ou", exact=True)).to_have_count(1)
+            expect(card.get_by_label("ou", exact=True)).to_have_value("peito")
+            assert_fits(page, "reviewing_list alternatives")
+            wait_for(
+                lambda: (
+                    stub.list_puts and stub.list_puts[-1]["items"][0]["alternatives"] == ["peito"]
+                ),
+                "the save",
+            )
         finally:
             context.close()
 

@@ -44,6 +44,7 @@ INTAKE_SCHEMA: dict = {
                     "source_line": {"type": "string"},
                     "name": {"type": "string"},
                     "search_term": {"type": "string"},
+                    "alternatives": {"type": "array", "items": {"type": "string"}},
                     "constraints": {"type": "array", "items": {"type": "string"}},
                     "brand": {"type": ["string", "null"]},
                     "quantity": {

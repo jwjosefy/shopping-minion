@@ -356,6 +356,7 @@ createApp({
         source_line: it.source_line ?? "",
         name: it.name ?? "",
         search_term: it.search_term ?? "",
+        alternatives: [...(it.alternatives || [])], // "ou" fields under "busca"
         constraints: (it.constraints || []).join(", "),
         brand: it.brand ?? "",
         qty_value: it.quantity ? it.quantity.value : "",
@@ -373,6 +374,7 @@ createApp({
         source_line: String(row.source_line).trim(),
         name,
         search_term: String(row.search_term).trim() || name,
+        alternatives: row.alternatives.map((a) => String(a).trim()).filter(Boolean),
         constraints: String(row.constraints)
           .split(",")
           .map((c) => c.trim())
@@ -421,6 +423,13 @@ createApp({
     function toggleMore(card) {
       const open = !cardOpen(card);
       card.items.forEach((it) => (it.row.open = open));
+    }
+    function addAlternative(row) {
+      row.alternatives.push("");
+    }
+    function dropAlternative(row, k) {
+      row.alternatives.splice(k, 1);
+      touchList();
     }
     function addQuantity(row) {
       row.qty_on = true;
@@ -771,7 +780,7 @@ createApp({
     return {
       units: UNITS, run, state, toast, offline, reconnecting, busy, canCancel, runs, access, uploading,
       pending, maxPhotos: MAX_PHOTOS, photoCount, photoTab, listPhoto, photoFailed,
-      rows, cards, cardOpen, toggleMore, addQuantity, dropQuantity, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
+      rows, cards, cardOpen, toggleMore, addQuantity, addAlternative, dropAlternative, dropQuantity, saveText, pick, cands, selected, pickTotal, pickPosition, jevNote, cart, skipped,
       qty, qtyEdited, qtyFlags, newTerm, flagBadges, onOffer, qtyText, plural, selectCandidate, searchAgain,
       reviewAll, summaryRows, reopen, backToSummary, report,
       elapsed, searchList, searchLast, searchTotal, searchDone, fillList, fillTotal, fillDone,
