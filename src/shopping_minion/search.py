@@ -78,9 +78,15 @@ def _offset(url: str) -> int:
     return int(_query_of(url).get("from", ["0"])[0])
 
 
-def search(page: Page, item: Item) -> list[Candidate]:
-    """Search the store for the item's term and return up to 15 candidates."""
-    term = item.search_term
+class SearchResults(list[Candidate]):
+    """The candidates of one search. `retried` is True when the first read came back empty and
+    the same URL was opened once more (LLD-M5 section 1.1). It is a list, so callers that only
+    want the candidates don't change."""
+
+    retried: bool = False
+
+
+def _read_once(page: Page, term: str) -> list[Candidate]:
     seen: dict[int, Response] = {}  # `from` offset -> response
 
     def on_response(response: Response) -> None:
@@ -91,11 +97,26 @@ def search(page: Page, item: Item) -> list[Candidate]:
     try:
         page.goto(search_url(term))
         settle(page)
-        candidates = _collect(page, seen)
+        return _collect(page, seen)
     finally:
         page.remove_listener("response", on_response)
+
+
+def search(page: Page, item: Item) -> SearchResults:
+    """Search the store for the item's term and return up to 15 candidates.
+
+    An empty result is read once more, the way a user reloads an empty page: runs 10 and 11
+    had empty searches whose terms found 12 to 15 products later.
+    """
+    term = item.search_term
+    candidates = _read_once(page, term)
+    retried = not candidates
+    if retried:
+        candidates = _read_once(page, term)
     dismiss_cookie_banner(page)
-    return candidates[:MAX_CANDIDATES]
+    results = SearchResults(candidates[:MAX_CANDIDATES])
+    results.retried = retried
+    return results
 
 
 def _collect(page: Page, seen: dict[int, Response]) -> list[Candidate]:
