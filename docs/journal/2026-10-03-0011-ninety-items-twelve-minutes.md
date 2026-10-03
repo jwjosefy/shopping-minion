@@ -1,6 +1,7 @@
 # 2026-10-03 — Ninety items, twelve minutes of mine
 
 _Drafted by Claude on 2026-10-03, at Johann's request, from the runs and commits of 2026-10-02 and 2026-10-03. The numbers come from `shopping-minion report`, `evals/history_eval.py` and `evals/confidence_report.py`._
+_Reviewed and approved by Johann on 2026-10-03._
 
 [Entry 0010](2026-10-01-0010-eight-minutes.md) ended with M3: a 32-item list in 8 minutes, and Jev sending me 25 of 32 items to pick. This entry covers M4 and M5, built in a day and a half. My real shopping list for the week, three handwritten pages, was the test.
 
