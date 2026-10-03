@@ -50,6 +50,7 @@ def candidate_from_hit(hit: dict) -> Candidate:
         list_price=_money(pricing.get("price")) if pricing.get("promotion") else None,
         unit_of_sale=unit,
         step_kg=quantity.get("fraction") if unit == "kg" else None,
+        min_kg=quantity.get("min") if unit == "kg" else None,
         available=(quantity.get("inStock") or 0) > 0,
         image=hit.get("image") or None,
     )

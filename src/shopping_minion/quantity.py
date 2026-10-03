@@ -47,9 +47,12 @@ def to_clicks(
     unit_of_sale: Literal["un", "kg"],
     step_kg: float | None,
     rounding: Rounding = "up",
+    min_kg: float | None = None,
 ) -> tuple[int, list[Flag]]:
     """Convert the target into clicks on the product's stepper. `up` is for an amount written
-    on the list; `nearest` is for an amount taken from history (at least 1 click, not flagged)."""
+    on the list; `nearest` is for an amount taken from history (at least 1 click, not flagged).
+    On a kg stepper the first click puts `min_kg` (when the store sets one) and each later
+    click one step."""
     value = Decimal(str(target.value))
 
     if unit_of_sale == "un":
@@ -62,7 +65,13 @@ def to_clicks(
     if target.unit in _WEIGHT_TO_KG:
         if step_kg is None or step_kg <= 0:
             raise ValueError("step_kg is required for a product sold by kg")
-        ratio = value * _WEIGHT_TO_KG[target.unit] / Decimal(str(step_kg))
-        clicks, exact = _count(ratio, rounding)
-        return clicks, [] if exact else ["QUANTITY_INEXACT"]
+        kg = value * _WEIGHT_TO_KG[target.unit]
+        step = Decimal(str(step_kg))
+        first = Decimal(str(min_kg)) if min_kg and min_kg > 0 else step
+        if kg <= first:  # the first click alone
+            return 1, [] if kg == first or rounding == "nearest" else ["QUANTITY_INEXACT"]
+        extra = (kg - first) / step
+        more = math.floor(extra + Decimal("0.5")) if rounding == "nearest" else math.ceil(extra)
+        exact = rounding == "nearest" or more == extra
+        return 1 + more, [] if exact else ["QUANTITY_INEXACT"]
     return 1, ["QUANTITY_INEXACT"]  # count or volume on a kg product

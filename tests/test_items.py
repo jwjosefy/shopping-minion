@@ -56,3 +56,27 @@ def test_an_old_saved_item_without_alternatives_still_loads():
 def test_alternatives_round_trip():
     item = Item(source_line="x", name="x", search_term="acém", alternatives=["paleta"])
     assert Item.model_validate_json(item.model_dump_json()).alternatives == ["paleta"]
+
+
+def test_kg_amount_counts_the_minimum_first():
+    from decimal import Decimal
+
+    from shopping_minion.items import Candidate, kg_amount
+
+    def cand(step, minimum):
+        return Candidate(
+            product_id="1",
+            slug="s",
+            name="Tempero Granel Kg",
+            brand=None,
+            price=Decimal("80.00"),
+            list_price=None,
+            unit_of_sale="kg",
+            step_kg=step,
+            min_kg=minimum,
+            available=True,
+        )
+
+    assert kg_amount(cand(0.05, 0.15), 4) == Decimal("0.30")
+    assert kg_amount(cand(0.1, None), 3) == Decimal("0.3")
+    assert kg_amount(cand(None, None), 3) is None

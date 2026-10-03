@@ -66,6 +66,12 @@ _Written by Claude on 2026-10-01 from a headed Playwright session (Playwright's 
 - **Not observed yet:** the logged-in marker, and what a returning session's cart shows. That needs Johann to log in, in T4's `login` command.
 - A cookie banner ("Usamos cookies…") with **Recusar** / **Aceitar tudo** / **Escolher** shows on the first page of a fresh context. Clicking "Recusar" dismissed it.
 
+## A minimum above the step on bulk products, seen on 2026-10-03
+
+The search's `quantity` has `min` as well as `fraction`. For most kg products they are equal. For bulk spices they aren't: Tempero Lemon Pepper Granel has `min 0.15`, `fraction 0.05`, and Tempero Chimichurri Granel has `min 0.15`, `fraction 0.1`. The first click on "Adicionar" puts the minimum, and each `+` adds one step.
+
+Run 12 expected 300 g, 200 g and 150 g and got 400 g, 250 g and 250 g. That is exactly min + (clicks − 1) × step, with clicks counted as if the first click were a step.
+
 ## Quantities above 1 kg, seen on 2026-10-02
 
 The stepper and the cart drawer write weights below 1 kg as grams (`900g`) and above 1 kg with a **dot** (`1.1kg`, `1.5kg`). In run 10, every kg product whose target passed 1 kg was reported as failed at the click that crossed 1 kg ("a quantidade não mudou"), and its drawer line was left out of the check. The cause was the stepper pattern accepting only a comma. The clicks themselves had gone through.

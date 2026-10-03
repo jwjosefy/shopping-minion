@@ -178,3 +178,21 @@ def test_nearest_still_flags_the_cases_it_cannot_convert():
 
 def test_up_is_still_the_default_and_still_flags():
     assert to_clicks(Quantity(value=3.68, unit="kg"), "kg", 0.5) == (8, ["QUANTITY_INEXACT"])
+
+
+# Bulk products: the first click puts the store's minimum, then one step per click (run 12).
+def test_kg_stepper_with_a_minimum_above_the_step():
+    lemon = Quantity(value=300, unit="g")  # min 0.15, step 0.05: 0.15 + 3 x 0.05
+    assert to_clicks(lemon, "kg", 0.05, min_kg=0.15) == (4, [])
+    paprica = Quantity(value=150, unit="g")  # exactly the minimum: one click
+    assert to_clicks(paprica, "kg", 0.05, min_kg=0.15) == (1, [])
+    chimichurri = Quantity(value=200, unit="g")  # min 0.15, step 0.1: 0.25 is the next amount
+    assert to_clicks(chimichurri, "kg", 0.1, min_kg=0.15) == (2, ["QUANTITY_INEXACT"])
+    tiny = Quantity(value=50, unit="g")  # below the minimum: one click, flagged
+    assert to_clicks(tiny, "kg", 0.05, min_kg=0.15) == (1, ["QUANTITY_INEXACT"])
+    assert to_clicks(chimichurri, "kg", 0.1, "nearest", min_kg=0.15) == (2, [])
+
+
+def test_kg_stepper_without_a_minimum_is_unchanged():
+    assert to_clicks(Quantity(value=300, unit="g"), "kg", 0.1) == (3, [])
+    assert to_clicks(Quantity(value=300, unit="g"), "kg", 0.1, min_kg=0.1) == (3, [])

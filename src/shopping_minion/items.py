@@ -39,6 +39,9 @@ class Candidate(Contract):
     list_price: Decimal | None  # before discount, if any
     unit_of_sale: Literal["un", "kg"]
     step_kg: float | None  # stepper increment for kg products
+    # The first click's amount on a kg stepper (the search's `quantity.min`); None means
+    # step_kg. Bulk spices have min 0.15 kg with a 0.05 kg step (seen 2026-10-03, run 12).
+    min_kg: float | None = None
     available: bool
     image: str | None = None  # product photo URL; only the web page shows it (LLD-M2 §7.5)
 
@@ -89,14 +92,23 @@ class CartDraft(Contract):
     warnings: list[str] = []  # e.g. a kg product with no stepper increment, left out
 
 
+def kg_amount(candidate: Candidate, clicks: int) -> Decimal | None:
+    """What `clicks` on a kg stepper put in the cart: the minimum, then one step per click."""
+    if candidate.step_kg is None:
+        return None
+    step = Decimal(str(candidate.step_kg))
+    first = Decimal(str(candidate.min_kg)) if candidate.min_kg else step
+    return first + step * (clicks - 1) if clicks > 0 else Decimal(0)
+
+
 def estimate_price(candidate: Candidate, clicks: int) -> Decimal | None:
-    """Price x amount: un -> price x clicks; kg -> price x (clicks x step_kg). In cents."""
+    """Price x amount: un -> price x clicks; kg -> price x `kg_amount`. In cents."""
     if candidate.price is None:
         return None
     if candidate.unit_of_sale == "kg":
-        if candidate.step_kg is None:
+        amount = kg_amount(candidate, clicks)
+        if amount is None:
             return None
-        amount = Decimal(clicks) * Decimal(str(candidate.step_kg))
     else:
         amount = Decimal(clicks)
     return (candidate.price * amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)

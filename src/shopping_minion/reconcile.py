@@ -9,7 +9,7 @@ leftover from an earlier run is visible instead of silently mixed in.
 import re
 from dataclasses import dataclass
 
-from shopping_minion.items import Candidate, CartTarget
+from shopping_minion.items import Candidate, CartTarget, kg_amount
 
 CartLines = list[tuple[str, str]]  # (product name, quantity text) as the drawer shows them
 
@@ -34,7 +34,8 @@ def cart_amount(text: str) -> tuple[float, str] | None:
 
 def expected_amount(candidate: Candidate, target: CartTarget) -> tuple[float, str]:
     if candidate.unit_of_sale == "kg":
-        return round(target.clicks * (candidate.step_kg or 0), 3), "kg"
+        amount = kg_amount(candidate, target.clicks)
+        return round(float(amount or 0), 3), "kg"
     return float(target.clicks), "un"
 
 

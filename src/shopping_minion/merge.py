@@ -33,7 +33,9 @@ def build_line(
     came from history, up otherwise (`rounding` overrides, for a merged line). Raises ValueError
     for a kg product with no stepper increment (from `to_clicks`)."""
     rounding = rounding or ("nearest" if from_history else "up")
-    clicks, inexact = to_clicks(quantity, candidate.unit_of_sale, candidate.step_kg, rounding)
+    clicks, inexact = to_clicks(
+        quantity, candidate.unit_of_sale, candidate.step_kg, rounding, min_kg=candidate.min_kg
+    )
     flags: list[Flag] = list(
         dict.fromkeys(
             [

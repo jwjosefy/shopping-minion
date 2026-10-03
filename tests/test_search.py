@@ -57,6 +57,7 @@ def test_kg_product_has_step():
     assert frango.available is True
     other_kg = next(c for c in candidates if c.product_id == "6140902")
     assert other_kg.step_kg == 0.9
+    assert (frango.min_kg, other_kg.min_kg) == (0.1, 0.9)  # the search's quantity.min
     assert all(c.step_kg is None for c in candidates if c.unit_of_sale == "un")
 
 
