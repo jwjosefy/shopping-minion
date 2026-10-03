@@ -177,9 +177,13 @@
             <span class="chip" v-for="c in pick.item.constraints" :key="c">{{ c }}</span>
           </p>
           <p v-if="jevNote" class="note" data-test="jev-note">{{ jevNote }}</p>
+          <template v-if="pick.no_results">
+            <p class="note" data-test="no-results">nada encontrado para “{{ pick.item.search_term }}”</p>
+            <!-- T22 (LLD-M5 2.3): the field for a new search term goes here, in this card. -->
+          </template>
         </div>
 
-        <div class="cands" role="listbox" aria-label="produtos">
+        <div v-if="!pick.no_results" class="cands" role="listbox" aria-label="produtos">
           <div v-for="(c, i) in cands" :key="c.product_id" role="option" class="cand"
                :class="{ selected: i === selected, unavailable: !c.available,
                          jev: c.product_id === pick.jev.choice }"
@@ -206,10 +210,12 @@
         </div>
         <div class="actions-bar">
           <button class="btn" data-test="skip" :disabled="busy" @click="skipPick">pular (0)</button>
-          <button class="btn primary" data-test="take" :disabled="busy || selected < 0"
+          <button v-if="!pick.no_results" class="btn primary" data-test="take"
+                  :disabled="busy || selected < 0"
                   @click="takeCandidate(selected)">escolher (Enter)</button>
         </div>
-        <p class="muted hint">Enter escolhe o produto marcado, ← → mudam a seleção, 0 pula.</p>
+        <p v-if="pick.no_results" class="muted hint">0 pula.</p>
+        <p v-else class="muted hint">Enter escolhe o produto marcado, ← → mudam a seleção, 0 pula.</p>
       </template>
     </section>
 
@@ -323,8 +329,8 @@
             <li v-for="(c, i) in problems" :key="i" class="bad" data-test="problem">
               <p class="name">{{ checkNames(c) }}</p>
               <p class="muted small">{{ c.product_name }}</p>
-              <p><strong>{{ c.verdict }}</strong></p>
-              <p class="muted small">esperado {{ c.expected }}<span v-if="c.found">; no carrinho {{ c.found }}</span></p>
+              <p><strong>{{ c.message }}</strong></p>
+              <p class="muted small">esperado {{ c.expected }}; no carrinho {{ c.found || "nada" }}</p>
             </li>
           </ul>
         </div>
@@ -354,6 +360,8 @@
         o carrinho está aberto na janela do navegador; revise e finalize no site
       </p>
       <div class="actions-bar">
+        <button v-if="state === 'done' && problems.length" class="btn" data-test="retry"
+                :disabled="busy" @click="retryFailed">tentar de novo ({{ problems.length }})</button>
         <button class="btn" data-test="close-browser" :disabled="busy" @click="resetRun">fechar navegador</button>
         <button class="btn primary" data-test="new-list" :disabled="busy" @click="resetRun">nova lista</button>
       </div>
