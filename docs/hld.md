@@ -50,7 +50,7 @@ One Python package, `src/shopping_minion/`, with one module per step. No framewo
 
 ### 3.2 Browser (`browser`)
 
-- Playwright with its pinned Chromium, **`headless=false`**, and a regular desktop Chrome user agent: the browser's own one with `HeadlessChrome` replaced by `Chrome`. alfa0 observed that a `HeadlessChrome` user agent gets 0 results.
+- Playwright with its pinned Chromium, **headless since 2026-10-02** (Johann; `login` still opens a window, since a person types there; it was `headless=false` until then), and a regular desktop Chrome user agent: the browser's own one with `HeadlessChrome` replaced by `Chrome`. alfa0 observed that a `HeadlessChrome` user agent gets 0 results.
 - One persistent context. The session is saved in `.auth/andorinha.json`.
 - **Login:** the first time, Johann logs in by hand in the Playwright window, and the session is saved. If it expires, the app pauses and asks him to log in again. Email and password are not used yet (§7).
 - The store is used only through its pages, as a user would: no HTTP client and no hand-built requests.

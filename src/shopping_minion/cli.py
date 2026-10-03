@@ -39,7 +39,7 @@ def _login() -> int:
 
     from shopping_minion.browser import BASE_URL, is_logged_in, open_browser, save_session
 
-    with open_browser() as (_browser, context):
+    with open_browser(headless=False) as (_browser, context):  # a person logs in here
         page = context.new_page()
         page.goto(BASE_URL)
         print("A browser window opened on the store. Log in by hand in that window.")

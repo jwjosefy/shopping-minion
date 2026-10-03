@@ -35,10 +35,16 @@ class NotLoggedInError(RuntimeError):
 
 
 @contextmanager
-def open_browser(auth_file: Path = AUTH_FILE) -> Iterator[tuple[Browser, BrowserContext]]:
-    """Headed Chromium with a desktop Chrome user agent and the saved session, if any."""
+def open_browser(
+    auth_file: Path = AUTH_FILE, headless: bool = True
+) -> Iterator[tuple[Browser, BrowserContext]]:
+    """Chromium with a desktop Chrome user agent and the saved session, if any.
+
+    Headless by default (Johann, 2026-10-02); `login` opens it headed, since a person types
+    there. The user agent below drops the "Headless" marker either way.
+    """
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=False)
+        browser = pw.chromium.launch(headless=headless)
         try:
             # The browser's own user agent, from a blank page, minus the "Headless" marker
             # (a HeadlessChrome agent gets 0 results from the store).
